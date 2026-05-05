@@ -586,6 +586,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
         <!-- PA content — hidden until unlocked -->
         <div class="admin-content hidden" id="admin-content">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+            <button onclick="resetProgress()" style="font-family:var(--font);font-size:12px;font-weight:500;color:var(--red);background:var(--red-bg);border:0.5px solid rgba(239,68,68,0.25);border-radius:var(--r);padding:6px 14px;cursor:pointer;">
+              Reset all progress
+            </button>
+          </div>
           <div class="admin-unlocked-note">
             <svg viewBox="0 0 16 16"><rect x="3" y="7" width="10" height="7" rx="1"/><path d="M11 7V5a3 3 0 0 0-6 0v2"/></svg>
             Admin access granted
@@ -681,15 +686,75 @@ let globalData  = {participant:'',operator:'',date:'',device:'Device A'};
 let activeTask  = null;
 let activePanel = null; // 'reminders' | 'trouble' | 'settings' | null
 let currentFilter='all';
+
+// ── LocalStorage persistence ──────────────────────────
+const STORAGE_KEY = 'centific_progress_v1';
+
+function saveProgress(){
+  try {
+    const state = {
+      taskDone:[...taskDone],
+      stepDone:stepDone.map(a=>[...a]),
+      taskData:taskData.map(d=>({...d})),
+      taskSynced:[...taskSynced],
+      globalData:{...globalData}
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch(e){ console.warn('Save failed',e); }
+}
+
+function loadProgress(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return false;
+    const state = JSON.parse(raw);
+    if(state.taskDone)   state.taskDone.forEach((v,i)=>{ taskDone[i]=v; });
+    if(state.stepDone)   state.stepDone.forEach((a,i)=>{ if(a) a.forEach((v,j)=>{ stepDone[i][j]=v; }); });
+    if(state.taskData)   state.taskData.forEach((d,i)=>{ Object.assign(taskData[i],d); });
+    if(state.taskSynced) state.taskSynced.forEach((v,i)=>{ taskSynced[i]=v; });
+    if(state.globalData) Object.assign(globalData,state.globalData);
+    return true;
+  } catch(e){ console.warn('Load failed',e); return false; }
+}
+
+function resetProgress(){
+  if(!confirm('Reset all progress? This cannot be undone.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  taskDone.fill(false);
+  stepDone.forEach(a=>a.fill(false));
+  taskData.forEach(d=>{ d.lux=''; d.notes=''; d.status='Not Started'; d.completedAt=''; });
+  taskSynced.fill(false);
+  globalData = {participant:'', operator:'', date: new Date().toISOString().split('T')[0], device:'Device A'};
+  document.getElementById('g-participant').value='';
+  document.getElementById('g-operator').value='';
+  document.getElementById('g-date').value=globalData.date;
+  document.getElementById('g-device').value='Device A';
+  activeTask=null; activePanel=null;
+  PANEL_IDS.forEach(p=>{
+    document.getElementById('panel-'+p).classList.remove('open');
+    document.getElementById(HD_IDS[p]).classList.remove('active');
+  });
+  document.getElementById('main-content').style.display='block';
+  document.getElementById('main-content').innerHTML='<div class="welcome"><div class="welcome-icon"><svg viewBox="0 0 24 24"><polyline points="4,13 9,18 20,6"/></svg></div><h2>Welcome to Project Kilo</h2><p>Select a task from the sidebar. Fill in the data fields, tick each step, then mark complete.</p></div>';
+  renderSidebar(); updateProgress();
+  showToast('Progress reset');
+}
 const DEFAULT_PA_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/6e31d0ca6c4240f0af0f6c4a3734b3aa/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=reuYXEx6a4HhPSV76DKzRtzcOE1XefhJlIQJ1vB23s0';
 let paUrl       = localStorage.getItem('centific_pa_url') || DEFAULT_PA_URL;
 let currentTheme= localStorage.getItem('centific_theme')||'dark';
 
 // ── Init ──────────────────────────────────────────────
-document.getElementById('g-date').value=new Date().toISOString().split('T')[0];
-globalData.date=document.getElementById('g-date').value;
+const savedOk = loadProgress();
+if(savedOk && globalData.date){
+  document.getElementById('g-date').value = globalData.date;
+} else {
+  document.getElementById('g-date').value = new Date().toISOString().split('T')[0];
+  globalData.date = document.getElementById('g-date').value;
+}
+if(savedOk && globalData.participant) document.getElementById('g-participant').value = globalData.participant;
+if(savedOk && globalData.operator)   document.getElementById('g-operator').value   = globalData.operator;
+if(savedOk && globalData.device)     document.getElementById('g-device').value     = globalData.device;
 applyTheme(currentTheme,false);
-// URL is pre-configured — show ready status immediately, no setup banner needed
 document.getElementById('config-banner').classList.add('hidden');
 updateSyncStatus('idle','Ready to sync');
 
@@ -841,6 +906,7 @@ function syncGlobal(){
   globalData.operator=document.getElementById('g-operator').value;
   globalData.date=document.getElementById('g-date').value;
   globalData.device=document.getElementById('g-device').value;
+  saveProgress();
 }
 
 // ── Filter & sidebar ──────────────────────────────────
@@ -881,6 +947,7 @@ function quickCheck(e,i){
   if(taskDone[i]) taskData[i].completedAt=new Date().toLocaleString();
   renderSidebar(); updateProgress();
   if(activeTask===i) renderDetail(i);
+  saveProgress();
   if(taskDone[i]) autoSync(i);
 }
 
@@ -979,24 +1046,24 @@ function saveField(i,field,val){
   if(field==='status'&&val==='Complete'){
     taskDone[i]=true;stepDone[i].fill(true);
     taskData[i].completedAt=new Date().toLocaleString();
-    renderSidebar();updateProgress();renderDetail(i);autoSync(i);
+    renderSidebar();updateProgress();renderDetail(i);saveProgress();autoSync(i);
   }
 }
 function toggleStep(ti,si){
   stepDone[ti][si]=!stepDone[ti][si];
   const dc=stepDone[ti].filter(Boolean).length;
   if(dc>0&&dc<stepDone[ti].length&&taskData[ti].status==='Not Started') taskData[ti].status='In Progress';
-  renderDetail(ti);renderSidebar();
+  renderDetail(ti);renderSidebar();saveProgress();
 }
 async function completeTask(i){
   taskDone[i]=true;stepDone[i].fill(true);
   taskData[i].status='Complete';taskData[i].completedAt=new Date().toLocaleString();
-  renderDetail(i);renderSidebar();updateProgress();await autoSync(i);
+  renderDetail(i);renderSidebar();updateProgress();saveProgress();await autoSync(i);
 }
 function undoTask(i){
   taskDone[i]=false;stepDone[i].fill(false);taskSynced[i]=false;
   taskData[i].status='Not Started';taskData[i].completedAt='';
-  renderDetail(i);renderSidebar();updateProgress();
+  renderDetail(i);renderSidebar();updateProgress();saveProgress();
 }
 async function autoSync(idx){
   if(!paUrl) return;
@@ -1120,8 +1187,27 @@ document.addEventListener('keydown', e => {
   if(e.key === 'Escape') closeVideoModal(null);
 });
 
-if(window.innerWidth<=700) document.getElementById('main-panel').classList.add('hidden');
-if(paUrl) document.getElementById('config-banner').classList.add('hidden');
+// ── Responsive layout handler ────────────────────────
+function applyLayout(){
+  const isMob = window.innerWidth <= 700;
+  const sidebar = document.getElementById('sidebar');
+  const mainPanel = document.getElementById('main-panel');
+  if(!isMob){
+    sidebar.classList.remove('hidden');
+    mainPanel.classList.remove('hidden');
+  } else {
+    if(activeTask === null && activePanel === null){
+      sidebar.classList.remove('hidden');
+      mainPanel.classList.add('hidden');
+    } else {
+      sidebar.classList.add('hidden');
+      mainPanel.classList.remove('hidden');
+    }
+  }
+}
+window.addEventListener('resize', applyLayout);
+applyLayout();
+document.getElementById('config-banner').classList.add('hidden');
 renderSidebar();
 updateProgress();
 </script>
