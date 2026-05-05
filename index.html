@@ -162,7 +162,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .main{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
 .entry-bar{background:var(--bg2);border-bottom:.5px solid var(--border);padding:10px 24px;display:flex;gap:14px;align-items:center;flex-wrap:nowrap;flex-shrink:0;box-shadow:var(--shadow-sm);overflow-x:auto}
 .entry-field{display:flex;flex-direction:column;gap:5px;min-width:110px;flex:1}
-.entry-label{display:block;font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--text3)}
+.entry-label{display:block;font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);white-space:nowrap}
 .entry-input{font-family:var(--font);font-size:14px;color:var(--text);background:var(--input-bg);border:.5px solid var(--border-strong);border-radius:var(--r);padding:7px 10px;outline:none;transition:all .2s ease;width:100%;letter-spacing:-0.01em}
 .entry-input::placeholder{color:var(--text3)}
 .entry-input:focus{border-color:var(--pink);background:var(--bg2);box-shadow:0 0 0 4px rgba(239,67,179,.10)}
@@ -369,10 +369,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   .main.hidden{display:none}
   .mobile-back{display:flex}
   .content,.side-panel{padding:16px}
-  .entry-bar{padding:8px 12px;gap:8px}
-  .entry-field{min-width:100px}
-  .entry-input{font-size:12px;padding:5px 8px}
+  .entry-bar{padding:8px 12px;gap:6px;flex-wrap:wrap}
+  .entry-field{min-width:calc(50% - 6px);max-width:calc(50% - 6px);flex:none}
+  .entry-label{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .entry-input{font-size:13px;padding:7px 9px}
   input[type="date"].entry-input{min-width:0}
+  input[type="date"].entry-input::-webkit-calendar-picker-indicator{width:14px;opacity:.5}
   .capture-grid{grid-template-columns:1fr}
   .config-input{width:100%}
   .config-banner{flex-direction:column;align-items:flex-start}
