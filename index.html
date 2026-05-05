@@ -335,6 +335,66 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 .mobile-back svg{width:16px;height:16px;stroke:var(--text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .mobile-back span{font-size:13px;color:var(--text3)}
 
+/* ── Video button ── */
+.video-btn{
+  display:flex;align-items:center;gap:7px;flex-shrink:0;
+  background:rgba(239,67,179,.1);color:var(--pink);
+  border:1px solid rgba(239,67,179,.3);border-radius:var(--r);
+  padding:7px 12px;cursor:pointer;font-size:11px;font-weight:600;
+  font-family:var(--font-head);letter-spacing:.04em;text-transform:uppercase;
+  transition:background .15s,border-color .15s;white-space:nowrap;
+}
+.video-btn:hover{background:rgba(239,67,179,.2);border-color:var(--pink)}
+.video-btn svg{width:14px;height:14px;stroke:var(--pink);flex-shrink:0}
+
+/* ── Video modal ── */
+.video-modal-overlay{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.65);
+  align-items:center;justify-content:center;padding:24px;
+}
+.video-modal-overlay.open{display:flex}
+.video-modal-box{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--rl);width:100%;max-width:480px;
+  overflow:hidden;
+}
+.video-modal-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;border-bottom:1px solid var(--border);
+}
+.video-modal-title{font-family:var(--font-head);font-size:15px;font-weight:700;color:var(--text)}
+.video-modal-close{
+  width:30px;height:30px;border-radius:8px;border:1px solid var(--border);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:border-color .15s;
+}
+.video-modal-close:hover{border-color:var(--pink)}
+.video-modal-close svg{width:14px;height:14px;stroke:var(--text);fill:none;stroke-width:2;stroke-linecap:round}
+.video-modal-body{padding:20px;display:flex;flex-direction:column;gap:14px}
+.video-modal-note{
+  display:flex;gap:10px;align-items:flex-start;
+  background:var(--blue-bg);border:1px solid #93c5fd;border-radius:var(--r);padding:12px 14px;
+}
+.video-modal-note svg{width:15px;height:15px;stroke:var(--blue-text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-top:1px}
+.video-modal-note p{font-size:13px;color:var(--blue-text);line-height:1.55}
+.video-open-btn{
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  background:var(--pink);color:#fff;border-radius:var(--r);
+  padding:13px 20px;font-family:var(--font-head);font-size:12px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;text-decoration:none;
+  transition:background .15s;
+}
+.video-open-btn:hover{background:var(--pink-dim)}
+.video-open-btn svg{width:16px;height:16px;flex-shrink:0}
+.video-modal-hint{font-size:11px;color:var(--text3);text-align:center;line-height:1.5}
+
+/* ── Welcome reminders ── */
+.welcome-reminders{width:100%;max-width:500px;margin-top:4px;text-align:left}
+.welcome-reminder-item{display:flex;gap:9px;align-items:flex-start;background:var(--amber-bg);border:1px solid var(--amber);border-radius:var(--r);padding:9px 12px;margin-bottom:6px}
+.welcome-reminder-item p{font-size:12px;color:var(--amber-text);line-height:1.5;font-weight:500}
+.welcome-section-label{font-family:var(--font-head);font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+
 /* ── Responsive ── */
 @media(max-width:700px){
   .nav{padding:0 14px}
@@ -468,7 +528,17 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
         <h2>Ready to collect</h2>
         <p>Select a task from the sidebar. Fill in the data fields, tick each step, then mark complete.</p>
         <div class="welcome-note">
-          <strong>Auto-sync to Excel:</strong> click the <strong>⚙ Settings</strong> icon in the top-right to configure your Power Automate URL.
+          <strong>Auto-sync to Excel:</strong> click the <strong>☰ menu → Settings</strong> in the top-right to configure your Power Automate URL.
+        </div>
+        <div class="welcome-reminders">
+          <div class="welcome-section-label">Key Reminders</div>
+          <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>Never move the device during a recording.</p></div>
+          <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>Always measure and record lux before each task.</p></div>
+          <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>Participant ID must remain consistent across all tasks and devices.</p></div>
+          <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>Registration must be completed before any tasks.</p></div>
+          <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>No hats or caps during initial registration — Task 1 is the only registration with a hat.</p></div>
+          <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>All lux measurements must be taken on the participant's face, with the sensor facing the device.</p></div>
+          <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>Participants are encouraged to submit more than required if time allows.</p></div>
         </div>
       </div>
     </div>
@@ -551,9 +621,47 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
   </div>
 </div>
 
+<!-- ── Video modal ── -->
+<div class="video-modal-overlay" id="video-modal" onclick="closeVideoModal(event)">
+  <div class="video-modal-box">
+    <div class="video-modal-header">
+      <div class="video-modal-title" id="video-modal-title">Task Video</div>
+      <button class="video-modal-close" onclick="closeVideoModal(null)" title="Close">
+        <svg viewBox="0 0 16 16"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+      </button>
+    </div>
+    <div class="video-modal-body">
+      <div class="video-modal-note">
+        <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="var(--blue-text)" stroke="none"/></svg>
+        <p>This video is hosted on SharePoint. You must be signed in to your Microsoft 365 account to view it. Click the button below to open it.</p>
+      </div>
+      <a class="video-open-btn" id="video-open-link" href="#" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><polygon points="6.5,5.5 11.5,8 6.5,10.5" fill="white" stroke="none"/></svg>
+        Open video in SharePoint
+      </a>
+      <p class="video-modal-hint">Opens in a new tab. Sign in with your Microsoft 365 account if prompted.</p>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"><div class="toast-dot"></div><span id="toast-msg"></span></div>
 
 <script>
+const TASK_VIDEOS = [
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2001.mp4?csf=1&web=1&e=52ZRmO",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2002.mp4?csf=1&web=1&e=kZsduU",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2003.mp4?csf=1&web=1&e=hH9abF",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2004.mp4?csf=1&web=1&e=IQmxhq",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2005.mp4?csf=1&web=1&e=J9bYfO",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2006.mp4?csf=1&web=1&e=rmGTTT",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2007.mp4?csf=1&web=1&e=NQEL78",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2008-10.mp4?csf=1&web=1&e=P1Itu5",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2008-10.mp4?csf=1&web=1&e=P1Itu5",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2008-10.mp4?csf=1&web=1&e=P1Itu5",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2011.mp4?csf=1&web=1&e=SnAZk1",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2012.mp4?csf=1&web=1&e=RkNlvJ"
+];
+
 const TASKS=[
   {id:1,title:"Registration — Hat",cat:"Registration",distance:"2–4 ft",lux:"0–10",duration:"Manual",warn:"",note:"",steps:["Press START SESSION → select Visual ID","Select registration_hat from the dropdown","Participant stands/sits at 2–4 ft","Tap START to begin recording",{t:"Perform head movements:",s:["Front→Left→Front→Right→Front→Upward→Front→Downward→Front"]},"Tap STOP SESSION","Remove the hat before continuing to remaining tasks"]},
   {id:2,title:"Device Visible Range",cat:"Movement",distance:"2–8 ft",lux:"0–10",duration:"Auto 2 min",warn:"",note:"",steps:["Press START SESSION → select Visual ID","Select Device Visible Range from the dropdown","Measure lux on face at 8 ft facing device — confirm 0–10 lux, enter value","Start recording","Participant faces device and walks backwards at normal speed to 8 ft","Takes 2 steps toward device, turns face left or right, turns back, looks at device 2–3 sec","Repeat until ~2 ft from device","Recording auto-ends at 2 minutes"]},
@@ -804,9 +912,18 @@ function openTask(i){
 function renderDetail(i){
   const t=TASKS[i],d=taskData[i];
   const done=stepDone[i].filter(Boolean).length;
+  const videoNote = (i===8||i===9) ? ' (same as Task 8)' : '';
   let html=`<div class="task-hdr">
-    <div class="task-eyebrow">TASK ${String(t.id).padStart(2,'0')} · ${t.cat} · Step ${done} of ${t.steps.length}</div>
-    <div class="task-title-main">${t.title}</div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+      <div style="flex:1;min-width:0">
+        <div class="task-eyebrow">TASK ${String(t.id).padStart(2,'0')} · ${t.cat} · Step ${done} of ${t.steps.length}</div>
+        <div class="task-title-main">${t.title}</div>
+      </div>
+      <button class="video-btn" onclick="openVideoModal(${i})" title="Watch task demo video">
+        <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><polygon points="6.5,5.5 11.5,8 6.5,10.5" fill="currentColor" stroke="none"/></svg>
+        <span>Task ${t.id} Video${videoNote}</span>
+      </button>
+    </div>
     <div class="meta-row">
       <span class="meta-chip">${t.distance}</span>
       <span class="meta-chip">${t.lux} lux</span>
@@ -947,6 +1064,26 @@ function exportToExcel(){
   XLSX.writeFile(wb,`Centific_DataCollection${p}${dt}.xlsx`);
   showToast('Excel downloaded');
 }
+
+// ── Video modal ───────────────────────────────────────
+function openVideoModal(taskIndex){
+  const t = TASKS[taskIndex];
+  const url = TASK_VIDEOS[taskIndex];
+  const note = (taskIndex===8||taskIndex===9) ? ' (same video as Task 8)' : '';
+  document.getElementById('video-modal-title').textContent = `Task ${t.id} — ${t.title}${note}`;
+  document.getElementById('video-open-link').href = url;
+  document.getElementById('video-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeVideoModal(e){
+  if(e && e.target !== document.getElementById('video-modal')) return;
+  document.getElementById('video-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+// close modal on Escape key
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') closeVideoModal(null);
+});
 
 if(window.innerWidth<=700) document.getElementById('main-panel').classList.add('hidden');
 if(paUrl) document.getElementById('config-banner').classList.add('hidden');
