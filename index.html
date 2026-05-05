@@ -986,7 +986,7 @@ function renderSidebar(){
         ${progressBar}
         <div class="s-status-row">
           <span class="s-status-pill ${sc.cls}">${sc.label}</span>
-          ${taskSynced[i]?'<span class="s-synced-pill">✓ Synced</span>':''}
+          ${taskSynced[i]?'<span class="s-synced-pill">✓ Data Synced</span>':''}
         </div>
       </div>`;
     item.addEventListener('click',()=>openTask(i));
@@ -1049,10 +1049,10 @@ function renderDetail(i){
   if(t.warn) html+=`<div class="warn-box"><svg viewBox="0 0 16 16"><path d="M8 2L15 13H1L8 2z"/><line x1="8" y1="7" x2="8" y2="10"/></svg><p>${t.warn}</p></div>`;
   if(t.note) html+=`<div class="note-box">${t.note}</div>`;
   if(taskDone[i]){
-    const sm=taskSynced[i]?'<span style="color:var(--green)">✓ Synced to Excel</span>':(paUrl?'Not yet synced':'Configure PA URL in Settings');
+    const sm=taskSynced[i]?'<span style="color:var(--green)">✓ Data Synced</span>':(paUrl?'Not yet synced':'Configure PA URL in Settings');
     html+=`<div class="done-banner"><p>Task complete</p><span>${sm}</span></div>`;
   }
-  if(taskDone[i]&&taskSynced[i]) html+=`<div class="sync-result success"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg><p>Row added to your Excel file on OneDrive / SharePoint.</p></div>`;
+  
   html+=`<div class="capture-card">
     <div class="capture-card-title">Data Capture</div>
     <div class="capture-grid">
@@ -1147,7 +1147,7 @@ function undoTask(i){
 async function autoSync(idx){
   if(!paUrl) return;
   const r=await postToPA(idx);
-  if(r.ok){taskSynced[idx]=true;renderSidebar();if(activeTask===idx)renderDetail(idx);showToast('Synced to Excel ✓');}
+  if(r.ok){taskSynced[idx]=true;renderSidebar();if(activeTask===idx)renderDetail(idx);showToast('Data Synced ✓');}
   else if(r.reason!=='no_url') showToast('Sync failed — check Settings');
 }
 async function manualSync(i){
@@ -1156,7 +1156,7 @@ async function manualSync(i){
   const btn=event.target.closest('button');
   if(btn) btn.disabled=true;
   const r=await postToPA(i);
-  if(r.ok){taskSynced[i]=true;renderSidebar();renderDetail(i);showToast('Synced to Excel ✓');}
+  if(r.ok){taskSynced[i]=true;renderSidebar();renderDetail(i);showToast('Data Synced ✓');}
   else showToast('Sync failed: '+(r.reason||'unknown'));
   if(btn) btn.disabled=false;
 }
