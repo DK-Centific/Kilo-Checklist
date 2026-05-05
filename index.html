@@ -90,6 +90,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .export-btn:hover{background:var(--bg4);color:var(--text)}
 .export-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 
+/* reset nav button */
+.reset-nav-btn{
+  display:flex;align-items:center;gap:6px;
+  font-family:var(--font);font-size:13px;font-weight:500;letter-spacing:-0.01em;
+  color:var(--red);background:var(--red-bg);
+  border:.5px solid rgba(239,68,68,0.3);border-radius:var(--r);padding:7px 14px;cursor:pointer;
+  transition:all .2s ease;
+}
+.reset-nav-btn:hover{background:#fecaca;border-color:var(--red)}
+.reset-nav-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:700px){.reset-nav-btn span{display:none}.reset-nav-btn{padding:7px 10px}}
+
 /* hamburger */
 .hamburger-btn{width:36px;height:36px;border-radius:var(--r);border:.5px solid var(--border-strong);background:var(--bg2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:all .2s ease;flex-shrink:0}
 .hamburger-btn:hover{background:var(--bg4)}
@@ -157,6 +169,17 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 }
 .s-synced{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;display:none}
 .s-item.synced .s-synced{display:block}
+
+/* ── Sidebar status indicators ── */
+.s-status-row{display:flex;align-items:center;gap:5px;margin-top:4px;flex-wrap:wrap}
+.s-status-pill{font-size:9px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:20px;flex-shrink:0}
+.s-status-notstarted{background:var(--bg4);color:var(--text3)}
+.s-status-inprogress{background:#FFF3DC;color:#9a6200;border:.5px solid #f5d08a}
+.s-status-complete{background:var(--green-bg);color:var(--green-text)}
+.s-status-skipped{background:var(--bg3);color:var(--text3)}
+.s-synced-pill{font-size:9px;font-weight:600;color:var(--green);letter-spacing:.04em}
+.s-prog-track{height:3px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-top:5px;margin-bottom:1px}
+.s-prog-fill{height:100%;background:var(--amber);border-radius:2px;transition:width .3s cubic-bezier(.4,0,.2,1)}
 
 /* ── Main ── */
 .main{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
@@ -404,6 +427,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
     <button class="export-btn" onclick="exportToExcel()">
       <svg viewBox="0 0 16 16"><path d="M13 10v3H3v-3M8 2v8M5 7l3 3 3-3"/></svg>
       Export
+    </button>
+    <button class="reset-nav-btn" onclick="resetProgress()" title="Reset all progress">
+      <svg viewBox="0 0 16 16"><path d="M14 8a6 6 0 1 1-1.5-4"/><polyline points="14,2 14,6 10,6"/></svg>
+      <span>Reset</span>
     </button>
     <!-- Hamburger menu -->
     <div style="position:relative" id="menu-wrap">
@@ -918,6 +945,14 @@ function setFilter(f,el){
   el.classList.add('active');
   renderSidebar();
 }
+function getTaskStatus(i){
+  if(taskDone[i]) return 'complete';
+  if(taskData[i].status==='Skipped') return 'skipped';
+  const done=stepDone[i].filter(Boolean).length;
+  if(done>0||taskData[i].lux||taskData[i].notes) return 'inprogress';
+  return 'notstarted';
+}
+
 function renderSidebar(){
   const el=document.getElementById('sidebar-list');
   el.innerHTML='';
@@ -925,6 +960,20 @@ function renderSidebar(){
     if(currentFilter==='done'&&!taskDone[i]) return;
     if(currentFilter==='todo'&&taskDone[i]) return;
     if(currentFilter==='synced'&&!taskSynced[i]) return;
+    const status=getTaskStatus(i);
+    const stepsDone=stepDone[i].filter(Boolean).length;
+    const stepsTotal=t.steps.length;
+    const pct=Math.round(stepsDone/stepsTotal*100);
+    const statusConfig={
+      notstarted:{label:'Not Started',cls:'s-status-notstarted'},
+      inprogress:{label:stepsDone+'/'+stepsTotal+' steps',cls:'s-status-inprogress'},
+      complete:  {label:'Complete',cls:'s-status-complete'},
+      skipped:   {label:'Skipped',cls:'s-status-skipped'},
+    };
+    const sc=statusConfig[status];
+    const progressBar=status==='inprogress'
+      ?`<div class="s-prog-track"><div class="s-prog-fill" style="width:${pct}%"></div></div>`
+      :'';
     const item=document.createElement('div');
     item.className='s-item'+(activeTask===i?' active':'')+(taskDone[i]?' done':'')+(taskSynced[i]?' synced':'');
     item.innerHTML=`
@@ -934,8 +983,12 @@ function renderSidebar(){
       <div class="s-info">
         <div class="s-num">TASK ${String(t.id).padStart(2,'0')}</div>
         <div class="s-title">${t.title}</div>
-      </div>
-      <div class="s-synced" title="Synced to Excel"></div>`;
+        ${progressBar}
+        <div class="s-status-row">
+          <span class="s-status-pill ${sc.cls}">${sc.label}</span>
+          ${taskSynced[i]?'<span class="s-synced-pill">✓ Synced</span>':''}
+        </div>
+      </div>`;
     item.addEventListener('click',()=>openTask(i));
     el.appendChild(item);
   });
