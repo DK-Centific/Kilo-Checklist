@@ -369,11 +369,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   .main.hidden{display:none}
   .mobile-back{display:flex}
   .content,.side-panel{padding:16px}
-  .entry-bar{padding:8px 12px;gap:6px;flex-wrap:wrap}
-  .entry-field{min-width:calc(50% - 6px);max-width:calc(50% - 6px);flex:none}
+  .entry-bar{padding:8px 12px;display:grid;grid-template-columns:1fr 1fr;gap:6px;overflow-x:unset}
+  .entry-field{min-width:0;flex:none;width:100%}
   .entry-label{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .entry-input{font-size:13px;padding:7px 9px}
-  input[type="date"].entry-input{min-width:0}
+  .entry-input{font-size:13px;padding:7px 9px;width:100%;min-width:0}
+  input[type="date"].entry-input{min-width:0;width:100%}
   input[type="date"].entry-input::-webkit-calendar-picker-indicator{width:14px;opacity:.5}
   .capture-grid{grid-template-columns:1fr}
   .config-input{width:100%}
