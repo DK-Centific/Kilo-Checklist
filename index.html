@@ -638,7 +638,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
             <li>Go to <strong>make.powerautomate.com</strong> → Create → Automated cloud flow → Skip the dialog.</li>
             <li>Click <strong>Add a trigger</strong> → search <strong>"HTTP"</strong> → select <strong>"When a HTTP request is received"</strong> (Request connector).</li>
             <li>Paste the JSON schema into the <strong>Request Body JSON Schema</strong> field:
-              <div class="code-block">{"type":"object","properties":{"taskId":{"type":"integer"},"taskTitle":{"type":"string"},"category":{"type":"string"},"distance":{"type":"string"},"duration":{"type":"string"},"luxReading":{"type":"string"},"status":{"type":"string"},"stepsDone":{"type":"integer"},"stepsTotal":{"type":"integer"},"participantId":{"type":"string"},"operator":{"type":"string"},"sessionDate":{"type":"string"},"deviceId":{"type":"string"},"completedAt":{"type":"string"},"notes":{"type":"string"},"submittedAt":{"type":"string"}}}</div>
+              <div class="code-block">{"type":"object","properties":{"taskId":{"type":"integer"},"taskTitle":{"type":"string"},"category":{"type":"string"},"distance":{"type":"string"},"duration":{"type":"string"},"luxReading":{"type":"string"},"status":{"type":"string"},"stepsDone":{"type":"integer"},"stepsTotal":{"type":"integer"},"participantId":{"type":"string"},"moderator":{"type":"string"},"sessionDate":{"type":"string"},"deviceId":{"type":"string"},"completedAt":{"type":"string"},"notes":{"type":"string"},"submittedAt":{"type":"string"}}}</div>
             </li>
             <li>Add a step: <strong>Excel Online (Business)</strong> → <strong>"Add a row into a table"</strong> → point it at your Excel file and the table named <strong>TaskData</strong>. Map each column to its dynamic value.</li>
             <li>Save the flow → copy the <strong>HTTP POST URL</strong> from the trigger card → paste it above.</li>
@@ -903,7 +903,7 @@ async function postToPA(idx){
     taskId:t.id,taskTitle:t.title,category:t.cat,distance:t.distance,duration:t.duration,
     luxReading:d.lux||'',status:d.status,
     stepsDone:stepDone[idx].filter(Boolean).length,stepsTotal:t.steps.length,
-    participantId:globalData.participant||'',operator:globalData.operator||'',
+    participantId:globalData.participant||'',moderator:globalData.operator||'',
     sessionDate:globalData.date||'',deviceId:globalData.device||'Device A',
     completedAt:d.completedAt||'',notes:d.notes||'',submittedAt:new Date().toISOString()
   };
@@ -1194,7 +1194,7 @@ function exportToExcel(){
   const ws=XLSX.utils.aoa_to_sheet(rows);
   ws['!cols']=[{wch:14},{wch:28},{wch:14},{wch:12},{wch:12},{wch:12},{wch:14},{wch:12},{wch:12},{wch:10},{wch:22},{wch:36}];
   XLSX.utils.book_append_sheet(wb,ws,'Session Summary');
-  const raw=[['task_id','task_title','category','distance','duration','participant_id','operator','session_date','device_id','lux_reading','status','steps_done','steps_total','synced','completed_at','notes']];
+  const raw=[['task_id','task_title','category','distance','duration','participant_id','moderator','session_date','device_id','lux_reading','status','steps_done','steps_total','synced','completed_at','notes']];
   TASKS.forEach((t,i)=>{const d=taskData[i];raw.push([t.id,t.title,t.cat,t.distance,t.duration,globalData.participant,globalData.operator,globalData.date,globalData.device,d.lux||'',d.status,stepDone[i].filter(Boolean).length,t.steps.length,taskSynced[i]?'Yes':'No',d.completedAt||'',d.notes||'']);});
   const wsR=XLSX.utils.aoa_to_sheet(raw);
   wsR['!cols']=[{wch:8},{wch:28},{wch:14},{wch:12},{wch:12},{wch:14},{wch:14},{wch:14},{wch:10},{wch:12},{wch:14},{wch:12},{wch:12},{wch:10},{wch:22},{wch:36}];
