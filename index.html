@@ -943,6 +943,7 @@ function renderSidebar(){
 
 function quickCheck(e,i){
   e.stopPropagation();
+  if(!taskDone[i] && !validateRequired()) return;
   taskDone[i]=!taskDone[i];
   stepDone[i].fill(taskDone[i]);
   taskData[i].status=taskDone[i]?'Complete':'Not Started';
@@ -1043,9 +1044,31 @@ function renderDetail(i){
   document.getElementById('main-content').innerHTML=html;
 }
 
+// ── Required field validation ─────────────────────────
+function validateRequired(){
+  syncGlobal();
+  const missing = [];
+  if(!globalData.participant.trim()) missing.push('Participant ID');
+  if(!globalData.operator.trim())   missing.push('Moderator');
+
+  const pField = document.getElementById('g-participant');
+  const mField = document.getElementById('g-operator');
+  if(pField) pField.style.borderColor = !globalData.participant.trim() ? 'var(--red)' : '';
+  if(mField) mField.style.borderColor = !globalData.operator.trim()   ? 'var(--red)' : '';
+
+  if(missing.length){
+    showToast('⚠ Required: ' + missing.join(' & ') + ' must be filled in');
+    const bar = document.querySelector('.entry-bar');
+    if(bar) bar.scrollIntoView({behavior:'smooth', block:'nearest'});
+    return false;
+  }
+  return true;
+}
+
 function saveField(i,field,val){
   taskData[i][field]=val;
   if(field==='status'&&val==='Complete'){
+    if(!validateRequired()) return;
     taskDone[i]=true;stepDone[i].fill(true);
     taskData[i].completedAt=new Date().toLocaleString();
     renderSidebar();updateProgress();renderDetail(i);saveProgress();autoSync(i);
@@ -1058,6 +1081,7 @@ function toggleStep(ti,si){
   renderDetail(ti);renderSidebar();saveProgress();
 }
 async function completeTask(i){
+  if(!validateRequired()) return;
   taskDone[i]=true;stepDone[i].fill(true);
   taskData[i].status='Complete';taskData[i].completedAt=new Date().toLocaleString();
   renderDetail(i);renderSidebar();updateProgress();saveProgress();await autoSync(i);
@@ -1074,6 +1098,7 @@ async function autoSync(idx){
   else if(r.reason!=='no_url') showToast('Sync failed — check Settings');
 }
 async function manualSync(i){
+  if(!validateRequired()) return;
   syncGlobal();
   const btn=event.target.closest('button');
   if(btn) btn.disabled=true;
