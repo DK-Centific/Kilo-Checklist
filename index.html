@@ -586,8 +586,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   .entry-field{min-width:0;flex:none;width:100%}
   .entry-label{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;margin-bottom:4px}
   .entry-input{font-size:13px;padding:7px 9px;width:100%;min-width:0;box-sizing:border-box}
-  input[type="date"].entry-input{min-width:0;width:100%}
-  input[type="date"].entry-input::-webkit-calendar-picker-indicator{width:14px;opacity:.5}
   .capture-grid{grid-template-columns:1fr}
   .config-input{width:100%}
   .config-banner{flex-direction:column;align-items:flex-start}
@@ -733,7 +731,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       </div>
       <div class="entry-field">
         <div class="entry-label">Session Date</div>
-        <input type="date" id="g-date" class="entry-input" oninput="syncGlobal()"/>
+        <input type="text" id="g-date" class="entry-input" readonly style="cursor:default;color:var(--text2)" oninput="syncGlobal()"/>
       </div>
       <div class="entry-field">
         <div class="entry-label">Device ID</div>
@@ -964,6 +962,20 @@ let currentUser = null; // {modId, modName, firstName, location, email, phone, l
 // ── LocalStorage persistence ──────────────────────────
 const STORAGE_KEY = 'centific_progress_v1';
 
+// ── Date helpers ──────────────────────────────────────
+function getTodayISO(){ return new Date().toISOString().split('T')[0]; }
+function formatDateDisplay(isoStr){
+  if(!isoStr) return '';
+  const d = new Date(isoStr + 'T00:00:00');
+  return d.toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'});
+}
+function setDateField(isoVal){
+  globalData.date = isoVal;
+  const el = document.getElementById('g-date');
+  if(el) el.value = formatDateDisplay(isoVal);
+}
+
+
 function saveProgress(){
   try {
     const state = {
@@ -1000,10 +1012,10 @@ function resetProgress(){
   taskSynced.fill(false);
   // Preserve moderator name from logged-in user
   const preservedOperator = currentUser ? currentUser.modName : (globalData.operator || '');
-  globalData = {participant:'', operator: preservedOperator, date: new Date().toISOString().split('T')[0], device:'Device A'};
+  globalData = {participant:'', operator: preservedOperator, date: getTodayISO(), device:'Device A'};
   document.getElementById('g-participant').value='';
   document.getElementById('g-operator').value = preservedOperator;
-  document.getElementById('g-date').value=globalData.date;
+  setDateField(globalData.date);
   document.getElementById('g-device').value='Device A';
   activeTask=null; activePanel=null;
   PANEL_IDS.forEach(p=>{
@@ -1047,10 +1059,9 @@ if(savedSession){
 }
 const savedOk = loadProgress();
 if(savedOk && globalData.date){
-  document.getElementById('g-date').value = globalData.date;
+  setDateField(globalData.date);
 } else {
-  document.getElementById('g-date').value = new Date().toISOString().split('T')[0];
-  globalData.date = document.getElementById('g-date').value;
+  setDateField(getTodayISO());
 }
 if(savedOk && globalData.participant) document.getElementById('g-participant').value = globalData.participant;
 if(savedOk && globalData.operator)   document.getElementById('g-operator').value   = globalData.operator;
