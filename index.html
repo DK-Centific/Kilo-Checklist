@@ -382,6 +382,194 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .divider{height:.5px;background:var(--border);margin:24px 0 20px}
 .hidden{display:none!important}
 
+/* ── Registration task ── */
+.reg-item{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border-radius:var(--rl);cursor:pointer;margin-bottom:3px;
+  border:.5px solid rgba(239,67,179,.2);background:rgba(239,67,179,.05);
+  transition:all .22s cubic-bezier(.4,0,.2,1);position:relative;
+}
+.reg-item:hover{background:rgba(239,67,179,.1);box-shadow:var(--shadow-sm)}
+.reg-item.active{background:rgba(239,67,179,.1);border-color:var(--pink)}
+.reg-badge{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:2px 7px;border-radius:20px;background:rgba(239,67,179,.15);color:var(--pink);flex-shrink:0}
+.reg-label{font-size:13px;font-weight:600;letter-spacing:-0.01em;color:var(--pink)}
+.reg-sublabel{font-size:10px;color:var(--text3);margin-top:1px}
+
+/* sub-task chooser */
+.subtask-chooser{display:flex;flex-direction:column;gap:12px;margin-bottom:24px}
+.subtask-btn{
+  display:flex;align-items:center;gap:14px;
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:var(--rl);padding:18px 20px;cursor:pointer;
+  transition:all .22s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow-sm);
+}
+.subtask-btn:hover{box-shadow:var(--shadow-md);transform:translateY(-1px);border-color:var(--pink)}
+.subtask-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.subtask-icon.phone{background:rgba(239,67,179,.1)}
+.subtask-icon.device{background:rgba(59,130,246,.1)}
+.subtask-icon svg{width:20px;height:20px;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.subtask-icon.phone svg{stroke:var(--pink)}
+.subtask-icon.device svg{stroke:var(--blue)}
+.subtask-name{font-size:16px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.subtask-desc{font-size:13px;color:var(--text2);margin-top:2px}
+
+/* video-lock badge on sidebar */
+.video-lock-pill{font-size:9px;font-weight:600;color:var(--amber-text);background:var(--amber-bg);
+  border:.5px solid #f5d08a;border-radius:20px;padding:2px 7px;white-space:nowrap}
+
+
+/* ── Registration chooser ── */
+.reg-chooser{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+.reg-option-btn{
+  display:flex;align-items:center;gap:14px;
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:var(--rl);padding:18px 20px;cursor:pointer;text-align:left;
+  box-shadow:var(--shadow-sm);transition:all .22s cubic-bezier(.4,0,.2,1);
+}
+.reg-option-btn:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);border-color:var(--pink)}
+.reg-option-icon{width:44px;height:44px;border-radius:12px;background:rgba(239,67,179,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.reg-option-icon svg{width:20px;height:20px;stroke:var(--pink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.reg-option-label{font-size:16px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.reg-option-sub{font-size:13px;color:var(--text3);margin-top:2px;font-weight:400}
+.reg-back-btn{display:flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:500;color:var(--text3);padding:4px 0;margin-bottom:16px;transition:color .15s}
+.reg-back-btn:hover{color:var(--pink)}
+.reg-back-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Video required lock ── */
+.video-required-banner{
+  display:flex;gap:10px;align-items:flex-start;
+  background:rgba(239,67,179,.06);border:.5px solid rgba(239,67,179,.3);
+  border-radius:var(--r);padding:12px 14px;margin-bottom:14px;
+}
+.video-required-banner svg{width:16px;height:16px;stroke:var(--pink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-top:1px}
+.video-required-banner p{font-size:13px;color:var(--pink);font-weight:500;line-height:1.5}
+.video-watched-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--green);background:var(--green-bg);border:.5px solid #86efac;border-radius:20px;padding:3px 10px;margin-left:8px}
+/* ── Login screen ── */
+#login-screen{
+  position:fixed;inset:0;z-index:1000;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+  animation:fadeUp .4s cubic-bezier(.4,0,.2,1);
+}
+#login-screen.hidden{display:none!important}
+
+/* ── Registration task ── */
+.reg-item{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border-radius:var(--rl);cursor:pointer;margin-bottom:3px;
+  border:.5px solid rgba(239,67,179,.2);background:rgba(239,67,179,.05);
+  transition:all .22s cubic-bezier(.4,0,.2,1);position:relative;
+}
+.reg-item:hover{background:rgba(239,67,179,.1);box-shadow:var(--shadow-sm)}
+.reg-item.active{background:rgba(239,67,179,.1);border-color:var(--pink)}
+.reg-badge{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:2px 7px;border-radius:20px;background:rgba(239,67,179,.15);color:var(--pink);flex-shrink:0}
+.reg-label{font-size:13px;font-weight:600;letter-spacing:-0.01em;color:var(--pink)}
+.reg-sublabel{font-size:10px;color:var(--text3);margin-top:1px}
+
+/* sub-task chooser */
+.subtask-chooser{display:flex;flex-direction:column;gap:12px;margin-bottom:24px}
+.subtask-btn{
+  display:flex;align-items:center;gap:14px;
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:var(--rl);padding:18px 20px;cursor:pointer;
+  transition:all .22s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow-sm);
+}
+.subtask-btn:hover{box-shadow:var(--shadow-md);transform:translateY(-1px);border-color:var(--pink)}
+.subtask-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.subtask-icon.phone{background:rgba(239,67,179,.1)}
+.subtask-icon.device{background:rgba(59,130,246,.1)}
+.subtask-icon svg{width:20px;height:20px;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.subtask-icon.phone svg{stroke:var(--pink)}
+.subtask-icon.device svg{stroke:var(--blue)}
+.subtask-name{font-size:16px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.subtask-desc{font-size:13px;color:var(--text2);margin-top:2px}
+
+/* video-lock badge on sidebar */
+.video-lock-pill{font-size:9px;font-weight:600;color:var(--amber-text);background:var(--amber-bg);
+  border:.5px solid #f5d08a;border-radius:20px;padding:2px 7px;white-space:nowrap}
+
+
+/* ── Registration chooser ── */
+.reg-chooser{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+.reg-option-btn{
+  display:flex;align-items:center;gap:14px;
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:var(--rl);padding:18px 20px;cursor:pointer;text-align:left;
+  box-shadow:var(--shadow-sm);transition:all .22s cubic-bezier(.4,0,.2,1);
+}
+.reg-option-btn:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);border-color:var(--pink)}
+.reg-option-icon{width:44px;height:44px;border-radius:12px;background:rgba(239,67,179,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.reg-option-icon svg{width:20px;height:20px;stroke:var(--pink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.reg-option-label{font-size:16px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.reg-option-sub{font-size:13px;color:var(--text3);margin-top:2px;font-weight:400}
+.reg-back-btn{display:flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:500;color:var(--text3);padding:4px 0;margin-bottom:16px;transition:color .15s}
+.reg-back-btn:hover{color:var(--pink)}
+.reg-back-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Video required lock ── */
+.video-required-banner{
+  display:flex;gap:10px;align-items:flex-start;
+  background:rgba(239,67,179,.06);border:.5px solid rgba(239,67,179,.3);
+  border-radius:var(--r);padding:12px 14px;margin-bottom:14px;
+}
+.video-required-banner svg{width:16px;height:16px;stroke:var(--pink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-top:1px}
+.video-required-banner p{font-size:13px;color:var(--pink);font-weight:500;line-height:1.5}
+.video-watched-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--green);background:var(--green-bg);border:.5px solid #86efac;border-radius:20px;padding:3px 10px;margin-left:8px}
+.login-card{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;padding:40px 36px;width:100%;max-width:400px;
+  box-shadow:var(--shadow-lg);
+  animation:fadeUp .5s cubic-bezier(.34,1.2,.64,1);
+}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;justify-content:center}
+.login-logo img{height:32px;width:auto}
+.login-eyebrow{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--pink);margin-bottom:8px;text-align:center}
+.login-title{font-size:24px;font-weight:600;letter-spacing:-0.03em;color:var(--text);margin-bottom:6px;text-align:center}
+.login-sub{font-size:14px;font-weight:300;color:var(--text2);letter-spacing:-0.01em;margin-bottom:28px;text-align:center;line-height:1.5}
+.login-label{display:block;font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.login-input{
+  width:100%;font-family:var(--font);font-size:16px;color:var(--text);
+  background:var(--input-bg);border:.5px solid var(--border-strong);
+  border-radius:var(--r);padding:13px 16px;outline:none;
+  transition:all .2s ease;letter-spacing:0.02em;text-align:center;
+  margin-bottom:6px;
+}
+.login-input::placeholder{color:var(--text3);letter-spacing:.02em;text-align:center}
+.login-input:focus{border-color:var(--pink);background:var(--bg2);box-shadow:0 0 0 4px rgba(239,67,179,.10)}
+.login-input.error{border-color:var(--red);box-shadow:0 0 0 4px rgba(239,68,68,.10)}
+.login-error{font-size:13px;color:var(--red);text-align:center;margin-bottom:14px;min-height:20px;font-weight:500}
+.login-btn{
+  width:100%;padding:14px;border-radius:var(--r);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.login-btn:hover{background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.28)}
+.login-btn:active{transform:scale(.98)}
+.login-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.login-spinner{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.login-hint{font-size:12px;color:var(--text3);text-align:center;margin-top:16px;line-height:1.6}
+.login-hint strong{color:var(--text2);font-weight:500}
+
+/* ── Nav user chip ── */
+.nav-user-chip{
+  display:flex;align-items:center;gap:7px;
+  font-size:13px;font-weight:500;color:var(--text2);
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  border-radius:99px;padding:4px 12px 4px 8px;
+  letter-spacing:-0.01em;white-space:nowrap;
+}
+.nav-user-avatar{
+  width:22px;height:22px;border-radius:50%;background:rgba(239,67,179,.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;color:var(--pink);flex-shrink:0;
+}
+@media(max-width:700px){.nav-user-chip span.nav-user-name{display:none}}
+
+
 /* ── Responsive ── */
 @media(max-width:700px){
   .nav{padding:0 16px}
@@ -408,6 +596,25 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 </head>
 <body>
 
+<!-- ── Login Screen ── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAAhjklEQVR42r17eZwU1dX2c25VL9Xr9DIzLCIat+holpfs+oYZRRGjJEqmP2OMxCRiMOKCiiIM3c2A4L5giGiMUaOYbsUl0QgqM4pJNImavK9DEmOiKDIDM909vXdXV93z/VFdMOJgXPJ99Zc/me7qc+45z3nOc84FPsbDAMUB0RdJzP9d+Krz1wbnh/b8W0pJoVv5ON8fR1z0Ia6O/X/PhHtP+HP0up6HQwun2H/zcd5BH/WDfYirXUga/eHlZ+0nIneXuQ4dxrYGzF8URP7nJw6vft1yBBOQFoSYtHz2QRwbF0AHEWImAFzbfqb3i8bhp2qsnkMQx0SET+yQub6js1cey4gLQlJ+VDvUj/rBTnQwABjC1JkBg00IiKlR8ixxmuolfwivfqgi6utohLYAMG2ndSJhEmg8R1AKKdGNAbYNeji0ZMoE8sxVG+r3/OQ5sEEmalw3rXPjKv4DD33YkO9HXLEckDQTiFMSSflMJPGdFnhXeeGeXOBKAyBHkDRUoaPOjWcNYd62yfvaI8ltd9fs9EDTUAZTPxJKF5KG/Z7N0eXTPOw4V4USC8ATrLAOnRt1t3C6TEhUufGTN8zRJWfkV40CQBox0Y0jCID8sNFAHw8D4gJIMIE4NWFB6/765OVucvxQhYKyrNeJyOEjlwAIZa6+1iDjzkEq3ztn5KpB+/NjfrDSH1n+NTec81UoM/3QqMw1NNioK6S4/KShwJU/jVL5suMzyf496ZWgj5MC9EFPngCsmzhP69Cnns9E+kUjD/34JbzUsEHKPsGnI8muIGvXBsgzrcRVGJA6AYqbnIoLDhS5km1Ari8o1Z/OHE7+ORW4ODxRjZzhhvMHGjk/rUCgxDVIcEOAyE+aWuF6sUy1lRdlHr7hJbzUYKSUfgyQ/c7NkeRx7aJl+r+ModQpuVWvxhEXyQ/oFPowgPdcZMVNB1DbhVWuI8/VlzJcXDAr1/v7PfndwYSYOQ3THDdFTrvEw84lXnL7ilwxeTfoKIqP3MhxmQ2Y/QrRoWH4J9dhoMq6BJgBsIscqgMKSlx9ZAdlrvhG5tq/E4DNY96zLjQveBQdeJWHXOe1kAc7ZHbHG2bhyDPyq0cBxj6w5qODoADtr7OBUVku+4Q2TSWx5XeRq1YtDz23ouv1ZL0PcTWFlBJDrPHfmZdWPxhZ/Mj+3LLaR+6vN2CizoZhwOQ8V0wFQvWT1qWzgVGUTSvImAkkguShAipvZqm0uCuz7AHbwe+KtGhyVov03Bwg7ZBRLhtZLkFATHI7hJsAjiMhPkjVoQ9ajxNI8BPRxYe0y/BjfvIcNsrlugA5g+ShUa68nFXKC04cTv4OAFJIKa1jQvS56PLTPaytCkA7IM8VlmAWIGKwBCCsH0Kmh1xqHQ3WYdzyv41/LD+ncGeWERdpbKVudIMQM28Mzm35onLYVT7S5hOAiqzXXeRwERGyKM7vysRv+zClkf492ltli8FEIF43cV70U/on7ovCf8Iolw0Jho/cqo6GWYF+9QOh55avef3JupUSkNZLkvKOwPfDRzoOSrjgPN8FB5W5Zn8vVCiql9zIo/xCUVQuOa7pSEZKSQOINfnA5mjP1wLSd3OAvAfluSIl2PCR21lnPTssCmfOHOn9zVjjbazofJ/q8GFAkFPoVmJImwDElnDvmlZqOa/MdWnAlApICZCH8lx+paBUzj9udzR0K/bpAcDG1p6jQ9J/XQDalwiAgEABlVyV9N5jRpbcDEAyUkoCA5xokqG1wfmhzzr2X+Vj97kMoMa6AQBB8qoFVAbe4J2xWPb6rTZW2RXig2AA7W0oANzbfqbngMYnEy5Sw9tpaOmckZsGbWS10sE61b5w74IW8txMDKqjYQoI1sip6jBkhfVr7vBvTN697dlaH+JqPyATe9ideC66MuZj91fqaOx4W+buj+WufotAkFgm0ugg+9SfisZPDrPvJj+0g/JckWzhBFrIq4xw8fEXzL+eeXH+7tGxxjdxyNwcSVzSSoHPvI3sDSeNrHhlvOpA49Pb3mWfEO1Jg00Mc/7lP7v+9d/zBifW7JoPgPoQV7qQNDaGemZFReAXbjjDZa4ZAASBKGhFw59HlcqC44eTz++JhiN4vHDc+9TvCHw/3OE4eLUf7nMYQJ0bhgQLBYK85KJh5G/6aqbnYvt7m5GJdZjnOBe3NzaHk1dOFa0rFRZ4h3Ovv3rgG0fMe2mdQZbJ/L5VQECgyjpyslSOCN9/dej7301Y2t1n/b0JgLuQNPoQV7tyyd9sCC86ZgpFUkHyHpnnisFgZZTLhodcn1Gk8tzz4VXXPOR5ORnbnq72Ia4ymIG06McAAUA/INMAkkjKpMUlTmmBdnMAngOtUwcAJjccQhKb7yB3/owm2CUAxJA0xxxg48lwz5w2Cq7MyVLdCYdCuw2m8VOgD3F1GB3cjW4JAL8IX+A/BJNe9pL7E1XW9RD5XNsxsrIrE1/6J8xzfA63N/aOmhuDc1u+pHzy3igFTs5zxZCQCgDeHQ2o/CVL5QtmjiSfG3tqY5ol8479Lg4fVW1b7YV2DoNRY90gkMoW2KkV1oeHMHrGydmVTzffa9qnaX/fI9HLPztVtj4PkLsB0/SSy7EdI7NnZnp/lUJKGcAAdwLCBve9MIApjZiIIW0+GenpmoTwZp0NgwDWyOnYhsxZszLL7x2bb3uH4Jbwyuuj5F9Y5jpLMBMgGGx4yKXqMLjM9es2eP4cv7EZDWPY3NeD0G70w3PgKFea1QOCAaOFPOool//8ppLrjg2vfn3v99tlOj3hyugBjZY/aHAdUOa6Hiav8x1k7unKxOda6ZeWtBc3IAD0TDRxug6zMGuk9/E44qITEF1IGn3h5T+eTJHzclxsOOBQADbeRnb617NXvWADzVjn2by8P7p8XpA9awULxQJHUkywFLujofo/OVQWnpCJP/No2wXtbeaEq3zwfI8hUeOGfepMIBkkjzKC4oYt+Md3L8/8rLi38RZwp0QMaVwc/uzmMPm/OsrlhganWoM++Lo5euQZeVc+ja0UQ9p8LHT5/gcq7Se8hrcenzNy0yD1hZMXTRHRG3U28Q4Nn3z8SO/jdg3/ceuwZ5o55X98cB9QgW7aX7qDRj73jcy1O8YhHHvAMbLk2CiH1mvkbCtx1SCQ2nSU4bF4A8qy/pBKyuej5N8/x2Vp4Q+ECZYqBGnkpGEuXD0923PFOM3Tu2l6uPeOiRT+QY5LhoCARk51ECOzZ2R6f2Xbc/vEQfdR9QNePliZeNg/zHe2bMou7RQA+Suss86G9Evvrfe0X+LtBGQ/IM4fXlvKUeUcJpACohp0w0/axHaEH7754BNdaXSQdfJ7ssgGx5mZlZv/qbxzdIlrL7eQV2XAaDI+tcI1abJEqwjM0eDcP8clkwBBlvGmRk4hIBo7OX/29GzPFQwWVl0f3/hNkfil7RT6wSiXDQAIkKZmULjHNt4mYwfXJ8UjFDhspznaEFC8ACCyjvy6CtezJkyEyHfAlEZwmf2iPsTVkzK9z2S5+JMAeRQGqMhVI4rAFz6bPeZnMcTMfiTeI3vZTogN3/j648ofp2dQfLCFPCoAsxnaAgAKXDEbMCSBFDs6AqQpOhs7hsTojK7ssp/3Ia4SSO5Namzjn4wuPXkCWq4tc81gMLngUEa5tKPgLV/ETbmsC0njiZbFnwrBt7DIlYaTHI4a129LAlLM2Xn9Lp0a6/2kiSJX9RZ4Fj7dFv/UHkYVF7uUoUVZLr2pwSkAEqNcNiZQ6IxnwomeLiSNdZjnGM8JjLhIDqdLX84s7t6F/CovuRQFAtLqAdA0XDQtM1rIqxZRe/FNOfSVWSO9W/bO97Gg24Wk8WhoUUerbLlfMksDUhAIKilUpOr8k99anesHxHBTuQoK349d5FAFhJLj4q68KD/QTDlQiSs/KXHVBFi4yKG6DedPANAwOrgfELHhtaUiqueQdXTMYKXIFaOdQss3hZd1n4vbG3uLl3bYMZhSSCnHZJZcuYOzZxOooZFTSHDDor1sCsAMkkfNcHH9eu2PXd8cvX4bI6WMZ3wccdGNlLwvOD80gcKPuEj119EAwBwkjzLM+fuOyyQfs1Qnq494Jpo4J0qBY0qyWveRW9Rh3PWNzLXFPsRVkUK3OCm7amsZ+kYfaWpJ1uqtFPzK05HEvBhiZic6uA9x9fhs8ukRLq5rpoI0IZUGGzKKwN0PR6+Y1oWkMZ4KTCCOIWb2Ia7OyCZ/PsS543Q03okIn8MJVfhJU9zkVAbl6PIvZxefceP2dNUCuz0VZiziW0yRcIC6X6qFvAeXuWYKENxw0iiXhmpG7gI79DsB+Wjb4vaA1FZXWJcKKY48V2pZR+k2ANQJSNGNbgBAHbWbGjBBREqVdRlkz6pft146IYEBHsZWZsTFP6l4WZaL25qpwDoMOEjRJsvwhvvbLmj/P0ib+5KpbVw4Kbfy+Vd58IsZWVgniV8to/70Dsp9bXpuaZwRHxfsxpy/QoiZfeHlt7ahZUaeK4aAUAiQKgmRQ/m8Ews3ZtPoIDsCQ4b3+iB5wzoaDT+5RQ36I6fuvPrNFFKCkJRk1/AEEnR82PFKC/k+Vea63kJe5xBn10/PLjtjbFu6MbzkhEnUulG3uLkqIc0geZUsF5/fmN3YlcCPGIi9h3CM1RHHM3AsmXo/VerpcPz8KRRdU+CqAUCVYDNEXmUHZ9d3ZpedYbPaGGLmk+Ge4ydTeFONGyYAcpAiBuXoV2blel9IoVvEkDaFxcUTShJJaQq+RYUCARIFrpgRCnxrYzh+gh2OfYirM7MrN2W5cLufNJXBhgKhFLhitFLwmGMjx91OiJm2ljB++2l1lHaOMuLCIlX/3vgnwktOiFLgljLXDQYrDEgNThrl8s6su7KAERfD2MpAGndNnesOwHMrAJZg6SWXKHHtd7Nyvb9nxMl+n7AlbgZoJw3+MselIQdUlS2wYz/ct941da4bSKMTkIy4eAvDl2W59JYbTkUCkkBqnsuNiQif/Uxk+WX7qgz2k0RS2k4lJGVsnHzfG/E3RK84tB0tD4CBJuKTaIb+KCrnnbZjdSaNDupGN2JIm1MLn7gySv5Dq9wwhdWhos76zc3mS+xp/Cw+zP2IK7HhtSWdjDs95AQBqLAuo+Q/ZGrpoCWWxzoojQ76TnZNocDleYKIBEgCgASrJa4ZbfBfsymydPa+KsOHk92ZupGS94YXBCZx8BE3OUM6DCkAIcFmgDzqMBceOCGb3NCHuNqNARaImb8OLz28hTyLSlwzCUwucooMF998NZJ9lMHUbKL2OMBuSQFQXpZuH+VyTYAUAaIS18wgexY9EV58BCFmdmOA+xBXT8j1bhzh4k8DpKkS0iQQNWAqJrOMcPC+X4UWH2lzgY8q2aeRFgTiA9C+PgT/4WWuGQRSJCDdzdDPu3ILGHFhtdRbiQEE4F6rkctlwARA7IaDDJI/ufD1NfUmceP3OCCJpGSkxOzc1W/VoG/wkUYApAETHnI6/fCutdvn/mYqvI1dl2RRfksjl8KAFCDS0WAXOXytFHgkFbg4DCR4L7r8gR4LpGLm5nDymgkUOinP5YbdTxDADlJEHrUfzR68YSSNDupAB8WQNjeHE3PbKNhZ5KoJQKgQao7L+V2Oyl1W6UuY79Y+xjxppMEAVaHfUuE6E0gQSCly1YxQYPoz0eWzCEnZMSYV8iidT2OkBgIpZa43Wil40AQ1fCWBeDy6/O8mTjGkzSeiSz8bIt9lBa6Y2NNMmX7SlGGZf/j4bPwhK/RjshvdMrXfxZoGV1JngwEiS2l2o4bG/bGhVcOMlNibUr/LAVaeM2Zme18sc+1FjZwCYJNArEKRTlZnAEArBiiGmMlIKTMzvb/KcfkJH7kFg03bCVXo0gF1JgAcOw6je7/HBqkAu2d44ZampSsQA6xAiBJXa1nkLmSrdZdAnAjEwXrgMCc5ptag22eilFDlstq4zdI60uOoX3uBDgBs8F8RUUmZ2mADvJurs5Awd4ylpMAAP9R+SZsbjo46N5isCRoIkAoESZJDFkB+NBxokHybIYWdspYTWLrI6fST/ziLT3QQkGAAME2MNNjUld3thYUVmql+mkDcag1Q9+2AfiQUAnHIoX0nQv6JDZgGADihihyX8xWq3kdNDOgEBCEpI43gDWHyTdVhyGZjwwIEE5IqrF9tpVbHh8IAqywzvebY/tgIin/1kVu1o0sCJFmKALw3pJpMNYEEpZBSTsomt+vQH/STRgyWtsrtZHFJHBBNoN+nA6gTCXPdtHkOJxzn1aAzW/XT1MgpiqgsnTVy1eAvkVI60EHNPnx2KwW/neOyabe0AjD8pKlDPJo4Ppt82mJ4+67z+9DqGUjQuYO3V0qyGKuyXnLCQbbEVkfDDJIWapfBtUkkZScgujHADKY8sovyqIy6oBIBKHNdBsj76aMjya4kkjLVJGDvcUAf4gqB+KA3J34tRN5DatyQALOXXOqwzP9hRja5NoWU0o0B7sYA3xe8IhRk7ScGm2x7msFGkDyOQc49MCObSPYhrr4fw3t/J1g/dmZu1au7KP9tQSQcUGw9QSlw1WhD8NRnoolvdSFppNFBaaTFKdkb3ymgcqVGLmEFDLMDCjRWLrKhflwH2GMsNzsvtPAGrECgzoZZVPT51pel0d8M/Umq96YQ+SbVoO8mJn7S1BEu/nGz//WzU0gpe5ecD/vYXeSszIrHhpFf5CO3KkA2oApLxdJuebRtcftA82BSSCnHZRK3jSD/gpdcKgCUuMoeuE78dXjp4TGk5VhuImy6SUjyxmjPNA+5ppe5BgbDT5qS58ots0aSL1vcvRuWChM/uQ3+swpcNQSEYoKlRk6lzLXBHcidltx2d81addn3aIqbC1DNkNwnRthd5HGZxLWDcvSuIHkdDDYIEDU0OEjeaKjh+XESSWlVjzQAcJ6q59W5YTYFGMNPmhog13kA+D1UuNkSs8buC7xwEwMNN5xKlktvvS7eiFsT2jS6McAPBy9sCbF2m8GSpaXVsRMKm2w2dnB2zpzsNdtTSCnvN51tOlx2IWk08YHfb9vLAsWUsjn31LxhLmwJkEc1IU0BshoxEZyzMRQ/3RJQusFIKSeNrHhlFJWb/aQpbGEBnOw4876JC6NdTZAFABG3xAf5RHjRfm5Wv1niGhMgVBJUouqFP8j8rJhGB7XiCCIkZUgN3xiCb3INuiRACAjTRU5lmErfn51b/Xsr78cHPQYTgymGtPl429KjXopcc+5z0eUnA6DxAGosKCYwwMvxrDHoGPlmHtW3PORWJFgyWNHZkCHyrLm/7YL2bgywRejiYlgZime5tE2DU23A0MPka5ncCJ1lRYFFzkSnFQXsJd85LeT1GGzoAdLUES48OiOTfMRuW7uQNDZF4ydFEfyuHfoMbgTJow5xdvUJmcS9vA8Nb8+pExOIt4RXXD3JbHnFB+22Vm751R8iV2+5L3rBIXbO76uD/CVSypyd1+/aQdnTdG7UnM3JXr2ZCpMbbbcSktKK6A6KDa8tFal8oUqCAFANDTikOj91RLeziU8kOpEw72m/xOtgxzkVrrOTHEqRq6WCrF1obXANUDcGOBW6PBg0PevMPaFvtJDXMYjsw8dmE4st9TZp7qufjyFtrg7NC74QXvXoBBFaZLAUea4YJa4ZAXiOPkzu9/zjkSXH2jk/Hi7YDjp1ZPVLuzB6loMUoUCYAIkiV4w2EfjmplA8ZrfaKaSU4zO9jw5z4ZEgeRxVqeth8h4cHTryFAJxH+KKIBDv3wjOiZB/Yp0N3UsutcDl+MmjK7fZYUJIynbhuyEkvPvVYZVHH7nVDJf+8qL69+9YlDRhjreSYosZD0YWfvJYcfCWEPln52TJ4OaMAICa57LpILVtMoc39kV7z2l2kTReE2VrDbOyK9M7eXSZnzSVAFM2q0KIPGuemLC4FRjgVgwQgynPpQsLXC05SBESzE6oF9mVTwAgFcr5OhrsEU7nLs6/MpLberMtcHYhaWyM9syKwP+9grXsRC44RIXrI287hk+9bOcvyrb4uXfq2sb/OrTkxAN54vNeuI7Kc9kgkGpz++Y0WqlzQxqQygQO3r4lvOJ6S68jHk9oPRe3W5Uhm+gd4tz9LeRVAZZ1NDhA3jav7rnVBuF+JJTZuavfKqCyzEtutcw100faMZsi8c8RklI8Fe05SSPXtDo3TAMSZdTmx5A2W3EEdQIyFZoXDLJ3nWRmCYYDCjOxHKRMd2zn9W/wOIhvSV5x6kLSeDbS+6PJIvSEAiXSXIvZ3dVZe0Kwlx6EhESZ68YEaln4Qviqx9aF5gVjSI+HC9yJhJlCSnkl/NvvZVB8sSnRocAVs5WCsU3hZd17Fia6lduyA7dkuPiSG07hgCo9cC4AAOFk18wQeUVEBNQcl2+bme190QY+QlK20ZTrwvBNqUE3BQR7yKnskvn5p2Su7rfy/t2In0K3YkleSf5tZMUt7Wi5VTLYUnJIkWBmQPpJUwyY7CGncEAltrpOYrCa47IRosAp08TBW9aHFx0+BhfeJbd3Y4AvfP3J+hAypxW5OqjBpTCYG2zKFnhvTU1Y3NoJyBxCIo20WUDtPCYWGhxCsOjqRrciyty4bZjzLw7K3G/ewfAVlrpibXg9GVpyYpT8P7D6cXCQPOoOmbvxhNzyO8ZDfBvs1kz6UeSFyOon2hBaUOKqYcIkAoQEDBdU8pFbZFF6OMOlT2e5sJCBop80BYDRjAY1z2VDg+uoQ9H6/JOh+InjgaNNl7+RuXbHIPKnGTB1FaqoQTdbyNvWpnvXEJLyUEzkFLqVE7PJPwyjcKlJ8tW6qPemkTZp/JU44BfhrO8QTP5fD1xTqtAbIfI6d3H+8WOyS07eezlhLNg9HLr8qCkUSfnJ80k73621OMgAeZUSV4eKVL2kM7Psfvuzj0SWHjYJ/puD8Mwscx0GTJNACoNNJ1SFCVzg0gXTs/Fb7a2Qsbs+9rs3RpaeOQWt91ZYNxgML7nVQc7MOS6b3GD1Md3vmTGKeHMYYQ0lQB3oIEJSTkHrdWHy719BveEjtzOH0ta/0ei3bP3NNp4BssdYv4ksnT1VtG7RyLnbeAYMFxzkJbeSQ/GBv9OuaZ2ZZfenkFLs+wDfyKz4+xcyl584xPkFTFzwk0eBNU0WOkwpWXI7hdf8NrJyDSHJFmnaA45dSBp/wjzHzMyKX+zE6MogeVQGS4NN6Ydn7X0TF0a7EZMJJMiaS9h7znvVWns4sSnUM7NdhJ7U2dCdUFWDzPw2GvzSaSM3vDZ2gGFvZhCIn4v2Lgyy93rJjAYM01qW2n3qgwVRu6RrpGf9mBMzGXECEpxAguzNsw3RKw7dj1tuDsB7YqUZDQCEAJlB8qojKGx6zbX9jLk7fpzZa3i6ezfhuVDvgxNEaE6OS7UW8rp3ceHe/84umWsPQ/YpiNiKiUauOQFoECAFBLGTR08/beSG18a2tymkmmBH4rfhFbe3c8v1DTZlA6a0RBQHecit5Lh0/1bxzrSukZ713Dz15sSW7VKXaKo6fYirp42sfu0LmStm7UL+RyCMBqxokBKs5LhkhOE74Yja1N+mWy791F7gyJ1ImIy4+Kv77bOyXHolSF53hXU4WDn1rqlzXdZO0rsPXby76bCk8bLS+HmGS8MKhLELo+edlF25aay3bb5/T/sP214Mr97URqFzClw1TEgQwEHyKiaZ74xQ4fQvZa/49ndGbhrcswaX4GavoL4YverQxyYujBJiJoG4Ex3cLKHiq5mla/9FO78wispvAuRRVCgEgPJcMTRyHnaQMuG5TZH4bIs0pRRrmdPK73MHb69sl8VTC1z5m5NUQxfmmrO33V1rhj//u01RAsB3TljQ2lr3aLNzV781dp5nO+Kx6JX/NUmGfukj98EFrhgA4IJDVUlBgSv3/U3JXHr28HVDtuH23hEAPBvunesh9+WCcQgR8nUY67c6diz//tCaYTs3+8f8fV+kd34A7qu8cLfYFckBVRVEyKF6aWdmyfX2fNNe5kwiKddNnOc52Jgy8bjhnn9+qF3hsRuV7969tf77qXByTgTenztJ9ZW41hAQSpA8oojKOyWqLewcWZbas+ubhp02v2pffGSb0XJNANosAyZq3IACAR+5UUB1ewW1K7+a6bl3z/r9nl3jDa1LDtrPDN4UIO3kKuvQ0WgoUBQ/aWKEC3dcmb3yvGetMkpjd5v/3dosvd9YyvboWOP7wssXR8l/lcEm6jB0jZxOFQoKXLn3DXXwsjN23bLTNtzeEZ47dbr7h8WZl7ngWKyRS7OGFkS75T/AdMGhOklFAZUnhmRp0ddzKwbG2zx/NtJ7rg/aKi9coWbkcYh8jiwX+7YpI2fEhq8b2uMEkH2t52PeGEkphJjZH0ku2o9arx6VZV2CRQt51AKq24tcvbgru+zB8fb6N4V6ZoZE4JogtE8VuQoTslkhyGSwQoDkppwOMPvJo1S5XqmK+qoHWrZcu+b1J+t7HGqt2a5vvfSgA83oTS3ktaKBG7Ww8Lt38ugrWde2Y04ZXFfdeyX2P+KA5yMrn5qE8Iw8V2CdVvWef6hvXnbWztt28W4xwyIb90d+NOkT2G+FBtfZCgQqrBsACwJJBUL1kgsV6HDBARMSNa7vvlWiQCh+0pDnyl+yKC+amU1uGs+5/dHl8/xSW+0ld6jKOkDAmzK7/6m5lW9/0GszH9ABVvhvivZMD3PwbmZZL6O2uDO7bMN4P+y5aO85Pqkt95J7QsHa6zcJEC44FDc5UUSlUIeRKlH9XpdUPusj9zwNriMIhDLXuDkDYA+5HCYkaqjf+Rrt7LGqSVz0W0KOJCTlg20XfWI/c8J1AXiOHub8XdOzPYsZcaL/5J2hdwHk1Onurd5hmd66Vbdvc9ggt7E1/pmw9Fzrh2eGFZpGXRA5POQSAoQS1/5lQP5siIv3nJpb+bb9nd04wrkgfPpsjVznKlBmeOFCySJBugAUm0KXRG3p9JGeO21s6AZ230N4IhwPnJRNFv6f3hscG1Zjd2+vbT/Te7Rx+GI3uy51k8NVkrU6Ebn8pKGOBmpo/E7nxroXHH97yNYP9gZK+x1PhZJf9gvXPJXFNwPk8VVYR50bdQcpLo2cKKL21E5RuOyU4RV/sYE6sXsj7cPfIv3QEWAzqQTilECCN7YuPigkWx5ugffIAldNAikB645fXRI/WoS+7rhMz+axjcs4t0ffc2v00fYlB0YN73edUOf6oU1tWLfKGhq5HJJlLculBV25ZXfa9PaD3hD5j98d3hJZcflhNHn1dpmBl9wocGWXKeS9Va7+tCuT/NvY+8Pvtzy1r3vDN4cXBD6PCd0OqOdq5Po8g+EjDYMyt+0r2cUHfFTDP/bdYXujpEq1DW/IXXMIpOzi0bvecmUf+PbgDSN2ngJpEMi07w9/kJGYnW6dgOiy8vpOAHf2h5PHu8g5j1h8uirq11qfSNAHvZT9/+3pQ1z9uNfax6acpTyNwaIjup3/qd/6fwEYvoZQIcJmzQAAAABJRU5ErkJggg==" alt="Centific" style="height:32px;width:auto;display:block;flex-shrink:0;" /></div>
+    <div class="login-title" style="font-size:32px;margin-bottom:20px">Project Kilo</div>
+    <div class="login-sub">Enter your assigned Login ID to continue</div>
+    <label class="login-label">Login ID</label>
+    <input type="text" id="login-id-input" class="login-input" placeholder="e.g. FirstName-Kilo"
+      autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+      onkeydown="if(event.key==='Enter')doLogin()"
+      oninput="this.classList.remove('error');document.getElementById('login-error').textContent=''"/>
+    <div class="login-error" id="login-error"></div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">
+      <span id="login-btn-text">Sign In</span>
+    </button>
+    <div class="login-hint">Your Login ID was assigned by your project administrator.<br>Contact your admin if you don't have one.</div>
+  </div>
+</div>
+
 <!-- ── Nav ── -->
 <nav class="nav">
     <div class="nav-brand">
@@ -420,6 +627,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       <span style="font-size:11px;color:var(--text3)" id="nav-label">0/12</span>
     </div>
     <span class="nav-count" id="nav-badge">0 / 12</span>
+    <div class="nav-user-chip" id="nav-user-chip" style="display:none">
+      <div class="nav-user-avatar" id="nav-user-avatar">?</div>
+      <span class="nav-user-name" id="nav-user-name"></span>
+    </div>
     <div class="sync-badge idle" id="sync-badge">
       <div class="sync-dot"></div>
       <span class="sync-label" id="sync-label">Not configured</span>
@@ -456,6 +667,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="hd-item" onclick="toggleTheme(); closeHamburger()">
           <svg id="hd-theme-icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3"/><line x1="8" y1="1" x2="8" y2="3"/><line x1="8" y1="13" x2="8" y2="15"/><line x1="1" y1="8" x2="3" y2="8"/><line x1="13" y1="8" x2="15" y2="8"/><line x1="3.2" y1="3.2" x2="4.6" y2="4.6"/><line x1="11.4" y1="11.4" x2="12.8" y2="12.8"/><line x1="12.8" y1="3.2" x2="11.4" y2="4.6"/><line x1="4.6" y1="11.4" x2="3.2" y2="12.8"/></svg>
           <span id="hd-theme-label">Switch to Light mode</span>
+        </div>
+        <div class="hd-divider"></div>
+        <div class="hd-item" id="hd-logout" onclick="doLogout()" style="color:var(--red)">
+          <svg viewBox="0 0 16 16" style="stroke:var(--red)"><path d="M6 14H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h3"/><polyline points="11,11 14,8 11,5"/><line x1="14" y1="8" x2="6" y2="8"/></svg>
+          <span id="hd-logout-label">Sign out</span>
         </div>
       </div>
     </div>
@@ -633,12 +849,30 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
           <div class="pa-status" id="pa-status">No URL saved yet</div>
 
           <div class="divider"></div>
-          <div class="sec-label">Power Automate setup guide</div>
+          <div class="pa-card-title" style="margin-bottom:6px;font-size:15px">🔐 Login Flow URL</div>
+          <div class="pa-card-sub" style="margin-bottom:14px">Separate PA flow that looks up a moderator by loginId and returns their record.</div>
+          <div class="pa-url-row">
+            <input type="url" class="pa-url-input" id="login-pa-url-input" placeholder="https://... (ModInfo lookup flow)"/>
+            <button class="pa-save-btn" onclick="saveLoginPaUrl()">Save</button>
+          </div>
+          <div class="pa-status" id="login-pa-status">No login URL saved yet</div>
+          <div class="divider"></div>
+          <div class="sec-label">Login flow setup (Power Automate)</div>
+          <ul class="steps-guide" style="margin-bottom:20px">
+            <li>Create a new Automated cloud flow → trigger: <strong>"When a HTTP request is received"</strong></li>
+            <li>JSON schema: <div class="code-block">{"type":"object","properties":{"loginId":{"type":"string"}}}</div></li>
+            <li>Add action: <strong>Excel Online → Get a row</strong> (or "List rows present in a table") → ModInfo table → filter: <code>loginId eq @{triggerBody()?['loginId']}</code></li>
+            <li>Add action: <strong>Response</strong> → Status 200 → Body:<div class="code-block">{"found": true, "modId": "@{first(outputs('List_rows')?['body/value'])?['modId']}", "modName": "@{first(outputs('List_rows')?['body/value'])?['modName']}", "location": "@{first(outputs('List_rows')?['body/value'])?['location']}", "email": "@{first(outputs('List_rows')?['body/value'])?['email']}", "phone": "@{first(outputs('List_rows')?['body/value'])?['phone']}"}</div></li>
+            <li>If no row found, add a parallel <strong>Response</strong> with body: <div class="code-block">{"found": false}</div></li>
+            <li>Save → copy HTTP POST URL → paste above</li>
+          </ul>
+          <div class="divider"></div>
+          <div class="sec-label">TaskData sync setup guide</div>
           <ul class="steps-guide">
             <li>Go to <strong>make.powerautomate.com</strong> → Create → Automated cloud flow → Skip the dialog.</li>
             <li>Click <strong>Add a trigger</strong> → search <strong>"HTTP"</strong> → select <strong>"When a HTTP request is received"</strong> (Request connector).</li>
             <li>Paste the JSON schema into the <strong>Request Body JSON Schema</strong> field:
-              <div class="code-block">{"type":"object","properties":{"taskId":{"type":"integer"},"taskTitle":{"type":"string"},"category":{"type":"string"},"distance":{"type":"string"},"duration":{"type":"string"},"luxReading":{"type":"string"},"status":{"type":"string"},"stepsDone":{"type":"integer"},"stepsTotal":{"type":"integer"},"participantId":{"type":"string"},"moderator":{"type":"string"},"sessionDate":{"type":"string"},"deviceId":{"type":"string"},"completedAt":{"type":"string"},"notes":{"type":"string"},"submittedAt":{"type":"string"}}}</div>
+              <div class="code-block">{"type":"object","properties":{"taskId":{"type":"integer"},"taskTitle":{"type":"string"},"category":{"type":"string"},"distance":{"type":"string"},"duration":{"type":"string"},"luxReading":{"type":"string"},"status":{"type":"string"},"stepsDone":{"type":"integer"},"stepsTotal":{"type":"integer"},"participantId":{"type":"string"},"moderator":{"type":"string"},"sessionDate":{"type":"string"},"deviceId":{"type":"string"},"completedAt":{"type":"string"},"notes":{"type":"string"},"submittedAt":{"type":"string"},"modId":{"type":"string"}}}</div>
             </li>
             <li>Add a step: <strong>Excel Online (Business)</strong> → <strong>"Add a row into a table"</strong> → point it at your Excel file and the table named <strong>TaskData</strong>. Map each column to its dynamic value.</li>
             <li>Save the flow → copy the <strong>HTTP POST URL</strong> from the trigger card → paste it above.</li>
@@ -676,22 +910,25 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="toast" id="toast"><div class="toast-dot"></div><span id="toast-msg"></span></div>
 
 <script>
+const REG_PHONE_VIDEO = "https://digitaltechedge.sharepoint.com/:v:/r/sites/ProjectKiloModerators/Shared%20Documents/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Registration%20Session%20via%20Phone.mp4?csf=1&web=1&e=sVlkAV";
+
 const TASK_VIDEOS = [
-  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2001.mp4?csf=1&web=1&e=52ZRmO",
-  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2002.mp4?csf=1&web=1&e=kZsduU",
-  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2003.mp4?csf=1&web=1&e=hH9abF",
-  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2004.mp4?csf=1&web=1&e=IQmxhq",
-  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2005.mp4?csf=1&web=1&e=J9bYfO",
-  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2006.mp4?csf=1&web=1&e=rmGTTT",
-  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2007.mp4?csf=1&web=1&e=NQEL78",
-  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2008-10.mp4?csf=1&web=1&e=P1Itu5",
-  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2008-10.mp4?csf=1&web=1&e=P1Itu5",
-  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2008-10.mp4?csf=1&web=1&e=P1Itu5",
-  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2011.mp4?csf=1&web=1&e=SnAZk1",
-  "https://digitaltechedge.sharepoint.com/:v:/r/sites/DataCollectionUSHUB/Shared%20Documents/Active%20Projects/Amazon/Ben_Kilo%20(1000%20Participants)/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2012.mp4?csf=1&web=1&e=RkNlvJ"
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/ProjectKiloModerators/Shared%20Documents/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2001.mp4?csf=1&web=1&e=yMfwdY",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/ProjectKiloModerators/Shared%20Documents/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2002.mp4?csf=1&web=1&e=Z5Ognc",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/ProjectKiloModerators/Shared%20Documents/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2003.mp4?csf=1&web=1&e=g1nE98",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/ProjectKiloModerators/Shared%20Documents/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2004.mp4?csf=1&web=1&e=VT2dbx",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/ProjectKiloModerators/Shared%20Documents/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2005.mp4?csf=1&web=1&e=KSvjq9",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/ProjectKiloModerators/Shared%20Documents/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2006.mp4?csf=1&web=1&e=SNb9lR",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/ProjectKiloModerators/Shared%20Documents/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2007.mp4?csf=1&web=1&e=Z8BT8g",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/ProjectKiloModerators/Shared%20Documents/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2008-10.mp4?csf=1&web=1&e=Extmrr",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/ProjectKiloModerators/Shared%20Documents/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2008-10.mp4?csf=1&web=1&e=Extmrr",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/ProjectKiloModerators/Shared%20Documents/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2008-10.mp4?csf=1&web=1&e=Extmrr",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/ProjectKiloModerators/Shared%20Documents/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2011.mp4?csf=1&web=1&e=5b156Z",
+  "https://digitaltechedge.sharepoint.com/:v:/r/sites/ProjectKiloModerators/Shared%20Documents/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2012.mp4?csf=1&web=1&e=ccAHfZ"
 ];
 
 const TASKS=[
+  {id:0,title:"Registration",cat:"Registration",distance:"",lux:"",duration:"",warn:"",note:"",isRegistration:true,steps:[]},
   {id:1,title:"Registration — Hat",cat:"Registration",distance:"2–4 ft",lux:"0–10",duration:"Manual",warn:"",note:"",steps:["Press START SESSION → select Visual ID","Select registration_hat from the dropdown","Participant stands/sits at 2–4 ft","Tap START to begin recording",{t:"Perform head movements:",s:["Front→Left→Front→Right→Front→Upward→Front→Downward→Front"]},"Tap STOP SESSION","Remove the hat before continuing to remaining tasks"]},
   {id:2,title:"Device Visible Range",cat:"Movement",distance:"2–8 ft",lux:"0–10",duration:"Auto 2 min",warn:"",note:"",steps:["Press START SESSION → select Visual ID","Select Device Visible Range from the dropdown","Measure lux on face at 8 ft facing device — confirm 0–10 lux, enter value","Start recording","Participant faces device and walks backwards at normal speed to 8 ft","Takes 2 steps toward device, turns face left or right, turns back, looks at device 2–3 sec","Repeat until ~2 ft from device","Recording auto-ends at 2 minutes"]},
   {id:3,title:"Seated Variations (Low Light)",cat:"Seated",distance:"2–8 ft",lux:"0–10",duration:"Auto 2 min",warn:"",note:"",steps:["Press START SESSION → select Visual ID","Select Seated Variations - Excellent. Complete metadata.",{t:"Arrange 3 chairs:",s:["Chair 1: ~2–3 ft from device","Chair 2: ~4–5 ft (different direction)","Chair 3: ~6–8 ft (same direction as Chair 1)"]},"Measure lux at furthest chair — confirm 0–10 lux, enter value","Start recording","Sit perpendicular to device, look straight, then face device for 2–3 sec","Move to each chair and repeat","Recording auto-ends at 2 minutes"]},
@@ -707,14 +944,15 @@ const TASKS=[
 ];
 
 // ── State ──────────────────────────────────────────────
-const taskDone  = new Array(12).fill(false);
+const taskDone  = new Array(13).fill(false);
 const stepDone  = TASKS.map(t=>new Array(t.steps.length).fill(false));
 const taskData  = TASKS.map(()=>({lux:'',notes:'',status:'Not Started',completedAt:''}));
-const taskSynced= new Array(12).fill(false);
+const taskSynced= new Array(13).fill(false);
 let globalData  = {participant:'',operator:'',date:'',device:'Device A'};
 let activeTask  = null;
 let activePanel = null; // 'reminders' | 'trouble' | 'settings' | null
 let currentFilter='all';
+let currentUser = null; // {modId, modName, firstName, location, email, phone, loginId}
 
 // ── LocalStorage persistence ──────────────────────────
 const STORAGE_KEY = 'centific_progress_v1';
@@ -768,11 +1006,19 @@ function resetProgress(){
   renderSidebar(); updateProgress();
   showToast('Progress reset');
 }
+const DEFAULT_LOGIN_PA_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/47e3b8b0644d431993240102d3144729/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=RJZTVliJceBcr00uadxq9nDqWwkJmBWx0fuVpp3hsWo';
+let loginPaUrl = localStorage.getItem('centific_login_pa_url') || DEFAULT_LOGIN_PA_URL;
+
 const DEFAULT_PA_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/6e31d0ca6c4240f0af0f6c4a3734b3aa/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=reuYXEx6a4HhPSV76DKzRtzcOE1XefhJlIQJ1vB23s0';
 let paUrl       = localStorage.getItem('centific_pa_url') || DEFAULT_PA_URL;
 let currentTheme= localStorage.getItem('centific_theme')||'dark';
 
 // ── Init ──────────────────────────────────────────────
+// Restore session user if logged in (sessionStorage survives refreshes in same tab)
+const savedSession = sessionStorage.getItem('centific_user');
+if(savedSession){
+  try{ currentUser = JSON.parse(savedSession); } catch(e){ currentUser = null; }
+}
 const savedOk = loadProgress();
 if(savedOk && globalData.date){
   document.getElementById('g-date').value = globalData.date;
@@ -903,7 +1149,7 @@ async function postToPA(idx){
     taskId:t.id,taskTitle:t.title,category:t.cat,distance:t.distance,duration:t.duration,
     luxReading:d.lux||'',status:d.status,
     stepsDone:stepDone[idx].filter(Boolean).length,stepsTotal:t.steps.length,
-    participantId:globalData.participant||'',moderator:globalData.operator||'',
+    participantId:globalData.participant||'',moderator:globalData.operator||'',modId:currentUser?currentUser.modId:'',
     sessionDate:globalData.date||'',deviceId:globalData.device||'Device A',
     completedAt:d.completedAt||'',notes:d.notes||'',submittedAt:new Date().toISOString()
   };
@@ -923,7 +1169,7 @@ async function postToPA(idx){
 }
 
 // ── Progress ──────────────────────────────────────────
-function completedCount(){ return taskDone.filter(Boolean).length; }
+function completedCount(){ return taskDone.slice(1).filter(Boolean).length; } // exclude reg task
 function updateProgress(){
   const c=completedCount(),pct=Math.round(c/12*100);
   document.getElementById('nav-fill').style.width=pct+'%';
@@ -946,6 +1192,7 @@ function setFilter(f,el){
   renderSidebar();
 }
 function getTaskStatus(i){
+  if(TASKS[i].isRegistration) return taskDone[i]?'complete':'notstarted';
   if(taskDone[i]) return 'complete';
   if(taskData[i].status==='Skipped') return 'skipped';
   const done=stepDone[i].filter(Boolean).length;
@@ -956,6 +1203,20 @@ function getTaskStatus(i){
 function renderSidebar(){
   const el=document.getElementById('sidebar-list');
   el.innerHTML='';
+  // ── Registration item ──
+  const regItem = document.createElement('div');
+  regItem.className='reg-item' + (activeTask==='reg'?' active':'');
+  regItem.innerHTML=`
+    <div style="width:22px;height:22px;border-radius:50%;background:rgba(239,67,179,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="var(--pink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="8,2 8,8 12,8"/><circle cx="8" cy="8" r="6"/></svg>
+    </div>
+    <div style="flex:1;min-width:0">
+      <div class="reg-badge">PRE-TASK</div>
+      <div class="reg-label">Registration</div>
+      <div class="reg-sublabel">Complete before any tasks</div>
+    </div>`;
+  regItem.addEventListener('click', ()=>openRegistration());
+  el.appendChild(regItem);
   TASKS.forEach((t,i)=>{
     if(currentFilter==='done'&&!taskDone[i]) return;
     if(currentFilter==='todo'&&taskDone[i]) return;
@@ -971,6 +1232,7 @@ function renderSidebar(){
       skipped:   {label:'Skipped',cls:'s-status-skipped'},
     };
     const sc=statusConfig[status];
+    const videoLocked = isFirstLogin && isFirstLogin() && !getVideosSeen()[i];
     const progressBar=status==='inprogress'
       ?`<div class="s-prog-track"><div class="s-prog-fill" style="width:${pct}%"></div></div>`
       :'';
@@ -981,12 +1243,13 @@ function renderSidebar(){
         <svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9.5 10.5,3"/></svg>
       </div>
       <div class="s-info">
-        <div class="s-num">TASK ${String(t.id).padStart(2,'0')}</div>
+        <div class="s-num">${t.id===0 ? 'REGISTRATION' : 'TASK '+String(t.id).padStart(2,'0')}</div>
         <div class="s-title">${t.title}</div>
         ${progressBar}
         <div class="s-status-row">
           <span class="s-status-pill ${sc.cls}">${sc.label}</span>
           ${taskSynced[i]?'<span class="s-synced-pill">✓ Data Synced</span>':''}
+          ${videoLocked?'<span class="video-lock-pill">▶ Watch video first</span>':''}
         </div>
       </div>`;
     item.addEventListener('click',()=>openTask(i));
@@ -997,6 +1260,11 @@ function renderSidebar(){
 function quickCheck(e,i){
   e.stopPropagation();
   if(!taskDone[i] && !validateRequired()) return;
+  if(!taskDone[i] && isFirstLogin() && !getVideosSeen()[i]){
+    showToast('⚠ Watch the Task ' + TASKS[i].id + ' video first');
+    openTask(i); // open the task so they can see the video button
+    return;
+  }
   taskDone[i]=!taskDone[i];
   stepDone[i].fill(taskDone[i]);
   taskData[i].status=taskDone[i]?'Complete':'Not Started';
@@ -1027,6 +1295,7 @@ function openTask(i){
 // ── Render task detail ────────────────────────────────
 function renderDetail(i){
   const t=TASKS[i],d=taskData[i];
+  if(t.isRegistration){ renderRegistration(i); return; }
   const done=stepDone[i].filter(Boolean).length;
   const videoNote = (i===8||i===9) ? ' (same as Task 8)' : '';
   let html=`<div class="task-hdr">
@@ -1135,6 +1404,18 @@ function toggleStep(ti,si){
 }
 async function completeTask(i){
   if(!validateRequired()) return;
+  // First-login: must watch all videos before completing any task
+  if(isFirstLogin()){
+    const seen = getVideosSeen();
+    if(!seen[i]){
+      showToast('⚠ Watch the Task ' + TASKS[i].id + ' video first — click the video button above');
+      // Highlight video button briefly
+      const vBtn = document.querySelector('.video-btn');
+      if(vBtn){ vBtn.style.boxShadow='0 0 0 3px var(--pink)'; setTimeout(()=>vBtn.style.boxShadow='',2000); }
+      return;
+    }
+    if(checkAllVideosSeen()) markVideosComplete();
+  }
   taskDone[i]=true;stepDone[i].fill(true);
   taskData[i].status='Complete';taskData[i].completedAt=new Date().toLocaleString();
   renderDetail(i);renderSidebar();updateProgress();saveProgress();await autoSync(i);
@@ -1238,6 +1519,11 @@ function checkAdminPw(){
     document.getElementById('pa-url-input').value = paUrl;
     document.getElementById('pa-status').textContent = '✓ URL configured — auto-sync enabled';
     document.getElementById('pa-status').className = 'pa-status saved';
+    // Pre-populate login URL field too
+    const loginInput = document.getElementById('login-pa-url-input');
+    if(loginInput) loginInput.value = loginPaUrl;
+    const loginStatus = document.getElementById('login-pa-status');
+    if(loginStatus && loginPaUrl){ loginStatus.textContent = '✓ Login URL configured'; loginStatus.className = 'pa-status saved'; }
   } else {
     errEl.classList.remove('hidden');
     const input = document.getElementById('admin-pw-input');
@@ -1247,13 +1533,501 @@ function checkAdminPw(){
   }
 }
 
+
+// ── Login system ──────────────────────────────────────
+const ADMIN_LOGIN_ID = 'Admin-Kilo';
+
+async function doLogin(){
+  const loginId = document.getElementById('login-id-input').value.trim();
+  const errEl   = document.getElementById('login-error');
+  const btn     = document.getElementById('login-btn');
+  const btnText = document.getElementById('login-btn-text');
+  if(!loginId){
+    errEl.textContent = 'Please enter your Login ID';
+    document.getElementById('login-id-input').classList.add('error');
+    return;
+  }
+  // Show spinner
+  btn.disabled = true;
+  btnText.innerHTML = '<div class="login-spinner"></div> Signing in…';
+  errEl.textContent = '';
+
+  // ── Admin bypass — no PA call needed ──
+  if(loginId === ADMIN_LOGIN_ID){
+    currentUser = {
+      modId:     'ADMIN',
+      modName:   'Admin',
+      firstName: 'Admin',
+      location:  '',
+      email:     '',
+      phone:     '',
+      loginId:   loginId,
+      isAdmin:   true
+    };
+    sessionStorage.setItem('centific_user', JSON.stringify(currentUser));
+    onLoginSuccess();
+    return;
+  }
+
+  if(!loginPaUrl){
+    // No login PA URL configured — admin needs to set it up
+    btn.disabled = false;
+    btnText.textContent = 'Sign In';
+    errEl.textContent = 'Login service not configured. Contact your admin.';
+    return;
+  }
+
+  try{
+    const res = await fetch(loginPaUrl, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({loginId: loginId})
+    });
+    if(!res.ok && res.status !== 202) throw new Error('HTTP ' + res.status);
+
+    let data;
+    const text = await res.text();
+    try { data = JSON.parse(text); }
+    catch(e) { throw new Error('Invalid response from server: ' + text.substring(0,100)); }
+
+    // PA should return: {found: true/false, modId, modName, location, email, phone}
+    if(!data || !data.found){
+      btn.disabled = false;
+      btnText.textContent = 'Sign In';
+      document.getElementById('login-id-input').classList.add('error');
+      errEl.textContent = 'Login ID not recognised. Please check and try again.';
+      return;
+    }
+
+    // Success — store user
+    const firstName = (data.modName || '').split(' ')[0] || data.modName;
+    currentUser = {
+      modId:    data.modId    || '',
+      modName:  data.modName  || '',
+      firstName: firstName,
+      location: data.location || '',
+      email:    data.email    || '',
+      phone:    data.phone    || '',
+      loginId:  loginId
+    };
+    sessionStorage.setItem('centific_user', JSON.stringify(currentUser));
+    onLoginSuccess();
+  } catch(e){
+    btn.disabled = false;
+    btnText.textContent = 'Sign In';
+    console.error('Login error full details:', e);
+    if(e.message && e.message.includes('Failed to fetch')){
+      errEl.textContent = 'Network error (possible CORS issue). Check browser console for details.';
+    } else if(e.message && e.message.includes('HTTP ')){
+      errEl.textContent = 'Server error: ' + e.message + '. Check your PA flow is enabled.';
+    } else {
+      errEl.textContent = 'Error: ' + (e.message || 'Unknown error') + ' — check browser console.';
+    }
+  }
+}
+
+function onLoginSuccess(){
+  // If returning user (not first login), skip video requirement
+  if(sessionStorage.getItem('centific_videos_seen_complete')){
+    // already done — no action needed
+  }
+  // Hide login screen
+  document.getElementById('login-screen').classList.add('hidden');
+  // Update nav user chip
+  const chip = document.getElementById('nav-user-chip');
+  document.getElementById('nav-user-avatar').textContent = (currentUser.firstName[0]||'?').toUpperCase();
+  document.getElementById('nav-user-name').textContent = currentUser.firstName;
+  chip.style.display = 'flex';
+  // Prefill moderator field
+  const modField = document.getElementById('g-operator');
+  if(modField && !modField.value) modField.value = currentUser.modName;
+  globalData.operator = currentUser.modName;
+  saveProgress();
+  // Update welcome message
+  updateWelcomeMessage();
+  // Update logout label
+  document.getElementById('hd-logout-label').textContent = 'Sign out (' + currentUser.firstName + ')';
+}
+
+function updateWelcomeMessage(){
+  // Update h2 if welcome screen is visible
+  const h2 = document.querySelector('#main-content h2');
+  if(h2 && currentUser){
+    h2.textContent = currentUser.firstName + ', Welcome to Project Kilo!';
+  }
+}
+
+function doLogout(){
+  if(!confirm('Sign out of the app?')) return;
+  currentUser = null;
+  sessionStorage.removeItem('centific_user');
+  // Hide nav chip
+  document.getElementById('nav-user-chip').style.display = 'none';
+  document.getElementById('hd-logout-label').textContent = 'Sign out';
+  // Clear moderator field
+  document.getElementById('g-operator').value = '';
+  globalData.operator = '';
+  saveProgress();
+  // Reset login form
+  document.getElementById('login-id-input').value = '';
+  document.getElementById('login-error').textContent = '';
+  document.getElementById('login-btn').disabled = false;
+  document.getElementById('login-btn-text').textContent = 'Sign In';
+  // Show login screen
+  document.getElementById('login-screen').classList.remove('hidden');
+  closeHamburger();
+}
+
+function saveLoginPaUrl(){
+  const val = document.getElementById('login-pa-url-input').value.trim();
+  if(!val || !val.startsWith('http')){ showToast('Please enter a valid URL'); return; }
+  loginPaUrl = val;
+  localStorage.setItem('centific_login_pa_url', loginPaUrl);
+  document.getElementById('login-pa-status').textContent = '✓ Login URL saved';
+  document.getElementById('login-pa-status').className = 'pa-status saved';
+  document.getElementById('login-pa-url-input').classList.add('saved');
+  showToast('Login URL saved');
+}
+
+
+// ── Registration task renderer ────────────────────────
+let regView = null; // null | 'cellphone' | 'deviceA'
+
+function stepItemHTML(stepText, isDone, taskIdx, type, stepIdx) {
+  var dotClass = 'step-dot' + (isDone ? ' done' : '');
+  var textClass = 'step-text' + (isDone ? ' done' : '');
+  return '<li class="step-item" onclick="toggleRegStep(' + taskIdx + ',\'' + type + '\',' + stepIdx + ')">'
+    + '<div class="' + dotClass + '"><span>' + (stepIdx+1) + '</span>'
+    + '<div class="step-tick"><svg viewBox="0 0 13 10"><path d="M1.5 5L5 8.5L11.5 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>'
+    + '<div class="step-content"><div class="' + textClass + '">' + stepText + '</div></div>'
+    + '</li>';
+}
+
+function backBtn(i) {
+  return '<button class="reg-back-btn" onclick="regView=null; renderRegistration(' + i + ')">'
+    + '<svg viewBox="0 0 18 18"><path d="M11.5 4L6.5 9L11.5 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    + 'Back to Registration</button>';
+}
+
+function renderRegistration(i) {
+  var mc = document.getElementById('main-content');
+  var watched = getWatchedVideos();
+  var firstLogin = isFirstLogin();
+  var out = '';
+
+  if (regView === null) {
+    out += '<div class="task-hdr">'
+      + '<div class="task-eyebrow">REGISTRATION · BEFORE TASKS BEGIN</div>'
+      + '<div class="task-title-main">Registration</div>'
+      + '<div style="margin-top:10px;font-size:14px;color:var(--text2);font-weight:300">Every participant must complete registration before any tasks. Choose the registration type below.</div>'
+      + '</div>';
+    if (firstLogin) {
+      out += '<div class="video-required-banner">'
+        + '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="var(--pink)" stroke="none"/></svg>'
+        + '<p>First session: please watch all task videos before starting. Videos are tracked when you open them.</p></div>';
+    }
+    out += '<div class="reg-chooser">'
+      + '<div class="reg-option-btn" onclick="regView=\'cellphone\'; renderRegistration(' + i + ')">'
+      + '<div class="reg-option-icon"><svg viewBox="0 0 16 16"><rect x="4" y="1" width="8" height="14" rx="1.5"/><line x1="8" y1="12" x2="8" y2="12.5"/></svg></div>'
+      + '<div><div class="reg-option-label">Registration — Cellphone</div><div class="reg-option-sub">Participant self-records selfie video</div></div>'
+      + '</div>'
+      + '<div class="reg-option-btn" onclick="regView=\'deviceA\'; renderRegistration(' + i + ')">'
+      + '<div class="reg-option-icon"><svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1.5"/><line x1="6" y1="14" x2="10" y2="14"/><line x1="8" y1="13" x2="8" y2="14"/></svg></div>'
+      + '<div><div class="reg-option-label">Registration — Device A</div><div class="reg-option-sub">Device A setup and registration</div></div>'
+      + '</div></div>';
+    mc.innerHTML = out;
+    return;
+  }
+
+  if (regView === 'cellphone') {
+    var videoWatched = watched['reg_cellphone'];
+    var phoneSteps = [
+      'Capture a single selfie video that includes all head poses.',
+      'Participant holds the cellphone at 2–4 ft distance (selfie style).',
+      'Record a single video performing the following head movements: Front → Left → Front → Right → Front → Upward → Front → Downward → Front',
+      'Uploading the selfie video registration (can be done after collection is complete).'
+    ];
+    out += backBtn(i);
+    out += '<div class="task-hdr"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px"><div>'
+      + '<div class="task-eyebrow">REGISTRATION · CELLPHONE</div>'
+      + '<div class="task-title-main">Registration — Cellphone</div>'
+      + '</div>'
+      + '<button class="video-btn" onclick="openVideoModal(' + i + ', \'cellphone\')">'
+      + '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><polygon points="6.5,5.5 11.5,8 6.5,10.5" fill="currentColor" stroke="none"/></svg>'
+      + '<span>Watch Video' + (videoWatched ? ' ✓' : '') + '</span></button>'
+      + '</div></div>';
+    if (firstLogin && !videoWatched) {
+      out += '<div class="video-required-banner">'
+        + '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="var(--pink)" stroke="none"/></svg>'
+        + '<p>Please watch the video before proceeding.</p></div>';
+    }
+    out += '<div class="capture-card"><div class="capture-card-title">Steps</div><ul class="steps-list">';
+    var regSteps = taskData[i].regPhoneSteps || new Array(phoneSteps.length).fill(false);
+    for (var j = 0; j < phoneSteps.length; j++) {
+      out += stepItemHTML(phoneSteps[j], regSteps[j], i, 'phone', j);
+    }
+    out += '</ul>'
+      + '<div class="note-box" style="margin-top:8px">At the end of collection, upload recording to your laptop and rename as: <strong>PID_PhoneModel_session.mp4</strong></div>'
+      + '</div>';
+    mc.innerHTML = out;
+    return;
+  }
+
+  if (regView === 'deviceA') {
+    var part1Steps = [
+      'Choose a room where lighting can be precisely controlled (multiple lamps, windows with shades, etc.).',
+      'Position Device A at a height of 1.5–6 ft. The DC App must populate the placement height entered at setup into the metadata of each video.',
+      'Plug in the device using the provided power adapter.',
+      'Navigate through setup steps and log in using the provided Account.',
+      'Verify: Camera shutter (top right corner) is slid all the way to the left (open). Privacy mode (top left) is off — the red light must NOT be on. If it is, press the button to turn it off.',
+      'Navigate to the DC App: Swipe down → Settings → Device Options → Developer Options → CV Uploader. If "Developer Options" is not visible, tap the Serial Number at the bottom of Device Options 8 times to enable it.'
+    ];
+    var part2Steps = [
+      'Every participant must complete registration before performing any tasks. Participants must NOT wear a hat/baseball cap during registration.',
+      'On Device A, swipe down → tap Settings icon.',
+      'Go to START SESSION → select Registration.',
+      'Enter first name. Fill out remaining fields and tap START.',
+      'Participant stands/sits 2–4 ft from the device.',
+      'Perform the following head movements in sequence: Front → Left → Front → Right → Front → Upward → Front → Downward → Front',
+      'Tap START to begin recording, then STOP SESSION when complete.'
+    ];
+    var devSteps = taskData[i].regDeviceSteps || new Array(part1Steps.length + part2Steps.length).fill(false);
+    out += backBtn(i);
+    out += '<div class="task-hdr"><div class="task-eyebrow">REGISTRATION · DEVICE A</div>'
+      + '<div class="task-title-main">Registration — Device A</div></div>';
+    out += '<div class="capture-card"><div class="capture-card-title">Part 1 — Device Setup of Device A</div><ul class="steps-list">';
+    for (var j = 0; j < part1Steps.length; j++) {
+      out += stepItemHTML(part1Steps[j], devSteps[j], i, 'device', j);
+    }
+    out += '</ul></div>';
+    out += '<div class="capture-card"><div class="capture-card-title">Part 2 — Registration for Device A</div><ul class="steps-list">';
+    for (var j = 0; j < part2Steps.length; j++) {
+      out += stepItemHTML(part2Steps[j], devSteps[part1Steps.length + j], i, 'device', part1Steps.length + j);
+    }
+    out += '</ul>'
+      + '<div class="btn-row" style="margin-top:12px">'
+      + '<button class="cta-btn primary" onclick="completeRegistration(' + i + ')">Mark Registration Complete</button>'
+      + '</div></div>';
+    mc.innerHTML = out;
+  }
+}
+
+function toggleRegStep(taskIdx, type, stepIdx) {
+  if (!taskData[taskIdx].regPhoneSteps) taskData[taskIdx].regPhoneSteps = new Array(4).fill(false);
+  if (!taskData[taskIdx].regDeviceSteps) taskData[taskIdx].regDeviceSteps = new Array(13).fill(false);
+  if (type === 'phone') taskData[taskIdx].regPhoneSteps[stepIdx] = !taskData[taskIdx].regPhoneSteps[stepIdx];
+  if (type === 'device') taskData[taskIdx].regDeviceSteps[stepIdx] = !taskData[taskIdx].regDeviceSteps[stepIdx];
+  saveProgress();
+  renderRegistration(taskIdx);
+}
+
+function completeRegistration(i) {
+  taskDone[i] = true;
+  taskData[i].status = 'Complete';
+  taskData[i].completedAt = new Date().toLocaleString();
+  renderSidebar(); updateProgress(); saveProgress();
+  showToast('Registration marked complete');
+  renderRegistration(i);
+}
+
+function toggleRegStep(taskIdx, type, stepIdx){
+  if(!taskData[taskIdx].regPhoneSteps) taskData[taskIdx].regPhoneSteps = new Array(4).fill(false);
+  if(!taskData[taskIdx].regDeviceSteps) taskData[taskIdx].regDeviceSteps = new Array(13).fill(false);
+  if(type === 'phone') taskData[taskIdx].regPhoneSteps[stepIdx] = !taskData[taskIdx].regPhoneSteps[stepIdx];
+  if(type === 'device') taskData[taskIdx].regDeviceSteps[stepIdx] = !taskData[taskIdx].regDeviceSteps[stepIdx];
+  saveProgress();
+  renderRegistration(taskIdx);
+}
+
+function completeRegistration(i){
+  taskDone[i] = true;
+  taskData[i].status = 'Complete';
+  taskData[i].completedAt = new Date().toLocaleString();
+  renderSidebar(); updateProgress(); saveProgress();
+  showToast('Registration marked complete');
+  renderRegistration(i);
+}
+
+
+// ── Registration task ─────────────────────────────────
+const REG_PHONE_STEPS = [
+  "Capture a single selfie video that includes all head poses.",
+  "Participant holds the cellphone at 2–4 ft distance (selfie style).",
+  {t:"Record a single video performing the following head movements:",s:["Front → Left → Front → Right → Front → Upward → Front → Downward → Front"]},
+  {t:"Uploading the selfie video registration (can be done after collection is complete):",s:["At the end of the collection, upload recording to your laptop and rename as follows:","PID_PhoneModel_session.mp4"]}
+];
+
+const REG_DEVICE_STEPS = [
+  {t:"Part 1 — Device Setup of Device A", section:true},
+  "Choose a room where lighting can be precisely controlled (multiple lamps, windows with shades, etc.).",
+  "Position Device A at a height of 1.5–6 ft. The DC App must populate the placement height entered at setup into the metadata of each video collected at that height.",
+  "Plug in the device using the provided power adapter.",
+  "Navigate through setup steps and log in using the provided Account.",
+  {t:"Verify the following:",s:["Camera shutter (top right corner) is slid all the way to the left (open).","Privacy mode (top left) is off — the red light must NOT be on. If it is, press the button to turn it off."]},
+  {t:"Navigate to the DC App:",s:["Swipe down → Settings → Device Options → Developer Options → CV Uploader…","If 'Developer Options' is not visible, tap the Serial Number at the bottom of Device Options 8 times to enable it."]},
+  {t:"Part 2 — Registration for Device A", section:true},
+  "Every participant must complete registration before performing any tasks. Participants must NOT wear a hat/baseball cap during registration.",
+  "On Device A, swipe down → tap Settings icon.",
+  "Go to START SESSION → select Registration.",
+  "Enter first name.",
+  "Fill out remaining fields and tap START.",
+  "Participant stands/sits 2–4 ft from the device.",
+  {t:"Perform the following head movements in sequence:",s:["Front → Left → Front → Right → Front → Upward → Front → Downward → Front"]},
+  "Tap START to begin recording, then STOP SESSION when complete."
+];
+
+let regSubTask = null; // null | 'phone' | 'device'
+let regStepsDone = { phone: [], device: [] };
+
+function openRegistration(){
+  activeTask = 'reg';
+  activePanel = null;
+  PANEL_IDS.forEach(p=>{
+    document.getElementById('panel-'+p).classList.remove('open');
+    document.getElementById(HD_IDS[p]).classList.remove('active');
+  });
+  document.getElementById('main-content').style.display='block';
+  if(window.innerWidth<=700){
+    document.getElementById('sidebar').classList.add('hidden');
+    document.getElementById('main-panel').classList.remove('hidden');
+  }
+  renderSidebar();
+  renderRegistration();
+}
+
+function renderRegistration(){
+  if(!regSubTask){
+    // Show chooser
+    document.getElementById('main-content').innerHTML = `
+      <div class="task-hdr">
+        <div class="task-eyebrow">PRE-TASK · Registration</div>
+        <div class="task-title-main">Registration</div>
+        <div style="font-size:14px;color:var(--text2);margin-top:8px;line-height:1.5">Complete registration before starting any tasks. Choose the registration type below.</div>
+      </div>
+      <div class="subtask-chooser">
+        <div class="subtask-btn" onclick="selectRegSubTask('phone')">
+          <div class="subtask-icon phone">
+            <svg viewBox="0 0 16 16"><rect x="4" y="1" width="8" height="14" rx="1.5"/><line x1="8" y1="12" x2="8" y2="12.5"/></svg>
+          </div>
+          <div>
+            <div class="subtask-name">Registration — Cellphone</div>
+            <div class="subtask-desc">Self-recorded selfie video using participant's phone</div>
+          </div>
+        </div>
+        <div class="subtask-btn" onclick="selectRegSubTask('device')">
+          <div class="subtask-icon device">
+            <svg viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1.5"/><line x1="5" y1="13" x2="11" y2="13"/><line x1="8" y1="13" x2="8" y2="14.5"/></svg>
+          </div>
+          <div>
+            <div class="subtask-name">Registration — Device A</div>
+            <div class="subtask-desc">Full device setup and registration using Device A</div>
+          </div>
+        </div>
+      </div>`;
+  } else {
+    const isPhone = regSubTask === 'phone';
+    const steps = isPhone ? REG_PHONE_STEPS : REG_DEVICE_STEPS;
+    const done = regStepsDone[regSubTask];
+    const doneCount = done.filter((v,j) => v && !(typeof steps[j]==='object' && steps[j].section)).length;
+    const totalCount = steps.filter(s => !(typeof s==='object' && s.section)).length;
+    const videoBtn = isPhone
+      ? `<button class="video-btn" onclick="openRegVideoModal()">
+          <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><polygon points="6.5,5.5 11.5,8 6.5,10.5" fill="currentColor" stroke="none"/></svg>
+          <span>Registration Video</span>
+        </button>`
+      : '';
+    let html2 = `
+      <div class="task-hdr">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+          <div>
+            <div class="task-eyebrow">PRE-TASK · Registration · Step ${doneCount} of ${totalCount}</div>
+            <div class="task-title-main">${isPhone ? 'Registration — Cellphone' : 'Registration — Device A'}</div>
+          </div>
+          ${videoBtn}
+        </div>
+      </div>
+      <div class="steps-label">Steps</div>
+      <ul class="steps-list">`;
+    steps.forEach((s,j)=>{
+      // Section title — render as header, not a checklist item
+      if(typeof s==='object' && s.section){
+        html2 += `<li style="display:flex;align-items:center;gap:0;padding:16px 0 6px;border-bottom:none;cursor:default;list-style:none">
+          <div style="font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--pink);border-bottom:.5px solid rgba(239,67,179,.25);padding-bottom:6px;width:100%">${s.t}</div>
+        </li>`;
+        return;
+      }
+      const isDone = done[j];
+      const text = typeof s==='string' ? s : s.t;
+      const subs = typeof s==='object'&&s.s&&s.s.length
+        ? '<div class="sub-items">'+s.s.map(x=>`<div class="sub-item"><span class="sub-dash">—</span><span>${x}</span></div>`).join('')+'</div>'
+        : '';
+      html2 += `<li class="step-item" onclick="toggleRegStep(${j})">
+        <div class="step-dot${isDone?' done':''}">
+          <span>${j+1}</span>
+          <div class="step-tick"><svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9.5 10.5,3"/></svg></div>
+        </div>
+        <div class="step-content"><div class="step-text${isDone?' done':''}">${text}</div>${subs}</div>
+      </li>`;
+    });
+    html2 += `</ul>
+      <div class="btn-row">
+        <button class="cta-btn secondary" onclick="regSubTask=null;renderRegistration()">← Back to options</button>
+      </div>`;
+    document.getElementById('main-content').innerHTML = html2;
+  }
+}
+
+function selectRegSubTask(type){
+  regSubTask = type;
+  if(!regStepsDone[type].length){
+    const steps = type==='phone' ? REG_PHONE_STEPS : REG_DEVICE_STEPS;
+    regStepsDone[type] = new Array(steps.length).fill(false);
+  }
+  renderRegistration();
+}
+
+function toggleRegStep(j){
+  const steps = regSubTask==='phone' ? REG_PHONE_STEPS : REG_DEVICE_STEPS;
+  if(typeof steps[j]==='object' && steps[j].section) return; // don't toggle titles
+  regStepsDone[regSubTask][j] = !regStepsDone[regSubTask][j];
+  renderRegistration();
+}
+
+function openRegVideoModal(){
+  document.getElementById('video-modal-title').textContent = 'Registration — Cellphone';
+  document.getElementById('video-open-link').href = REG_PHONE_VIDEO;
+  document.getElementById('video-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
 // ── Video modal ───────────────────────────────────────
-function openVideoModal(taskIndex){
+function openVideoModal(taskIndex, regType){
   const t = TASKS[taskIndex];
-  const url = TASK_VIDEOS[taskIndex];
-  const note = (taskIndex===8||taskIndex===9) ? ' (same video as Task 8)' : '';
-  document.getElementById('video-modal-title').textContent = `Task ${t.id} — ${t.title}${note}`;
+  let url, title, watchKey;
+  if(regType === 'cellphone'){
+    url = REG_VIDEOS.cellphone;
+    title = 'Registration — Cellphone';
+    watchKey = 'reg_cellphone';
+  } else if(regType === 'deviceA'){
+    url = REG_VIDEOS.cellphone; // no separate video for deviceA
+    title = 'Registration — Device A';
+    watchKey = 'reg_deviceA';
+  } else {
+    // Adjust index since TASKS[0] is registration
+    const videoIdx = taskIndex - 1;
+    url = TASK_VIDEOS[videoIdx] || '';
+    const note = (taskIndex===9||taskIndex===10) ? ' (same video as Task 8)' : '';
+    title = `Task ${t.id} — ${t.title}${note}`;
+    watchKey = 'task_' + t.id;
+  }
+  document.getElementById('video-modal-title').textContent = title;
   document.getElementById('video-open-link').href = url;
+  // Track that user opened/watched this video
+  markVideoWatched(watchKey);
+  if(isFirstLogin()) {
+    // After watching all videos, mark login as seen and refresh sidebar
+    if(allVideosWatched()){ markLoginSeen(); renderSidebar(); }
+  }
   document.getElementById('video-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -1262,6 +2036,26 @@ function closeVideoModal(e){
   document.getElementById('video-modal').classList.remove('open');
   document.body.style.overflow = '';
 }
+function getVideosSeen(){
+  try { return JSON.parse(sessionStorage.getItem('centific_videos_seen') || '{}'); }
+  catch(e){ return {}; }
+}
+
+function isFirstLogin(){
+  // First login = no 'centific_videos_seen' key yet, or not all 12 seen
+  return !sessionStorage.getItem('centific_videos_seen_complete');
+}
+
+function checkAllVideosSeen(){
+  const seen = getVideosSeen();
+  for(let i=0;i<12;i++){ if(!seen[i]) return false; }
+  return true;
+}
+
+function markVideosComplete(){
+  sessionStorage.setItem('centific_videos_seen_complete', '1');
+}
+
 // close modal on Escape key
 document.addEventListener('keydown', e => {
   if(e.key === 'Escape') closeVideoModal(null);
@@ -1290,6 +2084,16 @@ applyLayout();
 document.getElementById('config-banner').classList.add('hidden');
 renderSidebar();
 updateProgress();
+
+// ── Restore login state ──────────────────────────────
+if(currentUser){
+  onLoginSuccess();
+} else {
+  // Show login screen — block app access
+  document.getElementById('login-screen').classList.remove('hidden');
+}
+// Update welcome message whenever it might be in view
+updateWelcomeMessage();
 </script>
 </body>
 </html>
