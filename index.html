@@ -658,9 +658,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 #login-screen{
   position:fixed;inset:0;z-index:1000;
   background:var(--bg);
-  display:flex;align-items:center;justify-content:center;padding:24px;
+  display:none;align-items:center;justify-content:center;padding:24px;
   animation:fadeUp .4s cubic-bezier(.4,0,.2,1);
 }
+#login-screen.visible{display:flex}
 #login-screen.hidden{display:none!important}
 
 /* ── Page toggle (Dashboard / Moderators) ── */
@@ -1509,6 +1510,8 @@ function resetProgress(){
 const DEFAULT_LOGIN_PA_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/47e3b8b0644d431993240102d3144729/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=RJZTVliJceBcr00uadxq9nDqWwkJmBWx0fuVpp3hsWo';
 let loginPaUrl = localStorage.getItem('centific_login_pa_url') || DEFAULT_LOGIN_PA_URL;
 
+const ADMIN_LOGIN_ID = 'Admin-Kilo';
+
 const DEFAULT_DASH_PA_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/1c8b2684a1ce41da9428dcce00d5bc0f/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=wSXohgb_YJMm5AbdlTr0HbP4WIpc0rske7OcudoMyzs';
 let dashPaUrl  = localStorage.getItem('centific_dash_pa_url') || DEFAULT_DASH_PA_URL;
 let dashData   = null;
@@ -2102,12 +2105,15 @@ async function doLogin(){
   const loginId = document.getElementById('login-id-input').value.trim();
   const errEl   = document.getElementById('login-error');
   const btn     = document.getElementById('login-btn');
-  const btnText = document.getElementById('login-btn-text');
+
+  function resetBtn(){ btn.disabled = false; btn.innerHTML = '<span id="login-btn-text">Sign In</span>'; }
+
   if(!loginId){
     errEl.textContent = 'Please enter your Login ID';
     document.getElementById('login-id-input').classList.add('error');
     return;
   }
+
   // Show spinner
   btn.disabled = true;
   btn.innerHTML = '<div class="login-spinner"></div><span>Signing in…</span>';
@@ -2116,14 +2122,8 @@ async function doLogin(){
   // ── Admin bypass — no PA call needed ──
   if(loginId === ADMIN_LOGIN_ID){
     currentUser = {
-      modId:     'ADMIN',
-      modName:   'Admin',
-      firstName: 'Admin',
-      location:  '',
-      email:     '',
-      phone:     '',
-      loginId:   loginId,
-      isAdmin:   true
+      modId:'ADMIN', modName:'Admin', firstName:'Admin',
+      location:'', email:'', phone:'', loginId:loginId, isAdmin:true
     };
     sessionStorage.setItem('centific_user', JSON.stringify(currentUser));
     onLoginSuccess();
@@ -2131,37 +2131,54 @@ async function doLogin(){
   }
 
   if(!loginPaUrl){
-    // No login PA URL configured — admin needs to set it up
-    btn.disabled = false;
-    btn.innerHTML = '<span id="login-btn-text">Sign In</span>';
+    resetBtn();
     errEl.textContent = 'Login service not configured. Contact your admin.';
     return;
   }
+
+  // Set a 15-second timeout so the button never stays stuck
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
 
   try{
     const res = await fetch(loginPaUrl, {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({loginId: loginId})
+      body: JSON.stringify({loginId: loginId}),
+      signal: controller.signal
     });
-    if(!res.ok && res.status !== 202) throw new Error('HTTP ' + res.status);
+    clearTimeout(timeout);
+
+    // PA can return 200 or 202
+    if(!res.ok && res.status !== 202){
+      throw new Error('HTTP ' + res.status);
+    }
+
+    // Read response text safely
+    let text = '';
+    try { text = await res.text(); } catch(e){ text = ''; }
+    console.log('[Login] Response status:', res.status, '| body preview:', text.substring(0,200));
+
+    // Handle empty 202 (PA async — no response body)
+    if(!text || text.trim() === ''){
+      resetBtn();
+      errEl.textContent = 'Login service returned no data. Check the PA Response action returns a JSON body.';
+      return;
+    }
 
     let data;
-    const text = await res.text();
     try { data = JSON.parse(text); }
-    catch(e) { throw new Error('Invalid response from server: ' + text.substring(0,100)); }
+    catch(e){ throw new Error('Invalid JSON: ' + text.substring(0,100)); }
 
-    // PA should return: {found: true/false, modId, modName, location, email, phone}
     if(!data || !data.found){
-      btn.disabled = false;
-      btn.innerHTML = '<span id="login-btn-text">Sign In</span>';
+      resetBtn();
       document.getElementById('login-id-input').classList.add('error');
       errEl.textContent = 'Login ID not recognised. Please check and try again.';
       return;
     }
 
-    // Success — store user
-    const firstName = (data.modName || '').split(' ')[0] || data.modName;
+    // Success
+    const firstName = (data.modName || '').split(' ')[0] || 'User';
     currentUser = {
       modId:    data.modId    || '',
       modName:  data.modName  || '',
@@ -2173,27 +2190,40 @@ async function doLogin(){
     };
     sessionStorage.setItem('centific_user', JSON.stringify(currentUser));
     onLoginSuccess();
+
   } catch(e){
-    btn.disabled = false;
-    btn.innerHTML = '<span id="login-btn-text">Sign In</span>';
-    console.error('Login error full details:', e);
-    if(e.message && e.message.includes('Failed to fetch')){
-      errEl.textContent = 'Network error (possible CORS issue). Check browser console for details.';
+    clearTimeout(timeout);
+    resetBtn();
+    console.error('[Login] Error:', e);
+    if(e.name === 'AbortError'){
+      errEl.textContent = 'Login timed out (15s). Check your network and try again.';
+    } else if(e.message && e.message.includes('Failed to fetch')){
+      errEl.textContent = 'Network error — check your connection or CORS headers on the PA flow.';
     } else if(e.message && e.message.includes('HTTP ')){
       errEl.textContent = 'Server error: ' + e.message + '. Check your PA flow is enabled.';
     } else {
-      errEl.textContent = 'Error: ' + (e.message || 'Unknown error') + ' — check browser console.';
+      errEl.textContent = 'Error: ' + (e.message || 'Unknown') + ' — check browser console.';
     }
   }
 }
 
 function onLoginSuccess(){
+  try { _onLoginSuccessInner(); } catch(e){
+    console.error('[onLoginSuccess error]', e);
+    // Make sure login screen is hidden even if something errors
+    document.getElementById('login-screen').classList.remove('visible');
+    // Reset button just in case
+    const btn = document.getElementById('login-btn');
+    if(btn){ btn.disabled=false; btn.innerHTML='<span id="login-btn-text">Sign In</span>'; }
+  }
+}
+function _onLoginSuccessInner(){
   // If returning user (not first login), skip video requirement
   if(localStorage.getItem('centific_videos_seen_complete')){
     // already done — no action needed
   }
   // Hide login screen
-  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('login-screen').classList.remove('visible');
   // Update nav user chip
   const chip = document.getElementById('nav-user-chip');
   document.getElementById('nav-user-avatar').textContent = (currentUser.firstName[0]||'?').toUpperCase();
@@ -2253,8 +2283,8 @@ function doLogout(){
   // Reset login form
   document.getElementById('login-id-input').value = '';
   document.getElementById('login-error').textContent = '';
-  document.getElementById('login-btn').disabled = false;
-  document.getElementById('login-btn-text').textContent = 'Sign In';
+  const btn = document.getElementById('login-btn');
+  if(btn){ btn.disabled = false; btn.innerHTML = '<span id="login-btn-text">Sign In</span>'; }
   // Hide admin switch button
   const switchBtn = document.getElementById('hd-switch-view');
   const switchSep = document.getElementById('hd-switch-sep');
@@ -2266,7 +2296,7 @@ function doLogout(){
   document.getElementById('dashboard-page').classList.remove('visible');
   document.querySelector('.layout').style.display = 'flex';
   // Show login screen
-  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('login-screen').classList.add('visible');
   closeHamburger();
 }
 
@@ -2785,7 +2815,7 @@ setTimeout(function(){
   if(currentUser){
     onLoginSuccess();
   } else {
-    document.getElementById('login-screen').classList.remove('hidden');
+    document.getElementById('login-screen').classList.add('visible');
   }
   updateWelcomeMessage();
 }, 0);
