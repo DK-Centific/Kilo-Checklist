@@ -1093,9 +1093,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       <svg viewBox="0 0 16 16"><path d="M13 10v3H3v-3M8 2v8M5 7l3 3 3-3"/></svg>
       Export
     </button>
-    <button class="reset-nav-btn" style="color:var(--text2);background:var(--bg2);border-color:var(--border-strong)" onclick="autoSyncFromNav()" title="Sync to Excel" id="nav-sync-btn">
+    <button class="reset-nav-btn" onclick="resetProgress()" title="Reset all progress" id="nav-reset-btn">
       <svg viewBox="0 0 16 16"><path d="M14 8a6 6 0 1 1-1.5-4"/><polyline points="14,2 14,6 10,6"/></svg>
-      <span>Sync</span>
+      <span>Reset</span>
     </button>
     <!-- Hamburger menu -->
     <div style="position:relative" id="menu-wrap">
@@ -2078,20 +2078,20 @@ function checkAdminPw(){
 
 
 // Steps (1-indexed) that are participant actions — shown with blue highlight
-// Key = task index (0-based), Value = Set of 1-based step numbers
+// Key = TASKS array index (0=Registration, 1=Task01, 2=Task02 ... 12=Task12)
 const PARTICIPANT_STEPS = {
-  0:  new Set([5]),           // Task 01
-  1:  new Set([5,6,7]),       // Task 02
-  2:  new Set([6,7]),         // Task 03
-  3:  new Set([5,6]),         // Task 04
-  4:  new Set([5,6,7,8,9]),   // Task 05
-  5:  new Set([6,7]),         // Task 06
-  6:  new Set([5,6]),         // Task 07
-  7:  new Set([5,6]),         // Task 08
-  8:  new Set([5,6]),         // Task 09
-  9:  new Set([5,6]),         // Task 10
-  10: new Set([5,6,7,8,9]),   // Task 11
-  11: new Set([5,6,7,8,9]),   // Task 12
+  1:  new Set([5]),           // Task 01 "Registration — Hat": Step 5 only
+  2:  new Set([5,6,7]),       // Task 02 "Device Visible Range": Step 5, 6, 7
+  3:  new Set([6,7,8]),       // Task 03 "Seated Variations": Step 6, 7, 8
+  4:  new Set([5,6]),         // Task 04 "Unengaged": Step 5, 6
+  5:  new Set([5,6,7,8,9]),   // Task 05 "Fast Movement": Step 5 to 9
+  6:  new Set([6,7]),         // Task 06 "Walk Toward Device": Step 6, 7
+  7:  new Set([5,6]),         // Task 07 "Appearance — Glasses": Step 5, 6
+  8:  new Set([5,6]),         // Task 08 "Appearance — Baseball Cap": Step 5, 6
+  9:  new Set([5,6]),         // Task 09 "Appearance — Hair Gear": Step 5, 6
+  10: new Set([5,6]),         // Task 10 "Appearance — Hairstyle": Step 5, 6 (no Step 7)
+  11: new Set([5,6,7,8,9]),   // Task 11 "Seated 4ft": Step 5 to 9
+  12: new Set([5,6,7,8,9]),   // Task 12 "Seated 8ft": Step 5 to 9
 };
 
 // Registration participant steps (1-indexed)
