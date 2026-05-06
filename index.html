@@ -1203,20 +1203,6 @@ function getTaskStatus(i){
 function renderSidebar(){
   const el=document.getElementById('sidebar-list');
   el.innerHTML='';
-  // ── Registration item ──
-  const regItem = document.createElement('div');
-  regItem.className='reg-item' + (activeTask==='reg'?' active':'');
-  regItem.innerHTML=`
-    <div style="width:22px;height:22px;border-radius:50%;background:rgba(239,67,179,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-      <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="var(--pink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="8,2 8,8 12,8"/><circle cx="8" cy="8" r="6"/></svg>
-    </div>
-    <div style="flex:1;min-width:0">
-      <div class="reg-badge">PRE-TASK</div>
-      <div class="reg-label">Registration</div>
-      <div class="reg-sublabel">Complete before any tasks</div>
-    </div>`;
-  regItem.addEventListener('click', ()=>openRegistration());
-  el.appendChild(regItem);
   TASKS.forEach((t,i)=>{
     if(currentFilter==='done'&&!taskDone[i]) return;
     if(currentFilter==='todo'&&taskDone[i]) return;
@@ -1628,7 +1614,7 @@ async function doLogin(){
 
 function onLoginSuccess(){
   // If returning user (not first login), skip video requirement
-  if(sessionStorage.getItem('centific_videos_seen_complete')){
+  if(localStorage.getItem('centific_videos_seen_complete')){
     // already done — no action needed
   }
   // Hide login screen
@@ -1996,6 +1982,13 @@ function toggleRegStep(j){
 function openRegVideoModal(){
   document.getElementById('video-modal-title').textContent = 'Registration — Cellphone';
   document.getElementById('video-open-link').href = REG_PHONE_VIDEO;
+  // Mark registration video as seen (index 0 in TASKS)
+  const seen = getVideosSeen();
+  seen[0] = true;
+  seen['reg_cellphone'] = true;
+  localStorage.setItem('centific_videos_seen', JSON.stringify(seen));
+  if(checkAllVideosSeen()) markVideosComplete();
+  renderSidebar(); // pill disappears immediately
   document.getElementById('video-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -2022,12 +2015,15 @@ function openVideoModal(taskIndex, regType){
   }
   document.getElementById('video-modal-title').textContent = title;
   document.getElementById('video-open-link').href = url;
-  // Track that user opened/watched this video
-  markVideoWatched(watchKey);
-  if(isFirstLogin()) {
-    // After watching all videos, mark login as seen and refresh sidebar
-    if(allVideosWatched()){ markLoginSeen(); renderSidebar(); }
-  }
+  // Mark this video as seen immediately in localStorage — pill disappears right away
+  const seen = getVideosSeen();
+  seen[watchKey] = true;
+  // Also mark by task index for the sidebar check
+  if(typeof taskIndex === 'number' && taskIndex >= 0) seen[taskIndex] = true;
+  localStorage.setItem('centific_videos_seen', JSON.stringify(seen));
+  if(checkAllVideosSeen()) markVideosComplete();
+  // Re-render sidebar so lock pill disappears instantly
+  renderSidebar();
   document.getElementById('video-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -2037,13 +2033,12 @@ function closeVideoModal(e){
   document.body.style.overflow = '';
 }
 function getVideosSeen(){
-  try { return JSON.parse(sessionStorage.getItem('centific_videos_seen') || '{}'); }
+  try { return JSON.parse(localStorage.getItem('centific_videos_seen') || '{}'); }
   catch(e){ return {}; }
 }
 
 function isFirstLogin(){
-  // First login = no 'centific_videos_seen' key yet, or not all 12 seen
-  return !sessionStorage.getItem('centific_videos_seen_complete');
+  return !localStorage.getItem('centific_videos_seen_complete');
 }
 
 function checkAllVideosSeen(){
@@ -2053,7 +2048,7 @@ function checkAllVideosSeen(){
 }
 
 function markVideosComplete(){
-  sessionStorage.setItem('centific_videos_seen_complete', '1');
+  localStorage.setItem('centific_videos_seen_complete', '1');
 }
 
 // close modal on Escape key
