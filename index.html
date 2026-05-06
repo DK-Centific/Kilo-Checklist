@@ -572,7 +572,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
 /* ── Responsive ── */
 @media(max-width:700px){
-  .nav{padding:0 16px}
+  .nav{padding:0 12px;height:52px}
+  .nav-name{display:none}
+  .nav-brand{gap:6px}
   .nav-prog-wrap,.sync-badge{display:none}
   .sidebar{width:100%;border-right:none}
   .sidebar.hidden{display:none}
@@ -580,10 +582,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   .main.hidden{display:none}
   .mobile-back{display:flex}
   .content,.side-panel{padding:16px}
-  .entry-bar{padding:8px 12px;display:grid;grid-template-columns:1fr 1fr;gap:6px;overflow-x:unset}
+  .entry-bar{padding:8px 12px;display:grid;grid-template-columns:1fr 1fr;gap:6px;overflow-x:unset;align-items:start}
   .entry-field{min-width:0;flex:none;width:100%}
-  .entry-label{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .entry-input{font-size:13px;padding:7px 9px;width:100%;min-width:0}
+  .entry-label{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;margin-bottom:4px}
+  .entry-input{font-size:13px;padding:7px 9px;width:100%;min-width:0;box-sizing:border-box}
   input[type="date"].entry-input{min-width:0;width:100%}
   input[type="date"].entry-input::-webkit-calendar-picker-indicator{width:14px;opacity:.5}
   .capture-grid{grid-template-columns:1fr}
@@ -591,6 +593,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   .config-banner{flex-direction:column;align-items:flex-start}
   .pa-url-row,.admin-pw-row,.theme-toggle-row{flex-direction:column}
   .video-btn span{display:none}
+  .export-btn span{display:none}
+  .export-btn{padding:7px 10px}
+  .reset-nav-btn span{display:none}
+  .reset-nav-btn{padding:7px 10px}
+  .nav-count{padding:4px 8px;font-size:12px}
 }
 </style>
 </head>
@@ -991,9 +998,11 @@ function resetProgress(){
   stepDone.forEach(a=>a.fill(false));
   taskData.forEach(d=>{ d.lux=''; d.notes=''; d.status='Not Started'; d.completedAt=''; });
   taskSynced.fill(false);
-  globalData = {participant:'', operator:'', date: new Date().toISOString().split('T')[0], device:'Device A'};
+  // Preserve moderator name from logged-in user
+  const preservedOperator = currentUser ? currentUser.modName : (globalData.operator || '');
+  globalData = {participant:'', operator: preservedOperator, date: new Date().toISOString().split('T')[0], device:'Device A'};
   document.getElementById('g-participant').value='';
-  document.getElementById('g-operator').value='';
+  document.getElementById('g-operator').value = preservedOperator;
   document.getElementById('g-date').value=globalData.date;
   document.getElementById('g-device').value='Device A';
   activeTask=null; activePanel=null;
@@ -1002,7 +1011,24 @@ function resetProgress(){
     document.getElementById(HD_IDS[p]).classList.remove('active');
   });
   document.getElementById('main-content').style.display='block';
-  document.getElementById('main-content').innerHTML='<div class="welcome"><div class="welcome-icon"><svg viewBox="0 0 24 24"><polyline points="4,13 9,18 20,6"/></svg></div><h2>Welcome to Project Kilo</h2><p>Select a task from the sidebar. Fill in the data fields, tick each step, then mark complete.</p></div>';
+  const firstName = currentUser ? currentUser.firstName : '';
+  const welcomeTitle = firstName ? firstName + ', Welcome to Project Kilo!' : 'Welcome to Project Kilo';
+  document.getElementById('main-content').innerHTML=`
+    <div class="welcome">
+      <div class="welcome-icon"><svg viewBox="0 0 24 24"><polyline points="4,13 9,18 20,6"/></svg></div>
+      <h2>${welcomeTitle}</h2>
+      <p>Select a task from the sidebar. Fill in the data fields, tick each step, then mark complete.</p>
+      <div class="welcome-reminders">
+        <div class="welcome-section-label">Key Reminders</div>
+        <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>Never move the device during a recording.</p></div>
+        <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>Always measure and record lux before each task.</p></div>
+        <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>Participant ID must remain consistent across all tasks and devices.</p></div>
+        <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>Registration must be completed before any tasks.</p></div>
+        <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>No hats or caps during initial registration — Task 1 is the only registration with a hat.</p></div>
+        <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>All lux measurements must be taken on the participant's face, with the sensor facing the device.</p></div>
+        <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>Participants are encouraged to submit more than required if time allows.</p></div>
+      </div>
+    </div>`;
   renderSidebar(); updateProgress();
   showToast('Progress reset');
 }
