@@ -6,6 +6,7 @@
 <title>Centific Data Collection</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
@@ -239,6 +240,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
 /* ── Steps ── */
 .steps-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:12px}
+.steps-label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:12px;flex-wrap:wrap}
+.steps-label-row .steps-label{margin-bottom:0}
+.steps-participant-note{font-size:11px;color:var(--blue);display:flex;align-items:center;gap:5px;flex-shrink:0;font-weight:500}
+.steps-participant-note .pip{width:18px;height:18px;border-radius:50%;background:rgba(59,130,246,.2);border:1.5px solid var(--blue);display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--blue);flex-shrink:0}
+/* Participant step dots — use !important to beat specificity of .step-dot.done */
+
 .steps-list{list-style:none;margin-bottom:20px}
 .step-item{display:flex;gap:14px;padding:13px 0;border-bottom:.5px solid var(--border);cursor:pointer;align-items:flex-start;transition:opacity .18s}
 .step-item:last-child{border-bottom:none}
@@ -382,6 +389,208 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .divider{height:.5px;background:var(--border);margin:24px 0 20px}
 .hidden{display:none!important}
 
+/* ── Page toggle (Dashboard / Moderators) ── */
+.page-toggle{display:flex;background:var(--bg3);border:.5px solid var(--border);border-radius:99px;padding:3px;gap:2px}
+.page-toggle-btn{font-family:var(--font);font-size:12px;font-weight:500;color:var(--text3);background:none;border:none;border-radius:99px;padding:5px 14px;cursor:pointer;transition:all .18s ease;white-space:nowrap}
+.page-toggle-btn.active{background:var(--bg2);color:var(--text);font-weight:600;box-shadow:0 1px 6px rgba(0,0,0,.10)}
+.page-toggle-btn:hover:not(.active){color:var(--text)}
+
+/* ── Moderators page ── */
+#moderators-page{display:none;background:var(--bg);height:calc(100vh - 52px);overflow-y:auto;overflow-x:hidden}
+#moderators-page.visible{display:block}
+
+.mods-body{padding:20px 24px;display:flex;flex-direction:column;gap:24px}
+.mods-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.mods-location-section{display:flex;flex-direction:column;gap:12px;margin-bottom:8px}
+.mods-location-header{display:flex;align-items:center;gap:8px;padding:6px 2px;border-bottom:.5px solid var(--border);margin-bottom:4px}
+.mods-location-header svg{width:14px;height:14px;stroke:var(--pink);fill:none;stroke-width:1.8;stroke-linecap:round;flex-shrink:0}
+.mods-location-header>span:nth-child(2){font-size:15px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.mods-location-count{font-size:12px;color:var(--text3)}
+.mods-location-online{font-size:11px;font-weight:600;color:var(--green);background:rgba(34,197,94,.1);border:.5px solid rgba(34,197,94,.25);border-radius:99px;padding:2px 8px}
+
+/* Moderator card */
+.mod-card{
+  background:var(--card-bg);border:.5px solid var(--border);border-radius:var(--rl);
+  overflow:hidden;box-shadow:var(--shadow-sm);transition:box-shadow .22s,transform .2s;
+}
+.mod-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.mod-card-header{
+  padding:18px 20px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  border-bottom:.5px solid var(--border);
+}
+.mod-avatar{
+  width:44px;height:44px;border-radius:50%;background:rgba(239,67,179,.12);border:.5px solid rgba(239,67,179,.25);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:600;color:var(--pink);flex-shrink:0;font-family:"Avenir Next","Avenir",var(--font);
+}
+.mod-info{flex:1;min-width:0}
+.mod-name{font-size:16px;font-weight:600;letter-spacing:-0.02em;color:var(--text);margin-bottom:3px}
+.mod-location{font-size:12px;color:var(--text3);display:flex;align-items:center;gap:4px}
+.mod-location svg{width:11px;height:11px;stroke:var(--text3);fill:none;stroke-width:1.8;stroke-linecap:round;flex-shrink:0}
+.mod-online-badge{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px;flex-shrink:0}
+.mod-online-badge.online{background:rgba(34,197,94,.12);color:var(--green);border:.5px solid rgba(34,197,94,.3)}
+.mod-online-badge.offline{background:var(--bg3);color:var(--text3);border:.5px solid var(--border)}
+.mod-online-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.mod-online-badge.online .mod-online-dot{background:var(--green);animation:blink .8s infinite}
+.mod-online-badge.offline .mod-online-dot{background:var(--text3)}
+
+/* Mod stats row */
+.mod-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;padding:14px 0;border-bottom:.5px solid var(--border)}
+.mod-stat{display:flex;flex-direction:column;align-items:center;padding:6px 12px;border-right:.5px solid var(--border)}
+.mod-stat:last-child{border-right:none}
+.mod-stat-val{font-size:22px;font-weight:300;letter-spacing:-0.03em;font-family:"Avenir Next","Avenir",var(--font)}
+.mod-stat-val.pink{color:var(--pink)}
+.mod-stat-val.green{color:var(--green)}
+.mod-stat-val.blue{color:var(--blue)}
+.mod-stat-lbl{font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-top:3px;text-align:center}
+.mod-last-active{font-size:11px;color:var(--text3);padding:8px 20px;text-align:center;border-bottom:.5px solid var(--border)}
+
+/* Live status section */
+.mod-live{padding:14px 18px 16px}
+.mod-live-title{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.mod-live-title span.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink .8s infinite}
+.mod-tasks-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.mod-task-pip{
+  aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;cursor:default;transition:transform .15s;
+  position:relative;
+}
+.mod-task-pip:hover{transform:scale(1.15);z-index:2}
+.mod-task-pip.complete{background:rgba(34,197,94,.15);border:.5px solid rgba(34,197,94,.4);color:var(--green)}
+.mod-task-pip.inprogress{background:rgba(245,158,11,.15);border:.5px solid rgba(245,158,11,.4);color:var(--amber)}
+.mod-task-pip.notstarted{background:var(--bg3);border:.5px solid var(--border);color:var(--text3)}
+.mod-task-pip.skipped{background:var(--bg3);border:.5px solid var(--border);color:var(--text3);opacity:.5}
+.mod-session-info{font-size:11px;color:var(--text3);margin-top:8px;text-align:center}
+
+/* empty state */
+.mods-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:80px 24px;color:var(--text3);text-align:center}
+.mods-empty svg{width:40px;height:40px;stroke:var(--text3);fill:none;stroke-width:1.4;opacity:.5}
+
+@media(max-width:700px){
+  .mods-grid{grid-template-columns:1fr}
+  .mod-tasks-grid{grid-template-columns:repeat(6,1fr)}
+  .page-toggle-btn{font-size:11px;padding:4px 10px}
+}
+
+
+
+/* ── Admin landing tiles ── */
+#admin-landing{display:none;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;min-height:calc(100vh - 52px);gap:20px;background:var(--bg)}
+#admin-landing.visible{display:flex}
+.admin-landing-title{font-size:28px;font-weight:600;letter-spacing:-0.03em;color:var(--text);margin-bottom:4px;text-align:center}
+.admin-landing-sub{font-size:15px;font-weight:300;color:var(--text2);margin-bottom:32px;text-align:center}
+.admin-tiles{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;width:100%;max-width:700px}
+.admin-tile{
+  flex:1;min-width:280px;max-width:320px;
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;padding:32px 28px;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow-sm);
+  display:flex;flex-direction:column;gap:14px;
+}
+.admin-tile:hover{box-shadow:var(--shadow-lg);transform:translateY(-3px);border-color:var(--pink)}
+.admin-tile-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center}
+.admin-tile-icon.checklist{background:rgba(239,67,179,.12);border:.5px solid rgba(239,67,179,.25)}
+.admin-tile-icon.dashboard{background:rgba(59,130,246,.12);border:.5px solid rgba(59,130,246,.25)}
+.admin-tile-icon svg{width:24px;height:24px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.admin-tile-icon.checklist svg{stroke:var(--pink)}
+.admin-tile-icon.dashboard svg{stroke:var(--blue)}
+.admin-tile-name{font-size:20px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.admin-tile-desc{font-size:14px;font-weight:300;color:var(--text2);line-height:1.5}
+.admin-tile-arrow{font-size:18px;color:var(--text3);margin-top:auto}
+
+/* ── Dashboard page ── */
+#dashboard-page{display:none;background:var(--bg);height:calc(100vh - 52px);overflow-y:auto;overflow-x:hidden}
+#dashboard-page.visible{display:block}
+.dash-toolbar{
+  position:sticky;top:0;z-index:10;background:var(--bg2);border-bottom:.5px solid var(--border);
+  padding:12px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.dash-back-btn{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--text2);background:none;border:none;cursor:pointer;padding:6px 0;letter-spacing:-0.01em;transition:color .15s;font-family:var(--font)}
+.dash-back-btn:hover{color:var(--pink)}
+.dash-back-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.dash-toolbar-title{font-size:15px;font-weight:600;letter-spacing:-0.02em;color:var(--text);flex:1}
+.dash-select{font-family:var(--font);font-size:12px;color:var(--text);background:var(--input-bg);border:.5px solid var(--border-strong);border-radius:8px;padding:6px 10px;outline:none;cursor:pointer;transition:border-color .15s;appearance:none;-webkit-appearance:none}
+.dash-select:focus{border-color:var(--pink)}
+.dash-btn{display:flex;align-items:center;gap:6px;font-family:var(--font);font-size:12px;font-weight:500;color:var(--text2);background:var(--bg2);border:.5px solid var(--border-strong);border-radius:8px;padding:7px 13px;cursor:pointer;transition:all .18s;white-space:nowrap}
+.dash-btn:hover{border-color:var(--pink);color:var(--pink)}
+.dash-btn.primary{background:var(--pink);color:#fff;border-color:var(--pink)}
+.dash-btn.primary:hover{background:var(--pink-dim)}
+.dash-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.dash-btn.syncing svg{animation:spin .7s linear infinite}
+.dash-filter-label{font-size:11px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:var(--text3);white-space:nowrap}
+.dash-sep{width:.5px;height:20px;background:var(--border);flex-shrink:0}
+.dash-last-sync{font-size:11px;color:var(--text3);white-space:nowrap}
+
+.dash-body{padding:20px 24px;display:flex;flex-direction:column;gap:20px}
+
+/* KPI row */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;flex-shrink:0}
+.kpi-card{
+  background:var(--card-bg);border:.5px solid var(--border);border-radius:var(--rl);
+  padding:20px 22px;box-shadow:var(--shadow-sm);transition:box-shadow .2s,transform .2s;
+  display:flex;flex-direction:column;justify-content:space-between;min-height:110px;
+}
+.kpi-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.kpi-top-row{display:flex;align-items:flex-start;justify-content:space-between}
+.kpi-bottom-row{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-top:auto}
+.kpi-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
+.kpi-value{font-size:28px;font-weight:700;letter-spacing:-0.03em;color:var(--text);line-height:1}
+.kpi-value-xl{font-family:"Avenir Next","Avenir","SF Pro Display",-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;font-weight:300;letter-spacing:-0.03em;line-height:1;text-align:right;flex-shrink:0}
+.kpi-value-xl{font-size:110px}
+@media(max-width:1200px){.kpi-value-xl{font-size:110px}}
+@media(max-width:960px){.kpi-value-xl{font-size:80px}}
+@media(max-width:700px){.kpi-value-xl{font-size:64px}}
+@media(max-width:480px){.kpi-value-xl{font-size:48px}}
+.kpi-sub{font-size:12px;color:var(--text3);font-weight:400;align-self:flex-end;padding-bottom:4px}
+.kpi-card.accent .kpi-value,.kpi-card.accent .kpi-value-xl{color:var(--pink)}
+.kpi-card.green .kpi-value,.kpi-card.green .kpi-value-xl{color:var(--green)}
+.kpi-card.blue .kpi-value,.kpi-card.blue .kpi-value-xl{color:var(--blue)}
+.kpi-card.amber .kpi-value,.kpi-card.amber .kpi-value-xl{color:var(--amber)}
+
+/* Charts grid */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.chart-card{background:var(--card-bg);border:.5px solid var(--border);border-radius:var(--rl);padding:18px 20px;box-shadow:var(--shadow-sm);transition:box-shadow .2s}
+.chart-card:hover{box-shadow:var(--shadow-md)}
+.chart-card.full{grid-column:1/-1}
+.chart-title{font-size:15px;font-weight:600;letter-spacing:-0.02em;color:var(--text);margin-bottom:3px;word-wrap:break-word}
+.chart-sub{font-size:12px;color:var(--text3);margin-bottom:16px}
+.chart-wrap{position:relative;width:100%}
+
+/* Detail table */
+.detail-table{width:100%;border-collapse:collapse}
+.detail-table th{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);padding:8px 12px;border-bottom:.5px solid var(--border);text-align:left;white-space:nowrap}
+.detail-table td{font-size:13px;color:var(--text);padding:10px 12px;border-bottom:.5px solid var(--border);vertical-align:middle}
+.detail-table tr:last-child td{border-bottom:none}
+.detail-table td:first-child{white-space:nowrap}
+.detail-table tr:hover td{background:var(--bg3)}
+.mod-pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:rgba(239,67,179,.1);color:var(--pink);border:.5px solid rgba(239,67,179,.2);white-space:nowrap}
+.prog-mini{width:80px;height:5px;background:var(--bg4);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:6px}
+.prog-mini-fill{height:100%;background:var(--pink);border-radius:3px;transition:width .3s}
+
+/* empty state */
+.dash-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:60px 24px;color:var(--text3);text-align:center}
+.dash-empty svg{width:40px;height:40px;stroke:var(--text3);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;opacity:.5}
+.dash-empty p{font-size:14px}
+
+/* loading */
+.dash-loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:40px;color:var(--text2);font-size:14px}
+.dash-spin{width:20px;height:20px;border-radius:50%;border:2px solid var(--border-strong);border-top-color:var(--pink);animation:spin .7s linear infinite;flex-shrink:0}
+
+@media(max-width:700px){
+  .kpi-row{grid-template-columns:1fr 1fr}
+  .charts-grid{grid-template-columns:1fr}
+  .chart-card{overflow:hidden}
+  .chart-wrap canvas{max-width:100%!important}
+  .dash-toolbar{flex-wrap:wrap;height:auto}
+  .detail-table{font-size:12px}
+  .detail-table th,.detail-table td{padding:8px 8px}
+  .chart-card.full{grid-column:1}
+  .admin-tiles{flex-direction:column}
+  .dash-toolbar{padding:10px 12px;gap:6px}
+  .dash-toolbar-title{display:none}
+}
+
+
 /* ── Registration task ── */
 .reg-item{
   display:flex;align-items:center;gap:10px;padding:10px 12px;
@@ -453,6 +662,227 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   animation:fadeUp .4s cubic-bezier(.4,0,.2,1);
 }
 #login-screen.hidden{display:none!important}
+
+/* ── Page toggle (Dashboard / Moderators) ── */
+.page-toggle{display:flex;background:var(--bg3);border:.5px solid var(--border);border-radius:99px;padding:3px;gap:2px}
+.page-toggle-btn{font-family:var(--font);font-size:12px;font-weight:500;color:var(--text3);background:none;border:none;border-radius:99px;padding:5px 14px;cursor:pointer;transition:all .18s ease;white-space:nowrap}
+.page-toggle-btn.active{background:var(--bg2);color:var(--text);font-weight:600;box-shadow:0 1px 6px rgba(0,0,0,.10)}
+.page-toggle-btn:hover:not(.active){color:var(--text)}
+
+/* ── Moderators page ── */
+#moderators-page{display:none;background:var(--bg);height:calc(100vh - 52px);overflow-y:auto;overflow-x:hidden}
+#moderators-page.visible{display:block}
+
+.mods-body{padding:20px 24px;display:flex;flex-direction:column;gap:24px}
+.mods-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+
+/* Moderator card */
+.mod-card{
+  background:var(--card-bg);border:.5px solid var(--border);border-radius:var(--rl);
+  overflow:hidden;box-shadow:var(--shadow-sm);transition:box-shadow .22s,transform .2s;
+}
+.mod-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.mod-card-header{
+  padding:18px 20px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  border-bottom:.5px solid var(--border);
+}
+.mod-avatar{
+  width:44px;height:44px;border-radius:50%;background:rgba(239,67,179,.12);border:.5px solid rgba(239,67,179,.25);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:600;color:var(--pink);flex-shrink:0;font-family:"Avenir Next","Avenir",var(--font);
+}
+.mod-info{flex:1;min-width:0}
+.mod-name{font-size:16px;font-weight:600;letter-spacing:-0.02em;color:var(--text);margin-bottom:3px}
+.mod-location{font-size:12px;color:var(--text3);display:flex;align-items:center;gap:4px}
+.mod-location svg{width:11px;height:11px;stroke:var(--text3);fill:none;stroke-width:1.8;stroke-linecap:round;flex-shrink:0}
+.mod-online-badge{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px;flex-shrink:0}
+.mod-online-badge.online{background:rgba(34,197,94,.12);color:var(--green);border:.5px solid rgba(34,197,94,.3)}
+.mod-online-badge.offline{background:var(--bg3);color:var(--text3);border:.5px solid var(--border)}
+.mod-online-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.mod-online-badge.online .mod-online-dot{background:var(--green);animation:blink .8s infinite}
+.mod-online-badge.offline .mod-online-dot{background:var(--text3)}
+
+/* Mod stats row */
+.mod-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;padding:14px 0;border-bottom:.5px solid var(--border)}
+.mod-stat{display:flex;flex-direction:column;align-items:center;padding:6px 12px;border-right:.5px solid var(--border)}
+.mod-stat:last-child{border-right:none}
+.mod-stat-val{font-size:22px;font-weight:300;letter-spacing:-0.03em;font-family:"Avenir Next","Avenir",var(--font)}
+.mod-stat-val.pink{color:var(--pink)}
+.mod-stat-val.green{color:var(--green)}
+.mod-stat-val.blue{color:var(--blue)}
+.mod-stat-lbl{font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-top:3px;text-align:center}
+.mod-last-active{font-size:11px;color:var(--text3);padding:8px 20px;text-align:center;border-bottom:.5px solid var(--border)}
+
+/* Live status section */
+.mod-live{padding:14px 18px 16px}
+.mod-live-title{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.mod-live-title span.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink .8s infinite}
+.mod-tasks-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.mod-task-pip{
+  aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;cursor:default;transition:transform .15s;
+  position:relative;
+}
+.mod-task-pip:hover{transform:scale(1.15);z-index:2}
+.mod-task-pip.complete{background:rgba(34,197,94,.15);border:.5px solid rgba(34,197,94,.4);color:var(--green)}
+.mod-task-pip.inprogress{background:rgba(245,158,11,.15);border:.5px solid rgba(245,158,11,.4);color:var(--amber)}
+.mod-task-pip.notstarted{background:var(--bg3);border:.5px solid var(--border);color:var(--text3)}
+.mod-task-pip.skipped{background:var(--bg3);border:.5px solid var(--border);color:var(--text3);opacity:.5}
+.mod-session-info{font-size:11px;color:var(--text3);margin-top:8px;text-align:center}
+
+/* empty state */
+.mods-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:80px 24px;color:var(--text3);text-align:center}
+.mods-empty svg{width:40px;height:40px;stroke:var(--text3);fill:none;stroke-width:1.4;opacity:.5}
+
+@media(max-width:700px){
+  .mods-grid{grid-template-columns:1fr}
+  .mod-tasks-grid{grid-template-columns:repeat(6,1fr)}
+  .page-toggle-btn{font-size:11px;padding:4px 10px}
+}
+
+
+/* ── Custom moderator multi-select dropdown ── */
+.mod-dropdown-wrap{position:relative;flex-shrink:0}
+.mod-dropdown-trigger{min-width:130px;justify-content:space-between}
+.mod-dropdown-panel{
+  position:absolute;top:calc(100% + 6px);left:0;z-index:400;
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  border-radius:var(--rl);min-width:200px;max-height:280px;
+  overflow-y:auto;box-shadow:var(--shadow-md);
+  animation:fadeUp .15s cubic-bezier(.4,0,.2,1);
+}
+.mod-dd-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px;border-bottom:.5px solid var(--border)}
+.mod-dd-clear{font-family:var(--font);font-size:11px;color:var(--pink);background:none;border:none;cursor:pointer;font-weight:500}
+.mod-dd-item{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;transition:background .12s}
+.mod-dd-item:hover{background:var(--bg3)}
+.mod-dd-item input[type="checkbox"]{
+  width:15px;height:15px;border-radius:4px;border:1.5px solid var(--border-strong);
+  appearance:none;-webkit-appearance:none;background:var(--input-bg);cursor:pointer;
+  flex-shrink:0;position:relative;transition:all .15s;
+}
+.mod-dd-item input[type="checkbox"]:checked{
+  background:var(--pink);border-color:var(--pink);
+}
+.mod-dd-item input[type="checkbox"]:checked::after{
+  content:'';position:absolute;left:3px;top:1px;width:5px;height:8px;
+  border:2px solid #fff;border-top:none;border-left:none;
+  transform:rotate(45deg);
+}
+.mod-dd-item label{font-size:13px;font-weight:500;color:var(--text);cursor:pointer;flex:1;letter-spacing:-0.01em}
+.mod-dd-empty{padding:14px;font-size:13px;color:var(--text3);text-align:center}
+
+
+/* ── Admin landing tiles ── */
+#admin-landing{display:none;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;min-height:calc(100vh - 52px);gap:20px;background:var(--bg)}
+#admin-landing.visible{display:flex}
+.admin-landing-title{font-size:28px;font-weight:600;letter-spacing:-0.03em;color:var(--text);margin-bottom:4px;text-align:center}
+.admin-landing-sub{font-size:15px;font-weight:300;color:var(--text2);margin-bottom:32px;text-align:center}
+.admin-tiles{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;width:100%;max-width:700px}
+.admin-tile{
+  flex:1;min-width:280px;max-width:320px;
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;padding:32px 28px;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow-sm);
+  display:flex;flex-direction:column;gap:14px;
+}
+.admin-tile:hover{box-shadow:var(--shadow-lg);transform:translateY(-3px);border-color:var(--pink)}
+.admin-tile-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center}
+.admin-tile-icon.checklist{background:rgba(239,67,179,.12);border:.5px solid rgba(239,67,179,.25)}
+.admin-tile-icon.dashboard{background:rgba(59,130,246,.12);border:.5px solid rgba(59,130,246,.25)}
+.admin-tile-icon svg{width:24px;height:24px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.admin-tile-icon.checklist svg{stroke:var(--pink)}
+.admin-tile-icon.dashboard svg{stroke:var(--blue)}
+.admin-tile-name{font-size:20px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.admin-tile-desc{font-size:14px;font-weight:300;color:var(--text2);line-height:1.5}
+.admin-tile-arrow{font-size:18px;color:var(--text3);margin-top:auto}
+
+/* ── Dashboard page ── */
+#dashboard-page{display:none;background:var(--bg);height:calc(100vh - 52px);overflow-y:auto;overflow-x:hidden}
+#dashboard-page.visible{display:block}
+.dash-toolbar{
+  position:sticky;top:0;z-index:10;background:var(--bg2);border-bottom:.5px solid var(--border);
+  padding:12px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.dash-back-btn{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--text2);background:none;border:none;cursor:pointer;padding:6px 0;letter-spacing:-0.01em;transition:color .15s;font-family:var(--font)}
+.dash-back-btn:hover{color:var(--pink)}
+.dash-back-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.dash-toolbar-title{font-size:15px;font-weight:600;letter-spacing:-0.02em;color:var(--text);flex:1}
+.dash-select{font-family:var(--font);font-size:12px;color:var(--text);background:var(--input-bg);border:.5px solid var(--border-strong);border-radius:8px;padding:6px 10px;outline:none;cursor:pointer;transition:border-color .15s;appearance:none;-webkit-appearance:none}
+.dash-select:focus{border-color:var(--pink)}
+.dash-btn{display:flex;align-items:center;gap:6px;font-family:var(--font);font-size:12px;font-weight:500;color:var(--text2);background:var(--bg2);border:.5px solid var(--border-strong);border-radius:8px;padding:7px 13px;cursor:pointer;transition:all .18s;white-space:nowrap}
+.dash-btn:hover{border-color:var(--pink);color:var(--pink)}
+.dash-btn.primary{background:var(--pink);color:#fff;border-color:var(--pink)}
+.dash-btn.primary:hover{background:var(--pink-dim)}
+.dash-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.dash-btn.syncing svg{animation:spin .7s linear infinite}
+.dash-filter-label{font-size:11px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:var(--text3);white-space:nowrap}
+.dash-sep{width:.5px;height:20px;background:var(--border);flex-shrink:0}
+.dash-last-sync{font-size:11px;color:var(--text3);white-space:nowrap}
+
+.dash-body{padding:20px 24px;display:flex;flex-direction:column;gap:20px}
+
+/* KPI row */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;flex-shrink:0}
+.kpi-card{
+  background:var(--card-bg);border:.5px solid var(--border);border-radius:var(--rl);
+  padding:20px 22px;box-shadow:var(--shadow-sm);transition:box-shadow .2s,transform .2s;
+  display:flex;flex-direction:column;justify-content:space-between;min-height:110px;
+}
+.kpi-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.kpi-top-row{display:flex;align-items:flex-start;justify-content:space-between}
+.kpi-bottom-row{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-top:auto}
+.kpi-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
+.kpi-value{font-size:28px;font-weight:700;letter-spacing:-0.03em;color:var(--text);line-height:1}
+.kpi-value-xl{font-family:"Avenir Next","Avenir","SF Pro Display",-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;font-weight:300;letter-spacing:-0.03em;line-height:1;text-align:right;flex-shrink:0}
+.kpi-value-xl{font-size:110px}
+@media(max-width:1200px){.kpi-value-xl{font-size:110px}}
+@media(max-width:960px){.kpi-value-xl{font-size:80px}}
+@media(max-width:700px){.kpi-value-xl{font-size:64px}}
+@media(max-width:480px){.kpi-value-xl{font-size:48px}}
+.kpi-sub{font-size:12px;color:var(--text3);font-weight:400;align-self:flex-end;padding-bottom:4px}
+.kpi-card.accent .kpi-value,.kpi-card.accent .kpi-value-xl{color:var(--pink)}
+.kpi-card.green .kpi-value,.kpi-card.green .kpi-value-xl{color:var(--green)}
+.kpi-card.blue .kpi-value,.kpi-card.blue .kpi-value-xl{color:var(--blue)}
+.kpi-card.amber .kpi-value,.kpi-card.amber .kpi-value-xl{color:var(--amber)}
+
+/* Charts grid */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.chart-card{background:var(--card-bg);border:.5px solid var(--border);border-radius:var(--rl);padding:18px 20px;box-shadow:var(--shadow-sm);transition:box-shadow .2s}
+.chart-card:hover{box-shadow:var(--shadow-md)}
+.chart-card.full{grid-column:1/-1}
+.chart-title{font-size:15px;font-weight:600;letter-spacing:-0.02em;color:var(--text);margin-bottom:3px;word-wrap:break-word}
+.chart-sub{font-size:12px;color:var(--text3);margin-bottom:16px}
+.chart-wrap{position:relative;width:100%}
+
+/* Detail table */
+.detail-table{width:100%;border-collapse:collapse}
+.detail-table th{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);padding:8px 12px;border-bottom:.5px solid var(--border);text-align:left;white-space:nowrap}
+.detail-table td{font-size:13px;color:var(--text);padding:10px 12px;border-bottom:.5px solid var(--border);vertical-align:middle}
+.detail-table tr:last-child td{border-bottom:none}
+.detail-table td:first-child{white-space:nowrap}
+.detail-table tr:hover td{background:var(--bg3)}
+.mod-pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:rgba(239,67,179,.1);color:var(--pink);border:.5px solid rgba(239,67,179,.2);white-space:nowrap}
+.prog-mini{width:80px;height:5px;background:var(--bg4);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:6px}
+.prog-mini-fill{height:100%;background:var(--pink);border-radius:3px;transition:width .3s}
+
+/* empty state */
+.dash-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:60px 24px;color:var(--text3);text-align:center}
+.dash-empty svg{width:40px;height:40px;stroke:var(--text3);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;opacity:.5}
+.dash-empty p{font-size:14px}
+
+/* loading */
+.dash-loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:40px;color:var(--text2);font-size:14px}
+.dash-spin{width:20px;height:20px;border-radius:50%;border:2px solid var(--border-strong);border-top-color:var(--pink);animation:spin .7s linear infinite;flex-shrink:0}
+
+@media(max-width:700px){
+  .kpi-row{grid-template-columns:1fr 1fr}
+  .charts-grid{grid-template-columns:1fr}
+  .chart-card.full{grid-column:1}
+  .admin-tiles{flex-direction:column}
+  .dash-toolbar{padding:10px 12px;gap:6px}
+  .dash-toolbar-title{display:none}
+}
+
 
 /* ── Registration task ── */
 .reg-item{
@@ -597,6 +1027,25 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   .reset-nav-btn{padding:7px 10px}
   .nav-count{padding:4px 8px;font-size:12px}
 }
+
+/* ── Participant step highlight — placed last to guarantee specificity ── */
+.step-dot.participant:not(.done){
+  background:rgba(59,130,246,.25) !important;
+  border-color:#3b82f6 !important;
+  border-width:2px !important;
+}
+.step-dot.participant:not(.done) span{
+  color:#2563eb !important;
+  font-weight:700 !important;
+}
+[data-theme="dark"] .step-dot.participant:not(.done){
+  background:rgba(147,197,253,.18) !important;
+  border-color:#60a5fa !important;
+}
+[data-theme="dark"] .step-dot.participant:not(.done) span{
+  color:#93c5fd !important;
+  font-weight:700 !important;
+}
 </style>
 </head>
 <body>
@@ -644,9 +1093,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       <svg viewBox="0 0 16 16"><path d="M13 10v3H3v-3M8 2v8M5 7l3 3 3-3"/></svg>
       Export
     </button>
-    <button class="reset-nav-btn" onclick="resetProgress()" title="Reset all progress">
+    <button class="reset-nav-btn" style="color:var(--text2);background:var(--bg2);border-color:var(--border-strong)" onclick="autoSyncFromNav()" title="Sync to Excel" id="nav-sync-btn">
       <svg viewBox="0 0 16 16"><path d="M14 8a6 6 0 1 1-1.5-4"/><polyline points="14,2 14,6 10,6"/></svg>
-      <span>Reset</span>
+      <span>Sync</span>
     </button>
     <!-- Hamburger menu -->
     <div style="position:relative" id="menu-wrap">
@@ -669,6 +1118,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
           <span>Settings</span>
         </div>
         <div class="hd-divider"></div>
+        <div class="hd-item" id="hd-switch-view" style="display:none" onclick="adminSwitchView();closeHamburger()">
+          <svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="9" rx="1.5"/><polyline points="5,9 7,7 9,8.5 11,6"/><line x1="5" y1="13" x2="11" y2="13"/><line x1="8" y1="12" x2="8" y2="13.5"/></svg>
+          <span id="hd-switch-label">Progress Tracker</span>
+        </div>
+        <div class="hd-divider" id="hd-switch-sep" style="display:none"></div>
         <div class="hd-item" onclick="toggleTheme(); closeHamburger()">
           <svg id="hd-theme-icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3"/><line x1="8" y1="1" x2="8" y2="3"/><line x1="8" y1="13" x2="8" y2="15"/><line x1="1" y1="8" x2="3" y2="8"/><line x1="13" y1="8" x2="15" y2="8"/><line x1="3.2" y1="3.2" x2="4.6" y2="4.6"/><line x1="11.4" y1="11.4" x2="12.8" y2="12.8"/><line x1="12.8" y1="3.2" x2="11.4" y2="4.6"/><line x1="4.6" y1="11.4" x2="3.2" y2="12.8"/></svg>
           <span id="hd-theme-label">Switch to Light mode</span>
@@ -709,7 +1163,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       </div>
     </div>
     <div class="sidebar-list" id="sidebar-list"></div>
-    <div class="sidebar-version">v 1.0</div>
+    <div class="sidebar-version">v 1.1</div>
   </div>
 
   <!-- Main -->
@@ -853,6 +1307,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
           </div>
           <div class="pa-status" id="pa-status">No URL saved yet</div>
 
+          <div class="divider"></div>
+          <div class="pa-card-title" style="margin-bottom:6px;font-size:15px">📊 Dashboard Data URL</div>
+          <div class="pa-card-sub" style="margin-bottom:14px">PA flow that reads all rows from TaskData and returns them as JSON for the Progress Tracker.</div>
+          <div class="pa-url-row">
+            <input type="url" class="pa-url-input" id="dash-pa-url-input" placeholder="https://... (TaskData read flow)"/>
+            <button class="pa-save-btn" onclick="saveDashPaUrl()">Save</button>
+          </div>
+          <div class="pa-status" id="dash-pa-status">No dashboard URL saved yet</div>
           <div class="divider"></div>
           <div class="pa-card-title" style="margin-bottom:6px;font-size:15px">🔐 Login Flow URL</div>
           <div class="pa-card-sub" style="margin-bottom:14px">Separate PA flow that looks up a moderator by loginId and returns their record.</div>
@@ -1047,6 +1509,32 @@ function resetProgress(){
 const DEFAULT_LOGIN_PA_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/47e3b8b0644d431993240102d3144729/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=RJZTVliJceBcr00uadxq9nDqWwkJmBWx0fuVpp3hsWo';
 let loginPaUrl = localStorage.getItem('centific_login_pa_url') || DEFAULT_LOGIN_PA_URL;
 
+const DEFAULT_DASH_PA_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/1c8b2684a1ce41da9428dcce00d5bc0f/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=wSXohgb_YJMm5AbdlTr0HbP4WIpc0rske7OcudoMyzs';
+let dashPaUrl  = localStorage.getItem('centific_dash_pa_url') || DEFAULT_DASH_PA_URL;
+let dashData   = null;
+try {
+  const cached = localStorage.getItem('centific_dash_data');
+  if(cached){
+    const parsed = JSON.parse(cached);
+    // Re-normalise sessionDate in case it was cached before toISODate fix
+    if(Array.isArray(parsed)){
+      dashData = parsed.map(r => ({
+        ...r,
+        sessionDate: (function(v){
+          if(!v) return '';
+          const s = String(v).trim();
+          if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0,10);
+          const mdy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+          if(mdy) return `${mdy[3]}-${mdy[1].padStart(2,'0')}-${mdy[2].padStart(2,'0')}`;
+          const d = new Date(s);
+          return isNaN(d) ? s : (d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'));
+        })(r.sessionDate)
+      }));
+    }
+  }
+} catch(e){ dashData = null; }
+let dashCharts = {};
+
 const DEFAULT_PA_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/6e31d0ca6c4240f0af0f6c4a3734b3aa/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=reuYXEx6a4HhPSV76DKzRtzcOE1XefhJlIQJ1vB23s0';
 let paUrl       = localStorage.getItem('centific_pa_url') || DEFAULT_PA_URL;
 let currentTheme= localStorage.getItem('centific_theme')||'dark';
@@ -1117,14 +1605,19 @@ const HD_IDS={reminders:'hd-reminders',trouble:'hd-trouble',settings:'hd-setting
 function openPanelFromMenu(name){ closeHamburger(); openPanel(name); }
 
 function openPanel(name){
-  const mc=document.getElementById('main-content');
+  const mc = document.getElementById('main-content');
+  // If on dashboard or admin landing, switch to checklist first so panels are reachable
+  const onDash    = _el('dashboard-page')?.classList.contains('visible');
+  const onLanding = _el('admin-landing')?.classList.contains('visible');
+  if(onDash || onLanding){ gotoChecklist(); }
+
   if(activePanel===name){
     activePanel=null;
     PANEL_IDS.forEach(p=>{
       document.getElementById('panel-'+p).classList.remove('open');
       document.getElementById(HD_IDS[p]).classList.remove('active');
     });
-    mc.style.display='block';
+    if(mc) mc.style.display='block';
     if(window.innerWidth<=700&&activeTask===null){
       document.getElementById('sidebar').classList.remove('hidden');
       document.getElementById('main-panel').classList.add('hidden');
@@ -1132,7 +1625,7 @@ function openPanel(name){
     return;
   }
   activePanel=name;
-  mc.style.display='none';
+  if(mc) mc.style.display='none';
   PANEL_IDS.forEach(p=>{
     document.getElementById('panel-'+p).classList.toggle('open',p===name);
     document.getElementById(HD_IDS[p]).classList.toggle('active',p===name);
@@ -1140,6 +1633,17 @@ function openPanel(name){
   if(window.innerWidth<=700){
     document.getElementById('sidebar').classList.add('hidden');
     document.getElementById('main-panel').classList.remove('hidden');
+  }
+}
+
+// ── Nav Sync button — routes to correct sync based on active view ─────────────
+async function autoSyncFromNav(){
+  const onDash = _el('dashboard-page')?.classList.contains('visible');
+  if(onDash){
+    await dashSync();
+  } else {
+    // Trigger the last active task sync or show toast
+    showToast('Use "Sync to Excel" on each completed task');
   }
 }
 
@@ -1367,13 +1871,18 @@ function renderDetail(i){
       </div>
     </div>
   </div>`;
-  html+=`<div class="steps-label">Steps</div><ul class="steps-list">`;
+  html+=`<div class="steps-label-row">
+    <div class="steps-label">Steps</div>
+    <div class="steps-participant-note"><span class="pip">P</span> Steps marked blue are participant actions</div>
+  </div><ul class="steps-list">`;
+  const participantSet = PARTICIPANT_STEPS[i] || new Set();
   t.steps.forEach((s,j)=>{
     const isDone=stepDone[i][j];
     const text=typeof s==='string'?s:s.t;
+    const isParticipant = participantSet.has(j+1);
     let subs=typeof s==='object'&&s.s?'<div class="sub-items">'+s.s.map(x=>`<div class="sub-item"><span class="sub-dash">—</span><span>${x}</span></div>`).join('')+'</div>':'';
     html+=`<li class="step-item" onclick="toggleStep(${i},${j})">
-      <div class="step-dot${isDone?' done':''}"><span>${j+1}</span><div class="step-tick"><svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9.5 10.5,3"/></svg></div></div>
+      <div class="step-dot${isDone?' done':''}${isParticipant&&!isDone?' participant':''}"><span>${j+1}</span><div class="step-tick"><svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9.5 10.5,3"/></svg></div></div>
       <div class="step-content"><div class="step-text${isDone?' done':''}">${text}</div>${subs}</div>
     </li>`;
   });
@@ -1538,15 +2047,26 @@ function checkAdminPw(){
     document.getElementById('admin-content').classList.remove('hidden');
     document.getElementById('admin-pw-error').classList.add('hidden');
     document.getElementById('admin-unlock-btn').innerHTML = `<svg viewBox="0 0 16 16"><rect x="3" y="7" width="10" height="7" rx="1"/><path d="M11 7V5a3 3 0 0 0-6 0v2"/></svg>Lock`;
-    // populate URL field
+    // populate TaskData sync URL field
     document.getElementById('pa-url-input').value = paUrl;
     document.getElementById('pa-status').textContent = '✓ URL configured — auto-sync enabled';
     document.getElementById('pa-status').className = 'pa-status saved';
-    // Pre-populate login URL field too
+    document.getElementById('pa-url-input').classList.add('saved');
+    // populate Dashboard URL field
+    const dashInput = document.getElementById('dash-pa-url-input');
+    if(dashInput){
+      dashInput.value = dashPaUrl;
+      dashInput.classList.add('saved');
+      document.getElementById('dash-pa-status').textContent = '✓ Dashboard URL configured';
+      document.getElementById('dash-pa-status').className = 'pa-status saved';
+    }
+    // populate Login URL field
     const loginInput = document.getElementById('login-pa-url-input');
-    if(loginInput) loginInput.value = loginPaUrl;
-    const loginStatus = document.getElementById('login-pa-status');
-    if(loginStatus && loginPaUrl){ loginStatus.textContent = '✓ Login URL configured'; loginStatus.className = 'pa-status saved'; }
+    if(loginInput){
+      loginInput.value = loginPaUrl;
+      const loginStatus = document.getElementById('login-pa-status');
+      if(loginPaUrl && loginStatus){ loginInput.classList.add('saved'); loginStatus.textContent = '✓ Login URL configured'; loginStatus.className = 'pa-status saved'; }
+    }
   } else {
     errEl.classList.remove('hidden');
     const input = document.getElementById('admin-pw-input');
@@ -1557,8 +2077,26 @@ function checkAdminPw(){
 }
 
 
-// ── Login system ──────────────────────────────────────
-const ADMIN_LOGIN_ID = 'Admin-Kilo';
+// Steps (1-indexed) that are participant actions — shown with blue highlight
+// Key = task index (0-based), Value = Set of 1-based step numbers
+const PARTICIPANT_STEPS = {
+  0:  new Set([5]),           // Task 01
+  1:  new Set([5,6,7]),       // Task 02
+  2:  new Set([6,7]),         // Task 03
+  3:  new Set([5,6]),         // Task 04
+  4:  new Set([5,6,7,8,9]),   // Task 05
+  5:  new Set([6,7]),         // Task 06
+  6:  new Set([5,6]),         // Task 07
+  7:  new Set([5,6]),         // Task 08
+  8:  new Set([5,6]),         // Task 09
+  9:  new Set([5,6]),         // Task 10
+  10: new Set([5,6,7,8,9]),   // Task 11
+  11: new Set([5,6,7,8,9]),   // Task 12
+};
+
+// Registration participant steps (1-indexed)
+const REG_PHONE_PARTICIPANT_STEPS  = new Set([2,3]);
+const REG_DEVICE_PARTICIPANT_STEPS = new Set([6,7]); // Part 2 steps 6,7 (overall indices)
 
 async function doLogin(){
   const loginId = document.getElementById('login-id-input').value.trim();
@@ -1572,7 +2110,7 @@ async function doLogin(){
   }
   // Show spinner
   btn.disabled = true;
-  btnText.innerHTML = '<div class="login-spinner"></div> Signing in…';
+  btn.innerHTML = '<div class="login-spinner"></div><span>Signing in…</span>';
   errEl.textContent = '';
 
   // ── Admin bypass — no PA call needed ──
@@ -1595,7 +2133,7 @@ async function doLogin(){
   if(!loginPaUrl){
     // No login PA URL configured — admin needs to set it up
     btn.disabled = false;
-    btnText.textContent = 'Sign In';
+    btn.innerHTML = '<span id="login-btn-text">Sign In</span>';
     errEl.textContent = 'Login service not configured. Contact your admin.';
     return;
   }
@@ -1616,7 +2154,7 @@ async function doLogin(){
     // PA should return: {found: true/false, modId, modName, location, email, phone}
     if(!data || !data.found){
       btn.disabled = false;
-      btnText.textContent = 'Sign In';
+      btn.innerHTML = '<span id="login-btn-text">Sign In</span>';
       document.getElementById('login-id-input').classList.add('error');
       errEl.textContent = 'Login ID not recognised. Please check and try again.';
       return;
@@ -1637,7 +2175,7 @@ async function doLogin(){
     onLoginSuccess();
   } catch(e){
     btn.disabled = false;
-    btnText.textContent = 'Sign In';
+    btn.innerHTML = '<span id="login-btn-text">Sign In</span>';
     console.error('Login error full details:', e);
     if(e.message && e.message.includes('Failed to fetch')){
       errEl.textContent = 'Network error (possible CORS issue). Check browser console for details.';
@@ -1666,10 +2204,31 @@ function onLoginSuccess(){
   if(modField && !modField.value) modField.value = currentUser.modName;
   globalData.operator = currentUser.modName;
   saveProgress();
-  // Update welcome message
-  updateWelcomeMessage();
   // Update logout label
   document.getElementById('hd-logout-label').textContent = 'Sign out (' + currentUser.firstName + ')';
+  // Admin gets landing tile chooser; regular users go straight to checklist
+  if(currentUser.isAdmin){
+    // Restore whichever admin view was active before refresh
+    const savedView = sessionStorage.getItem('centific_admin_view') || 'landing';
+    if(savedView === 'dashboard'){
+      gotoDashboard();
+    } else if(savedView === 'checklist'){
+      gotoChecklist();
+    } else {
+      showAdminLanding();
+    }
+    updateAdminSwitchBtn();
+    // Pre-populate dashboard URL in settings
+    const dashInput = document.getElementById('dash-pa-url-input');
+    if(dashInput){ dashInput.value = dashPaUrl; document.getElementById('dash-pa-status').textContent='✓ Dashboard URL configured'; document.getElementById('dash-pa-status').className='pa-status saved'; }
+    // Restore dash last sync time if available
+    const ls = localStorage.getItem('centific_dash_last_sync');
+    if(ls) { const el=document.getElementById('dash-last-sync'); if(el) el.textContent = 'Last synced at ' + ls; }
+    if(dashData){ populateModFilter(); }
+  } else {
+    document.querySelector('.layout').style.display = 'flex';
+    updateWelcomeMessage();
+  }
 }
 
 function updateWelcomeMessage(){
@@ -1696,9 +2255,29 @@ function doLogout(){
   document.getElementById('login-error').textContent = '';
   document.getElementById('login-btn').disabled = false;
   document.getElementById('login-btn-text').textContent = 'Sign In';
+  // Hide admin switch button
+  const switchBtn = document.getElementById('hd-switch-view');
+  const switchSep = document.getElementById('hd-switch-sep');
+  if(switchBtn) switchBtn.style.display = 'none';
+  if(switchSep) switchSep.style.display = 'none';
+  sessionStorage.removeItem('centific_admin_view');
+  // Hide dashboard/landing pages
+  document.getElementById('admin-landing').classList.remove('visible');
+  document.getElementById('dashboard-page').classList.remove('visible');
+  document.querySelector('.layout').style.display = 'flex';
   // Show login screen
   document.getElementById('login-screen').classList.remove('hidden');
   closeHamburger();
+}
+
+function saveDashPaUrl(){
+  const val = document.getElementById('dash-pa-url-input').value.trim();
+  if(!val || !val.startsWith('http')){ showToast('Please enter a valid URL'); return; }
+  dashPaUrl = val;
+  localStorage.setItem('centific_dash_pa_url', dashPaUrl);
+  document.getElementById('dash-pa-status').textContent = '✓ Dashboard URL saved';
+  document.getElementById('dash-pa-status').className = 'pa-status saved';
+  showToast('Dashboard URL saved');
 }
 
 function saveLoginPaUrl(){
@@ -1716,11 +2295,23 @@ function saveLoginPaUrl(){
 // ── Registration task renderer ────────────────────────
 let regView = null; // null | 'cellphone' | 'deviceA'
 
-function stepItemHTML(stepText, isDone, taskIdx, type, stepIdx) {
-  var dotClass = 'step-dot' + (isDone ? ' done' : '');
+function stepItemHTML(stepText, isDone, taskIdx, type, stepIdx, isParticipant) {
+  var dotClass = 'step-dot' + (isDone ? ' done' : '') + (isParticipant && !isDone ? ' participant' : '');
   var textClass = 'step-text' + (isDone ? ' done' : '');
+  var displayNum = stepIdx + 1; // default 1-based overall index
   return '<li class="step-item" onclick="toggleRegStep(' + taskIdx + ',\'' + type + '\',' + stepIdx + ')">'
-    + '<div class="' + dotClass + '"><span>' + (stepIdx+1) + '</span>'
+    + '<div class="' + dotClass + '"><span>' + displayNum + '</span>'
+    + '<div class="step-tick"><svg viewBox="0 0 13 10"><path d="M1.5 5L5 8.5L11.5 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>'
+    + '<div class="step-content"><div class="' + textClass + '">' + stepText + '</div></div>'
+    + '</li>';
+}
+
+function stepItemPart2HTML(stepText, isDone, taskIdx, stepIdx, part2LocalIdx, isParticipant) {
+  // Part 2 uses local 1-based numbering (1,2,3... not continuing from Part 1)
+  var dotClass = 'step-dot' + (isDone ? ' done' : '') + (isParticipant && !isDone ? ' participant' : '');
+  var textClass = 'step-text' + (isDone ? ' done' : '');
+  return '<li class="step-item" onclick="toggleRegStep(' + taskIdx + ',\'device\',' + stepIdx + ')">'
+    + '<div class="' + dotClass + '"><span>' + (part2LocalIdx + 1) + '</span>'
     + '<div class="step-tick"><svg viewBox="0 0 13 10"><path d="M1.5 5L5 8.5L11.5 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>'
     + '<div class="step-content"><div class="' + textClass + '">' + stepText + '</div></div>'
     + '</li>';
@@ -1784,10 +2375,12 @@ function renderRegistration(i) {
         + '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="var(--pink)" stroke="none"/></svg>'
         + '<p>Please watch the video before proceeding.</p></div>';
     }
-    out += '<div class="capture-card"><div class="capture-card-title">Steps</div><ul class="steps-list">';
+    out += '<div class="capture-card"><div class="steps-label-row"><div class="capture-card-title" style="margin-bottom:0">Steps</div><div class="steps-participant-note"><span class="pip">P</span> Steps marked blue are participant actions</div></div><ul class="steps-list">';
     var regSteps = taskData[i].regPhoneSteps || new Array(phoneSteps.length).fill(false);
+    // Phone participant steps: 2, 3 (1-indexed)
+    var phoneParticipant = new Set([2, 3]);
     for (var j = 0; j < phoneSteps.length; j++) {
-      out += stepItemHTML(phoneSteps[j], regSteps[j], i, 'phone', j);
+      out += stepItemHTML(phoneSteps[j], regSteps[j], i, 'phone', j, phoneParticipant.has(j+1));
     }
     out += '</ul>'
       + '<div class="note-box" style="margin-top:8px">At the end of collection, upload recording to your laptop and rename as: <strong>PID_PhoneModel_session.mp4</strong></div>'
@@ -1811,21 +2404,40 @@ function renderRegistration(i) {
       'Go to START SESSION → select Registration.',
       'Enter first name. Fill out remaining fields and tap START.',
       'Participant stands/sits 2–4 ft from the device.',
-      'Perform the following head movements in sequence: Front → Left → Front → Right → Front → Upward → Front → Downward → Front',
-      'Tap START to begin recording, then STOP SESSION when complete.'
+      'Participant performs the following head movements in sequence: Front → Left → Front → Right → Front → Upward → Front → Downward → Front',
+      'Tap START to begin recording.',
+      'Tap STOP SESSION when complete.'
     ];
-    var devSteps = taskData[i].regDeviceSteps || new Array(part1Steps.length + part2Steps.length).fill(false);
+    var devSteps = taskData[i].regDeviceSteps || new Array(14).fill(false);
     out += backBtn(i);
     out += '<div class="task-hdr"><div class="task-eyebrow">REGISTRATION · DEVICE A</div>'
       + '<div class="task-title-main">Registration — Device A</div></div>';
     out += '<div class="capture-card"><div class="capture-card-title">Part 1 — Device Setup of Device A</div><ul class="steps-list">';
     for (var j = 0; j < part1Steps.length; j++) {
-      out += stepItemHTML(part1Steps[j], devSteps[j], i, 'device', j);
+      // Part 1: local 1-based number, no participant highlights
+      var dotClass1 = 'step-dot' + (devSteps[j] ? ' done' : '');
+      var textClass1 = 'step-text' + (devSteps[j] ? ' done' : '');
+      out += '<li class="step-item" onclick="toggleRegStep(' + i + ',\'device\',' + j + ')">'
+        + '<div class="' + dotClass1 + '"><span>' + (j+1) + '</span>'
+        + '<div class="step-tick"><svg viewBox="0 0 13 10"><path d="M1.5 5L5 8.5L11.5 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>'
+        + '<div class="step-content"><div class="' + textClass1 + '">' + part1Steps[j] + '</div></div>'
+        + '</li>';
     }
     out += '</ul></div>';
-    out += '<div class="capture-card"><div class="capture-card-title">Part 2 — Registration for Device A</div><ul class="steps-list">';
+    // Part 2: local 1-based numbering, participant steps 6 and 7
+    var part2Participant = new Set([6, 7]);
+    out += '<div class="capture-card"><div class="steps-label-row"><div class="capture-card-title" style="margin-bottom:0">Part 2 — Registration for Device A</div><div class="steps-participant-note"><span class="pip">P</span> Steps marked blue are participant actions</div></div><ul class="steps-list">';
     for (var j = 0; j < part2Steps.length; j++) {
-      out += stepItemHTML(part2Steps[j], devSteps[part1Steps.length + j], i, 'device', part1Steps.length + j);
+      var overallIdx = part1Steps.length + j;
+      var isDone2 = devSteps[overallIdx] || false;
+      var isPart = part2Participant.has(j+1);
+      var dotClass2 = 'step-dot' + (isDone2 ? ' done' : '') + (isPart && !isDone2 ? ' participant' : '');
+      var textClass2 = 'step-text' + (isDone2 ? ' done' : '');
+      out += '<li class="step-item" onclick="toggleRegStep(' + i + ',\'device\',' + overallIdx + ')">'
+        + '<div class="' + dotClass2 + '"><span>' + (j+1) + '</span>'
+        + '<div class="step-tick"><svg viewBox="0 0 13 10"><path d="M1.5 5L5 8.5L11.5 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>'
+        + '<div class="step-content"><div class="' + textClass2 + '">' + part2Steps[j] + '</div></div>'
+        + '</li>';
     }
     out += '</ul>'
       + '<div class="btn-row" style="margin-top:12px">'
@@ -1837,7 +2449,7 @@ function renderRegistration(i) {
 
 function toggleRegStep(taskIdx, type, stepIdx) {
   if (!taskData[taskIdx].regPhoneSteps) taskData[taskIdx].regPhoneSteps = new Array(4).fill(false);
-  if (!taskData[taskIdx].regDeviceSteps) taskData[taskIdx].regDeviceSteps = new Array(13).fill(false);
+  if (!taskData[taskIdx].regDeviceSteps) taskData[taskIdx].regDeviceSteps = new Array(14).fill(false);
   if (type === 'phone') taskData[taskIdx].regPhoneSteps[stepIdx] = !taskData[taskIdx].regPhoneSteps[stepIdx];
   if (type === 'device') taskData[taskIdx].regDeviceSteps[stepIdx] = !taskData[taskIdx].regDeviceSteps[stepIdx];
   saveProgress();
@@ -1855,7 +2467,7 @@ function completeRegistration(i) {
 
 function toggleRegStep(taskIdx, type, stepIdx){
   if(!taskData[taskIdx].regPhoneSteps) taskData[taskIdx].regPhoneSteps = new Array(4).fill(false);
-  if(!taskData[taskIdx].regDeviceSteps) taskData[taskIdx].regDeviceSteps = new Array(13).fill(false);
+  if(!taskData[taskIdx].regDeviceSteps) taskData[taskIdx].regDeviceSteps = new Array(14).fill(false);
   if(type === 'phone') taskData[taskIdx].regPhoneSteps[stepIdx] = !taskData[taskIdx].regPhoneSteps[stepIdx];
   if(type === 'device') taskData[taskIdx].regDeviceSteps[stepIdx] = !taskData[taskIdx].regDeviceSteps[stepIdx];
   saveProgress();
@@ -1968,32 +2580,82 @@ function renderRegistration(){
           </div>
           ${videoBtn}
         </div>
-      </div>
-      <div class="steps-label">Steps</div>
-      <ul class="steps-list">`;
-    steps.forEach((s,j)=>{
-      // Section title — render as header, not a checklist item
-      if(typeof s==='object' && s.section){
-        html2 += `<li style="display:flex;align-items:center;gap:0;padding:16px 0 6px;border-bottom:none;cursor:default;list-style:none">
-          <div style="font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--pink);border-bottom:.5px solid rgba(239,67,179,.25);padding-bottom:6px;width:100%">${s.t}</div>
+      </div>`;
+
+    if(isPhone){
+      // Cellphone: flat list, steps 2+3 are participant
+      const phoneParticipant = new Set([2,3]);
+      html2 += `<div class="steps-label-row">
+        <div class="steps-label">Steps</div>
+        <div class="steps-participant-note"><span class="pip">P</span> Steps marked blue are participant actions</div>
+      </div><ul class="steps-list">`;
+      let stepNum = 0;
+      steps.forEach((s,j)=>{
+        if(typeof s==='object' && s.section) return;
+        stepNum++;
+        const isDone = done[j];
+        const text = typeof s==='string' ? s : s.t;
+        const subs = typeof s==='object'&&s.s&&s.s.length
+          ? '<div class="sub-items">'+s.s.map(x=>`<div class="sub-item"><span class="sub-dash">—</span><span>${x}</span></div>`).join('')+'</div>' : '';
+        const isPart = phoneParticipant.has(stepNum);
+        const dotCls = `step-dot${isDone?' done':''}${isPart&&!isDone?' participant':''}`;
+        html2 += `<li class="step-item" onclick="toggleRegStep(${j})">
+          <div class="${dotCls}"><span>${stepNum}</span>
+            <div class="step-tick"><svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9.5 10.5,3"/></svg></div>
+          </div>
+          <div class="step-content"><div class="step-text${isDone?' done':''}">${text}</div>${subs}</div>
         </li>`;
-        return;
-      }
-      const isDone = done[j];
-      const text = typeof s==='string' ? s : s.t;
-      const subs = typeof s==='object'&&s.s&&s.s.length
-        ? '<div class="sub-items">'+s.s.map(x=>`<div class="sub-item"><span class="sub-dash">—</span><span>${x}</span></div>`).join('')+'</div>'
-        : '';
-      html2 += `<li class="step-item" onclick="toggleRegStep(${j})">
-        <div class="step-dot${isDone?' done':''}">
-          <span>${j+1}</span>
-          <div class="step-tick"><svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9.5 10.5,3"/></svg></div>
+      });
+      html2 += `</ul>`;
+    } else {
+      // Device A: split into Part 1 (1–6) and Part 2 (1–8) with independent numbering
+      const part2Participant = new Set([6,7]);
+      const part1Items = [], part2Items = [];
+      let inPart2 = false;
+      steps.forEach((s, j) => {
+        if(typeof s==='object' && s.section){ if(s.t.includes('Part 2')) inPart2=true; return; }
+        if(inPart2) part2Items.push({s,j}); else part1Items.push({s,j});
+      });
+
+      // Part 1
+      html2 += `<div class="capture-card">
+        <div class="capture-card-title">Part 1 — Device Setup of Device A</div>
+        <ul class="steps-list">`;
+      part1Items.forEach(({s,j}, li)=>{
+        const isDone=done[j], text=typeof s==='string'?s:s.t;
+        const subs=typeof s==='object'&&s.s&&s.s.length?'<div class="sub-items">'+s.s.map(x=>`<div class="sub-item"><span class="sub-dash">—</span><span>${x}</span></div>`).join('')+'</div>':'';
+        html2 += `<li class="step-item" onclick="toggleRegStep(${j})">
+          <div class="step-dot${isDone?' done':''}"><span>${li+1}</span>
+            <div class="step-tick"><svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9.5 10.5,3"/></svg></div>
+          </div>
+          <div class="step-content"><div class="step-text${isDone?' done':''}">${text}</div>${subs}</div>
+        </li>`;
+      });
+      html2 += `</ul></div>`;
+
+      // Part 2 — restart from 1, steps 6+7 blue
+      html2 += `<div class="capture-card">
+        <div class="steps-label-row">
+          <div class="capture-card-title" style="margin-bottom:0">Part 2 — Registration for Device A</div>
+          <div class="steps-participant-note"><span class="pip">P</span> Steps marked blue are participant actions</div>
         </div>
-        <div class="step-content"><div class="step-text${isDone?' done':''}">${text}</div>${subs}</div>
-      </li>`;
-    });
-    html2 += `</ul>
-      <div class="btn-row">
+        <ul class="steps-list">`;
+      part2Items.forEach(({s,j}, li)=>{
+        const isDone=done[j], text=typeof s==='string'?s:s.t;
+        const subs=typeof s==='object'&&s.s&&s.s.length?'<div class="sub-items">'+s.s.map(x=>`<div class="sub-item"><span class="sub-dash">—</span><span>${x}</span></div>`).join('')+'</div>':'';
+        const isPart=part2Participant.has(li+1);
+        const dotCls=`step-dot${isDone?' done':''}${isPart&&!isDone?' participant':''}`;
+        html2 += `<li class="step-item" onclick="toggleRegStep(${j})">
+          <div class="${dotCls}"><span>${li+1}</span>
+            <div class="step-tick"><svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9.5 10.5,3"/></svg></div>
+          </div>
+          <div class="step-content"><div class="step-text${isDone?' done':''}">${text}</div>${subs}</div>
+        </li>`;
+      });
+      html2 += `</ul></div>`;
+    }
+
+    html2 += `<div class="btn-row">
         <button class="cta-btn secondary" onclick="regSubTask=null;renderRegistration()">← Back to options</button>
       </div>`;
     document.getElementById('main-content').innerHTML = html2;
@@ -2118,14 +2780,841 @@ renderSidebar();
 updateProgress();
 
 // ── Restore login state ──────────────────────────────
-if(currentUser){
-  onLoginSuccess();
-} else {
-  // Show login screen — block app access
-  document.getElementById('login-screen').classList.remove('hidden');
+// Defer to next frame so DOM + Chart.js are fully ready
+setTimeout(function(){
+  if(currentUser){
+    onLoginSuccess();
+  } else {
+    document.getElementById('login-screen').classList.remove('hidden');
+  }
+  updateWelcomeMessage();
+}, 0);
+
+// ══════════════════════════════════════════════════════════
+// ── DASHBOARD SYSTEM ──────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+
+// dashPaUrl and DEFAULT_DASH_PA_URL declared at top of script with other URL variables
+// dashPaUrl, dashData, dashCharts declared at top of script with other state variables
+
+function _layout(){ return document.querySelector('.layout'); }
+function _el(id){ return document.getElementById(id); }
+
+function showAdminLanding(){
+  const al=_el('admin-landing'); if(al) al.classList.add('visible');
+  const dp=_el('dashboard-page'); if(dp) dp.classList.remove('visible');
+  const la=_layout(); if(la) la.style.display='none';
+  sessionStorage.setItem('centific_admin_view','landing');
+  updateAdminSwitchBtn();
 }
-// Update welcome message whenever it might be in view
-updateWelcomeMessage();
+
+function gotoChecklist(){
+  const al=_el('admin-landing'); if(al) al.classList.remove('visible');
+  const dp=_el('dashboard-page'); if(dp) dp.classList.remove('visible');
+  const la=_layout(); if(la) la.style.display='flex';
+  sessionStorage.setItem('centific_admin_view','checklist');
+  updateAdminSwitchBtn();
+}
+
+function gotoDashboard(){
+  const al=_el('admin-landing'); if(al) al.classList.remove('visible');
+  const dp=_el('dashboard-page'); if(dp) dp.classList.add('visible');
+  const la=_layout(); if(la) la.style.display='none';
+  sessionStorage.setItem('centific_admin_view','dashboard');
+  updateAdminSwitchBtn();
+  setTimeout(function(){
+    if(dashData){
+      populateModFilter();
+      const savedSub = sessionStorage.getItem('centific_tracker_page') || 'dashboard';
+      if(savedSub === 'moderators'){
+        switchTrackerPage('moderators');
+      } else {
+        switchTrackerPage('dashboard');
+        setTimeout(function(){
+          Object.values(dashCharts).forEach(c=>{ try{ c.resize(); }catch(e){} });
+        }, 100);
+      }
+    } else {
+      switchTrackerPage('dashboard');
+    }
+  }, 80);
+}
+
+function adminSwitchView(){
+  const dp=_el('dashboard-page');
+  const onDash = dp && dp.classList.contains('visible');
+  if(onDash){ gotoChecklist(); } else { gotoDashboard(); }
+}
+
+function updateAdminSwitchBtn(){
+  if(!currentUser || !currentUser.isAdmin) return;
+  const btn=_el('hd-switch-view'), sep=_el('hd-switch-sep'), label=_el('hd-switch-label');
+  if(!btn||!sep||!label) return;
+  btn.style.display=''; sep.style.display='';
+  const dp=_el('dashboard-page');
+  const onDash = dp && dp.classList.contains('visible');
+  label.textContent = onDash ? 'Switch to Checklist' : 'Progress Tracker';
+  const svg = btn.querySelector('svg');
+  if(svg){
+    if(onDash){
+      svg.setAttribute('viewBox','0 0 24 24');
+      svg.innerHTML='<polyline points="9,11 12,14 22,4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>';
+    } else {
+      svg.setAttribute('viewBox','0 0 16 16');
+      svg.innerHTML='<rect x="2" y="3" width="12" height="9" rx="1.5"/><polyline points="5,9 7,7 9,8.5 11,6"/><line x1="5" y1="13" x2="11" y2="13"/><line x1="8" y1="12" x2="8" y2="13.5"/>';
+    }
+  }
+}
+
+function dashBack(){
+  Object.values(dashCharts).forEach(c=>{ try{c.destroy();}catch(e){} });
+  dashCharts={};
+  const dp=_el('dashboard-page'); if(dp) dp.classList.remove('visible');
+  if(currentUser&&currentUser.isAdmin){ showAdminLanding(); }
+  else { const la=_layout(); if(la) la.style.display='flex'; }
+  updateAdminSwitchBtn();
+}
+
+async function dashSync(){
+  const btn = document.getElementById('dash-sync-btn');
+  if(!btn) return;
+  btn.classList.add('syncing');
+  btn.disabled = true;
+  if(!dashPaUrl){
+    showToast('Dashboard PA URL not configured in Settings → Admin');
+    btn.classList.remove('syncing'); btn.disabled = false; return;
+  }
+  try {
+    const res = await fetch(dashPaUrl, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action: 'getAll'})
+    });
+    if(!res.ok && res.status !== 202 && res.status !== 200){
+      throw new Error('HTTP ' + res.status);
+    }
+    const text = await res.text();
+    console.log('Dashboard raw response (first 500):', text.substring(0, 500));
+    let data;
+    try{ data=JSON.parse(text); }catch(e){ throw new Error('Invalid JSON: '+text.substring(0,100)); }
+
+    // PA Excel "List rows" returns array directly or wrapped in value/rows
+    // Rows may also contain @odata metadata — strip those keys
+    let rows = Array.isArray(data) ? data : (data.value || data.rows || data.body?.value || []);
+
+    // Normalise each row — strip @odata keys, handle possible column name variations
+    dashData = rows.map(r => {
+      const clean = {};
+      Object.keys(r).forEach(k => {
+        if(k.startsWith('@')) return; // skip odata metadata
+        clean[k] = r[k];
+      });
+      return {
+        taskId:        clean.taskId        || clean.TaskId        || '',
+        taskTitle:     clean.taskTitle     || clean.TaskTitle     || '',
+        category:      clean.category      || clean.Category      || '',
+        distance:      clean.distance      || clean.Distance      || '',
+        duration:      clean.duration      || clean.Duration      || '',
+        luxReading:    clean.luxReading    || clean.LuxReading    || '',
+        status:        clean.status        || clean.Status        || '',
+        stepsDone:     clean.stepsDone     || clean.StepsDone     || 0,
+        stepsTotal:    clean.stepsTotal    || clean.StepsTotal    || 0,
+        participantId: clean.participantId || clean.ParticipantId || '',
+        moderator:     clean.moderator     || clean.Moderator     || '',
+        sessionDate:   (function(v){ if(!v) return ''; var s=String(v).trim(); if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0,10); var d=new Date(s); return isNaN(d)?s:(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')); })(clean.sessionDate||clean.SessionDate||''),
+        deviceId:      clean.deviceId      || clean.DeviceId      || '',
+        completedAt:   (clean.completedAt||clean.CompletedAt||'').toString().split(',')[0].trim(),
+        notes:         clean.notes         || clean.Notes         || '',
+        submittedAt:   clean.submittedAt   || clean.SubmittedAt   || '',
+        location:      clean.location      || clean.Location      || '',
+        modId:         clean.modId         || clean.ModId         || '',
+      };
+    });
+
+    console.log('Dashboard parsed rows:', dashData.length, dashData[0] || 'no rows');
+
+    if(!dashData.length){
+      showToast('Sync succeeded but table appears empty');
+    }
+
+    localStorage.setItem('centific_dash_data', JSON.stringify(dashData));
+    const now = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    localStorage.setItem('centific_dash_last_sync', now);
+    const syncEl = document.getElementById('dash-last-sync');
+    if(syncEl) syncEl.textContent = 'Synced at '+now;
+    populateModFilter(); renderDashboard();
+    if(currentTrackerPage === 'moderators') renderModeratorsPage();
+    showToast('Dashboard updated — '+dashData.length+' rows loaded');
+  } catch(e){
+    console.error('Dash sync error:', e);
+    if(e.message && (e.message.includes('Failed to fetch') || e.message.includes('NetworkError') || e.message.includes('CORS'))){
+      showToast('CORS error — add Access-Control-Allow-Origin: * header to your PA Response action');
+    } else {
+      showToast('Sync failed: ' + e.message);
+    }
+  }
+  btn.classList.remove('syncing'); btn.disabled = false;
+}
+
+function populateModFilter(){
+  if(!dashData) return;
+  const location = document.getElementById('dash-location')?.value || 'all';
+  // Only show moderators that have data in the selected location
+  const filtered = location === 'all'
+    ? dashData
+    : dashData.filter(r => (r.location||'').trim().toLowerCase() === location.trim().toLowerCase());
+  const mods = [...new Set(filtered.map(r=>r.moderator).filter(Boolean))].sort();
+  const list = document.getElementById('mod-dd-list');
+  if(!list) return;
+  // Remember currently checked mods so we can preserve valid selections
+  const prevSelected = getSelectedMods();
+  if(!mods.length){
+    list.innerHTML = '<div class="mod-dd-empty">No moderators for this location</div>';
+    updateModDropdownLabel();
+    return;
+  }
+  list.innerHTML = mods.map(m=>`
+    <div class="mod-dd-item">
+      <input type="checkbox" id="mod-cb-${CSS.escape(m)}" value="${m}" onchange="onModCheckChange()"
+        ${prevSelected.includes(m) ? 'checked' : ''}/>
+      <label for="mod-cb-${CSS.escape(m)}">${m}</label>
+    </div>`).join('');
+  updateModDropdownLabel();
+}
+
+function onModCheckChange(){
+  updateModDropdownLabel();
+  renderDashboard();
+}
+
+function updateModDropdownLabel(){
+  const selected = getSelectedMods();
+  const label = document.getElementById('mod-dropdown-label');
+  if(!label) return;
+  if(!selected.length){ label.textContent = 'All Moderators'; }
+  else if(selected.length === 1){ label.textContent = selected[0]; }
+  else{ label.textContent = selected.length + ' moderators'; }
+}
+
+function clearModSelection(){
+  document.querySelectorAll('#mod-dd-list input[type="checkbox"]').forEach(c=>c.checked=false);
+  updateModDropdownLabel();
+  renderDashboard();
+}
+
+function toggleModDropdown(e){
+  e.stopPropagation();
+  const panel = document.getElementById('mod-dropdown-panel');
+  if(!panel) return;
+  panel.classList.toggle('hidden');
+}
+
+// Close mod dropdown when clicking outside
+document.addEventListener('click', function(e){
+  const wrap = document.getElementById('mod-dropdown-wrap');
+  if(wrap && !wrap.contains(e.target)){
+    const panel = document.getElementById('mod-dropdown-panel');
+    if(panel) panel.classList.add('hidden');
+  }
+});
+
+// Normalise a date value from Excel to ISO YYYY-MM-DD regardless of format
+function toISODate(val){
+  if(!val && val !== 0) return '';
+  const s = String(val).trim();
+  if(!s) return '';
+
+  // ── Excel serial number MUST be checked first ──
+  // e.g. 46147 = May 5, 2026 (days since Dec 30, 1899)
+  const serial = parseInt(s, 10);
+  if(!isNaN(serial) && String(serial) === s && serial > 40000 && serial < 60000){
+    const d = new Date(Math.round((serial - 25569) * 86400 * 1000)); // Unix epoch conversion
+    const y = d.getUTCFullYear();
+    const m = String(d.getUTCMonth()+1).padStart(2,'0');
+    const dd = String(d.getUTCDate()).padStart(2,'0');
+    console.log('[toISODate serial]', s, '→', `${y}-${m}-${dd}`);
+    return `${y}-${m}-${dd}`;
+  }
+  // Already ISO: 2026-05-05
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0,10);
+  // mm/dd/yyyy
+  const mdyMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(mdyMatch) return `${mdyMatch[3]}-${mdyMatch[1].padStart(2,'0')}-${mdyMatch[2].padStart(2,'0')}`;
+  // dd-mm-yyyy
+  const dmyMatch = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if(dmyMatch) return `${dmyMatch[3]}-${dmyMatch[2].padStart(2,'0')}-${dmyMatch[1].padStart(2,'0')}`;
+  // Native parse fallback
+  const d = new Date(s);
+  if(!isNaN(d.getTime())){
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+  return s;
+}
+
+// Get selected moderators from custom checkbox dropdown
+function getSelectedMods(){
+  const checks = document.querySelectorAll('#mod-dd-list input[type="checkbox"]:checked');
+  return [...checks].map(c=>c.value);
+}
+
+function getFilteredData(){
+  if(!dashData||!dashData.length) return [];
+  const period   = document.getElementById('dash-period').value;
+  const location = document.getElementById('dash-location').value;
+  const selMods  = getSelectedMods();
+  const now = new Date();
+  const y=now.getFullYear(), mo=String(now.getMonth()+1).padStart(2,'0'), d=String(now.getDate()).padStart(2,'0');
+  const todayStr = `${y}-${mo}-${d}`;
+  const weekAgo  = new Date(now - 7*24*60*60*1000);
+  const wyStr    = weekAgo.getFullYear()+'-'+String(weekAgo.getMonth()+1).padStart(2,'0')+'-'+String(weekAgo.getDate()).padStart(2,'0');
+
+  return dashData.filter(r=>{
+    // Use completedAt for date filtering — parse mm/dd/yyyy from "5/5/2026, 7:05 PM" format
+    const rDateRaw = r.completedAt || r.submittedAt || r.sessionDate || '';
+    const rDate = toISODate(rDateRaw.split(',')[0].trim());
+    const rLoc  = (r.location || '').trim().toLowerCase();
+    if(period==='today' && rDate !== todayStr) return false;
+    if(period==='week'  && rDate < wyStr) return false;
+    if(location!=='all' && rLoc !== location.trim().toLowerCase()) return false;
+    if(selMods.length && !selMods.includes(r.moderator)) return false;
+    return true;
+  });
+}
+
+function renderDashboard(){
+  // Don't render if dashboard page isn't visible — charts need dimensions
+  const dp = _el('dashboard-page');
+  if(!dp || !dp.classList.contains('visible')) return;
+  Object.values(dashCharts).forEach(c=>{ try{c.destroy();}catch(e){} });
+  dashCharts={};
+  const data=getFilteredData();
+  const body=document.getElementById('dash-body');
+  if(!data.length){
+    body.innerHTML='<div class="dash-empty"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="7,12 10,8 13,11 16,7"/></svg><p>No data for selected filters. Try adjusting or click Sync.</p></div>';
+    return;
+  }
+  const completedRows=data.filter(r=>r.status==='Complete');
+  const uniqueParts=new Set(data.map(r=>r.participantId).filter(Boolean));
+  const uniqueMods=new Set(data.map(r=>r.moderator).filter(Boolean));
+  const uniqueDates=new Set(data.map(r=>r.sessionDate).filter(Boolean));
+  // Participant-based completion: how many participants finished all 12 tasks
+  const partTaskCount = {};
+  completedRows.forEach(r=>{
+    if(!r.participantId) return;
+    partTaskCount[r.participantId] = (partTaskCount[r.participantId]||0) + 1;
+  });
+  const fullyCompleteParticipants = Object.values(partTaskCount).filter(n=>n>=12).length;
+  const rate = uniqueParts.size > 0 ? Math.round(fullyCompleteParticipants / uniqueParts.size * 100) : 0;
+  const modParts={};
+  data.forEach(r=>{ if(!r.moderator||!r.participantId) return; if(!modParts[r.moderator]) modParts[r.moderator]=new Set(); modParts[r.moderator].add(r.participantId); });
+  const modNames=Object.keys(modParts).sort();
+  const modCounts=modNames.map(m=>modParts[m].size);
+  const dailyC={};
+  completedRows.forEach(r=>{
+    const raw = (r.completedAt || r.submittedAt || r.sessionDate || '').split(',')[0].trim();
+    const dateKey = toISODate(raw);
+    if(!dateKey) return;
+    dailyC[dateKey]=(dailyC[dateKey]||0)+1;
+  });
+  const sortedDates=Object.keys(dailyC).sort();
+  const taskC={};
+  completedRows.forEach(r=>{ const k=r.taskTitle||('Task '+r.taskId); taskC[k]=(taskC[k]||0)+1; });
+  const tLabels=Object.keys(taskC).sort((a,b)=>taskC[b]-taskC[a]).slice(0,12);
+  const tVals=tLabels.map(k=>taskC[k]);
+  const modRows=modNames.map(m=>{
+    const mR  = data.filter(r=>r.moderator===m);
+    const mP  = modParts[m].size; // unique participants
+    const mL  = mR[0]?.location||'—';
+    const mD  = mR.filter(r=>r.status==='Complete').length; // completed task rows
+
+    // A participant is "fully complete" when all 12 tasks are done
+    // Count participants who have exactly 12 Complete rows
+    const partTaskMap = {};
+    mR.forEach(r=>{
+      if(!r.participantId) return;
+      if(!partTaskMap[r.participantId]) partTaskMap[r.participantId] = 0;
+      if(r.status === 'Complete') partTaskMap[r.participantId]++;
+    });
+    const fullyComplete = Object.values(partTaskMap).filter(n => n >= 12).length;
+    const mRt = mP > 0 ? Math.round(fullyComplete / mP * 100) : 0;
+
+    return {name:m, participants:mP, completed:mD, fullyComplete, total:mR.length, rate:mRt, location:mL};
+  }).sort((a,b)=>b.participants-a.participants);
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  const gc=isDark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)';
+  const tc=isDark?'#a8a8a0':'#6e6e73';
+  const COLORS=['#EF43B3','#3b82f6','#22c55e','#f59e0b','#8b5cf6','#ec4899','#14b8a6','#f97316','#6366f1','#84cc16'];
+  Chart.defaults.font.family="-apple-system,'SF Pro Display',sans-serif";
+  Chart.defaults.font.size=12; Chart.defaults.color=tc;
+  const ttBase={
+    backgroundColor:isDark?'rgba(26,26,24,0.96)':'rgba(255,255,255,0.96)',
+    borderColor:isDark?'rgba(255,255,255,0.12)':'rgba(0,0,0,0.10)',
+    borderWidth:1,
+    titleColor:isDark?'#F7F5F0':'#1d1d1f',
+    titleFont:{size:13,weight:'600'},
+    bodyColor:tc,bodyFont:{size:12},
+    padding:12,cornerRadius:10,
+    displayColors:false
+  };
+  // Integer-only tick config for bar charts
+  const intTicks = { color:tc, precision:0, stepSize:1, callback: v => Number.isInteger(v)?v:'' };
+
+  body.innerHTML=`
+    <!-- KPI row — large Apple-style numbers -->
+    <div class="kpi-row">
+      <div class="kpi-card accent">
+        <div class="kpi-top-row"><div class="kpi-label">Total Participants</div></div>
+        <div class="kpi-bottom-row">
+          <div class="kpi-sub">${uniqueDates.size} session day${uniqueDates.size!==1?'s':''}</div>
+          <div class="kpi-value kpi-value-xl ">${uniqueParts.size}</div>
+        </div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-top-row"><div class="kpi-label">Tasks Completed</div></div>
+        <div class="kpi-bottom-row">
+          <div class="kpi-sub">of ${data.length} synced rows</div>
+          <div class="kpi-value kpi-value-xl ">${completedRows.length}</div>
+        </div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-top-row"><div class="kpi-label">Active Moderators</div></div>
+        <div class="kpi-bottom-row">
+          <div class="kpi-sub">in selected filters</div>
+          <div class="kpi-value kpi-value-xl ">${uniqueMods.size}</div>
+        </div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-top-row"><div class="kpi-label">Completion Rate</div></div>
+        <div class="kpi-bottom-row">
+          <div class="kpi-sub">${fullyCompleteParticipants} of ${uniqueParts.size} done</div>
+          <div class="kpi-value kpi-value-xl ">${rate}<span style="font-size:0.45em;font-weight:500;opacity:.7">%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Participants per Moderator</div>
+        <div class="chart-sub">Unique participants completed per moderator</div>
+        <div class="chart-wrap" style="height:240px"><canvas id="cModBar"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Daily Completions</div>
+        <div class="chart-sub">Completed tasks by date</div>
+        <div class="chart-wrap" style="height:240px"><canvas id="cDailyLine"></canvas></div>
+      </div>
+      <div class="chart-card full">
+        <div class="chart-title">Task Completion Breakdown</div>
+        <div class="chart-sub">How many times each task was completed</div>
+        <div class="chart-wrap" style="height:${Math.max(220,tLabels.length*30)}px"><canvas id="cTaskHBar"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-card full" style="overflow-x:auto">
+      <div class="chart-title">Moderator Summary</div>
+      <div class="chart-sub">Detailed breakdown by moderator — 1 participant = 12 tasks complete</div>
+      <table class="detail-table">
+        <thead><tr>
+          <th>Moderator</th><th>Location</th>
+          <th>Participants</th><th>Fully Complete (12/12)</th>
+          <th>Tasks Completed</th><th>Completion Rate</th>
+        </tr></thead>
+        <tbody>${modRows.map(r=>`<tr>
+          <td><span class="mod-pill">${r.name}</span></td>
+          <td style="color:var(--text2);font-size:13px">${r.location}</td>
+          <td style="font-size:20px;font-weight:700;color:var(--pink);letter-spacing:-0.02em">${r.participants}</td>
+          <td style="font-size:20px;font-weight:700;color:var(--green);letter-spacing:-0.02em">${r.fullyComplete}<span style="font-size:12px;font-weight:400;color:var(--text3)"> / ${r.participants}</span></td>
+          <td style="font-size:16px;font-weight:600;color:var(--text)">${r.completed}</td>
+          <td>
+            <span style="font-size:18px;font-weight:700;letter-spacing:-0.02em;color:${r.rate>=80?'var(--green)':r.rate>=50?'var(--amber)':'var(--text)'}">${r.rate}%</span>
+            <span class="prog-mini"><span class="prog-mini-fill" style="width:${r.rate}%"></span></span>
+          </td>
+        </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+
+  const so={
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{display:false}, tooltip:{...ttBase}},
+    scales:{
+      x:{grid:{color:gc}, ticks:{color:tc, font:{size:12}}},
+      y:{grid:{color:gc}, ticks:{...intTicks}, beginAtZero:true}
+    }
+  };
+
+  if(modNames.length){
+    dashCharts['cModBar']=new Chart(document.getElementById('cModBar'),{
+      type:'bar',
+      data:{
+        labels:modNames,
+        datasets:[{
+          data:modCounts,
+          backgroundColor:modNames.map((_,i)=>COLORS[i%COLORS.length]+'bb'),
+          borderColor:modNames.map((_,i)=>COLORS[i%COLORS.length]),
+          borderWidth:0, borderRadius:8, borderSkipped:false,
+        }]
+      },
+      options:{...so,
+        plugins:{...so.plugins, tooltip:{...ttBase, callbacks:{
+          title:i=>[i[0].label],
+          label:i=>`  ${i.raw} participant${i.raw!==1?'s':''}`
+        }}},
+        scales:{...so.scales, y:{...so.scales.y, ticks:{...intTicks}}}
+      }
+    });
+  }
+
+  if(sortedDates.length){
+    dashCharts['cDailyLine']=new Chart(document.getElementById('cDailyLine'),{
+      type:'line',
+      data:{
+        labels:sortedDates.map(d=>{
+          const dt=new Date(d+'T00:00:00');
+          return dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+        }),
+        datasets:[{
+          data:sortedDates.map(d=>dailyC[d]),
+          borderColor:'#EF43B3', backgroundColor:'rgba(239,67,179,.10)',
+          borderWidth:2.5, pointRadius:5, pointBackgroundColor:'#EF43B3',
+          pointBorderColor:isDark?'#1a1a18':'#fff', pointBorderWidth:2,
+          fill:true, tension:0.4,
+        }]
+      },
+      options:{...so,
+        plugins:{...so.plugins, tooltip:{...ttBase, callbacks:{
+          label:i=>`  ${i.raw} task${i.raw!==1?'s':''} completed`
+        }}},
+        scales:{...so.scales, y:{...so.scales.y, ticks:{...intTicks}}}
+      }
+    });
+  }
+
+  if(tLabels.length){
+    dashCharts['cTaskHBar']=new Chart(document.getElementById('cTaskHBar'),{
+      type:'bar',
+      data:{
+        labels:tLabels,
+        datasets:[{
+          data:tVals,
+          backgroundColor:'rgba(59,130,246,.8)',
+          borderColor:'transparent', borderWidth:0, borderRadius:6,
+        }]
+      },
+      options:{...so,
+        indexAxis:'y',
+        plugins:{...so.plugins, tooltip:{...ttBase, callbacks:{
+          label:i=>`  Completed ${i.raw} time${i.raw!==1?'s':''}`
+        }}},
+        scales:{
+          x:{...so.scales.x, beginAtZero:true, ticks:{...intTicks}},
+          y:{grid:{display:false}, ticks:{color:tc, font:{size:12}}}
+        }
+      }
+    });
+  }
+}
+
+function saveDashPaUrl(){
+  const val = document.getElementById('dash-pa-url-input').value.trim();
+  if(!val || !val.startsWith('http')){ showToast('Please enter a valid URL'); return; }
+  dashPaUrl = val;
+  localStorage.setItem('centific_dash_pa_url', dashPaUrl);
+  document.getElementById('dash-pa-status').textContent = '✓ Dashboard URL saved';
+  document.getElementById('dash-pa-status').className = 'pa-status saved';
+  document.getElementById('dash-pa-url-input').classList.add('saved');
+  showToast('Dashboard URL saved ✓');
+}
+
+// ══════════════════════════════════════════════════════════
+// ── MODERATORS PAGE ───────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+
+let currentTrackerPage = 'dashboard'; // 'dashboard' | 'moderators'
+
+function switchTrackerPage(page){
+  currentTrackerPage = page;
+  const dashBody  = document.getElementById('dash-body');
+  const modsBody  = document.getElementById('mods-body');
+  const isDash    = page === 'dashboard';
+
+  document.getElementById('toggle-dashboard').classList.toggle('active', isDash);
+  document.getElementById('toggle-moderators').classList.toggle('active', !isDash);
+
+  if(dashBody) dashBody.style.display = isDash ? '' : 'none';
+  if(modsBody) modsBody.style.display = isDash ? 'none' : '';
+
+  // Show/hide dashboard-specific filters
+  const filterEls = document.querySelectorAll('#dash-period, #dash-location, .mod-dropdown-wrap, #dash-period ~ .dash-filter-label');
+  filterEls.forEach(el=>el.style.display = isDash ? '' : 'none');
+
+  if(!isDash && dashData) renderModeratorsPage();
+  if(isDash && dashData){
+    renderDashboard();
+    setTimeout(()=>Object.values(dashCharts).forEach(c=>{try{c.resize();}catch(e){}}),100);
+  }
+  sessionStorage.setItem('centific_tracker_page', page);
+}
+
+function renderModeratorsPage(){
+  if(!dashData || !dashData.length) return;
+  const container = document.getElementById('mods-grid-container');
+  if(!container) return;
+
+  const now = new Date();
+  const thirtyMinsAgo = new Date(now - 30*60*1000);
+
+  // Group data by moderator
+  const modMap = {};
+  dashData.forEach(r=>{
+    if(!r.moderator) return;
+    if(!modMap[r.moderator]) modMap[r.moderator] = {
+      name: r.moderator, location: r.location||'—',
+      rows: [], lastActiveRaw: ''
+    };
+    modMap[r.moderator].rows.push(r);
+    // Track most recent activity
+    const ts = r.submittedAt || r.completedAt || '';
+    if(ts && ts > modMap[r.moderator].lastActiveRaw) modMap[r.moderator].lastActiveRaw = ts;
+  });
+
+  const mods = Object.values(modMap).sort((a,b)=>a.name.localeCompare(b.name));
+  if(!mods.length){
+    container.innerHTML='<div class="mods-empty"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><p>No moderator data found.</p></div>';
+    return;
+  }
+
+  // Group by location
+  const locationGroups = {};
+  mods.forEach(mod=>{
+    const loc = mod.location && mod.location !== '—' ? mod.location : 'Unknown';
+    if(!locationGroups[loc]) locationGroups[loc] = [];
+    locationGroups[loc].push(mod);
+  });
+  const LOCATION_ORDER = ['Redmond', 'New York', 'Las Vegas'];
+  const sortedLocations = Object.keys(locationGroups).sort((a, b) => {
+    const ai = LOCATION_ORDER.indexOf(a);
+    const bi = LOCATION_ORDER.indexOf(b);
+    if(ai === -1 && bi === -1) return a.localeCompare(b); // unknown locations alphabetically at end
+    if(ai === -1) return 1;
+    if(bi === -1) return -1;
+    return ai - bi;
+  });
+
+  const TASK_LABELS = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+
+  const cards = mods.map(mod=>{
+    const rows = mod.rows;
+    // Stats
+    const uniqueParts = new Set(rows.map(r=>r.participantId).filter(Boolean));
+    const completedTasks = rows.filter(r=>r.status==='Complete').length;
+    // Participant completion rate
+    const partTaskCount = {};
+    rows.filter(r=>r.status==='Complete').forEach(r=>{
+      if(r.participantId) partTaskCount[r.participantId] = (partTaskCount[r.participantId]||0)+1;
+    });
+    const fullyDone = Object.values(partTaskCount).filter(n=>n>=12).length;
+
+    // Is online? Last activity within 5 hours
+    let isOnline = false;
+    let lastActiveStr = 'No activity';
+    if(mod.lastActiveRaw){
+      const lastDate = new Date(mod.lastActiveRaw);
+      if(!isNaN(lastDate)){
+        isOnline = lastDate > thirtyMinsAgo;
+        const diff = Math.round((now - lastDate)/60000); // minutes ago
+        if(diff < 1)       lastActiveStr = 'Just now';
+        else if(diff < 30) lastActiveStr = diff + 'm ago';
+        else if(diff < 60) lastActiveStr = diff + 'm ago';
+        else if(diff < 1440) lastActiveStr = Math.round(diff/60) + 'h ago';
+        else               lastActiveStr = lastDate.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      }
+    }
+
+    // Latest session: get most recent participantId's task statuses
+    // Find the participant with the most recent submittedAt
+    const partLatest = {};
+    rows.forEach(r=>{
+      if(!r.participantId) return;
+      const ts = r.submittedAt || r.completedAt || '';
+      if(!partLatest[r.participantId] || ts > partLatest[r.participantId].ts){
+        partLatest[r.participantId] = {ts, pid: r.participantId};
+      }
+    });
+    const sortedParts = Object.values(partLatest).sort((a,b)=>b.ts.localeCompare(a.ts));
+    const latestPid = sortedParts[0]?.pid || null;
+    const sessionRows = latestPid ? rows.filter(r=>r.participantId===latestPid) : [];
+    // Build task status map for latest session
+    const taskStatus = {};
+    sessionRows.forEach(r=>{
+      const id = parseInt(r.taskId)||0;
+      if(id>=1&&id<=12) taskStatus[id] = r.status;
+    });
+
+    // Avatar initial
+    const initials = mod.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    const sessionLabel = latestPid ? `Latest session: Participant ${latestPid}` : 'No session data';
+
+    // Task pips
+    const pips = TASK_LABELS.map((_,i)=>{
+      const id = i+1;
+      const st = taskStatus[id] || 'notstarted';
+      const cls = st==='Complete'?'complete':st==='In Progress'?'inprogress':st==='Skipped'?'skipped':'notstarted';
+      const icon = st==='Complete'?'✓':st==='In Progress'?'…':String(id);
+      return `<div class="mod-task-pip ${cls}" title="Task ${id}: ${st}">${icon}</div>`;
+    }).join('');
+
+    return {name: mod.name, card: `<div class="mod-card">
+      <div class="mod-card-header">
+        <div class="mod-avatar">${initials}</div>
+        <div class="mod-info">
+          <div class="mod-name">${mod.name}</div>
+          <div class="mod-location">
+            <svg viewBox="0 0 16 16"><path d="M8 2a4 4 0 0 1 4 4c0 3-4 8-4 8S4 9 4 6a4 4 0 0 1 4-4z"/><circle cx="8" cy="6" r="1.5" fill="currentColor" stroke="none"/></svg>
+            ${mod.location}
+          </div>
+        </div>
+        <div class="mod-online-badge ${isOnline?'online':'offline'}">
+          <span class="mod-online-dot"></span>
+          ${isOnline?'Active':'Inactive'}
+        </div>
+      </div>
+      <div class="mod-stats">
+        <div class="mod-stat"><div class="mod-stat-val pink">${uniqueParts.size}</div><div class="mod-stat-lbl">Participants</div></div>
+        <div class="mod-stat"><div class="mod-stat-val green">${completedTasks}</div><div class="mod-stat-lbl">Tasks Done</div></div>
+        <div class="mod-stat"><div class="mod-stat-val blue">${fullyDone}</div><div class="mod-stat-lbl">Complete (12/12)</div></div>
+      </div>
+      <div class="mod-last-active">Last active: ${lastActiveStr}</div>
+      <div class="mod-live">
+        <div class="mod-live-title">
+          ${isOnline?'<span class="live-dot"></span>':''}
+          ${isOnline?'Active Session (last 30 min)':'Latest Session Status'}
+        </div>
+        <div class="mod-tasks-grid">${pips}</div>
+        <div class="mod-session-info">${sessionLabel}</div>
+      </div>
+    </div>`};
+  });
+
+  // Build grouped HTML by location
+  const groupedHTML = sortedLocations.map(loc => {
+    const locMods = locationGroups[loc];
+    const locCards = locMods.map(mod => {
+      const found = cards.find(c => c.name === mod.name);
+      return found ? found.card : '';
+    }).join('');
+    const onlineCount = locMods.filter(m => {
+      const d = new Date(m.lastActiveRaw);
+      return !isNaN(d) && d > thirtyMinsAgo;
+    }).length;
+    return `<div class="mods-location-section">
+      <div class="mods-location-header">
+        <svg viewBox="0 0 16 16"><path d="M8 2a4 4 0 0 1 4 4c0 3-4 8-4 8S4 9 4 6a4 4 0 0 1 4-4z"/><circle cx="8" cy="6" r="1.5" fill="currentColor" stroke="none"/></svg>
+        <span>${loc}</span>
+        <span class="mods-location-count">${locMods.length} moderator${locMods.length!==1?'s':''}</span>
+        ${onlineCount>0?`<span class="mods-location-online">${onlineCount} online</span>`:''}
+      </div>
+      <div class="mods-grid">${locCards}</div>
+    </div>`;
+  }).join('');
+
+  container.innerHTML = groupedHTML;
+}
+
 </script>
+
+<!-- ── Admin Landing ── -->
+<div id="admin-landing">
+  <div class="admin-landing-title">Admin Dashboard</div>
+  <div class="admin-landing-sub">What would you like to do?</div>
+  <div class="admin-tiles">
+    <div class="admin-tile" onclick="gotoChecklist()">
+      <div class="admin-tile-icon checklist">
+        <svg viewBox="0 0 24 24"><polyline points="9,11 12,14 22,4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <div class="admin-tile-name">Checklist</div>
+      <div class="admin-tile-desc">Run a data collection session, mark tasks and sync results to Excel.</div>
+      <div class="admin-tile-arrow">→</div>
+    </div>
+    <div class="admin-tile" onclick="gotoDashboard()">
+      <div class="admin-tile-icon dashboard">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><polyline points="7,12 10,8 13,11 16,7"/></svg>
+      </div>
+      <div class="admin-tile-name">Progress Tracker</div>
+      <div class="admin-tile-desc">Interactive dashboard — view moderator progress, filter by date, location and compare performance.</div>
+      <div class="admin-tile-arrow">→</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Dashboard Page ── -->
+<div id="dashboard-page">
+  <div class="dash-toolbar">
+    <button class="dash-back-btn" onclick="dashBack()">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      Back
+    </button>
+    <div class="dash-sep"></div>
+    <div class="page-toggle" id="tracker-toggle">
+      <button class="page-toggle-btn active" id="toggle-dashboard" onclick="switchTrackerPage('dashboard')">Dashboard</button>
+      <button class="page-toggle-btn" id="toggle-moderators" onclick="switchTrackerPage('moderators')">Moderators</button>
+    </div>
+
+    <span class="dash-filter-label">Period</span>
+    <select class="dash-select" id="dash-period" onchange="renderDashboard()">
+      <option value="today">Today</option>
+      <option value="week">This Week</option>
+      <option value="overall" selected>Overall</option>
+    </select>
+
+    <span class="dash-filter-label">Location</span>
+    <select class="dash-select" id="dash-location" onchange="populateModFilter();renderDashboard()">
+      <option value="all">All Locations</option>
+      <option value="Redmond">Redmond</option>
+      <option value="Las Vegas">Las Vegas</option>
+      <option value="New York">New York</option>
+    </select>
+
+    <span class="dash-filter-label">Moderators</span>
+    <div class="mod-dropdown-wrap" id="mod-dropdown-wrap">
+      <button class="dash-btn mod-dropdown-trigger" id="mod-dropdown-trigger" onclick="toggleModDropdown(event)">
+        <span id="mod-dropdown-label">All Moderators</span>
+        <svg viewBox="0 0 16 16" style="width:11px;height:11px;margin-left:4px"><path d="M3 6l5 5 5-5"/></svg>
+      </button>
+      <div class="mod-dropdown-panel hidden" id="mod-dropdown-panel">
+        <div class="mod-dd-header">
+          <span style="font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.05em;text-transform:uppercase">Select Moderators</span>
+          <button class="mod-dd-clear" onclick="clearModSelection()">Clear all</button>
+        </div>
+        <div id="mod-dd-list"></div>
+      </div>
+    </div>
+
+    <div class="dash-sep"></div>
+    <span class="dash-last-sync" id="dash-last-sync">Not synced</span>
+    <button class="dash-btn primary" id="dash-sync-btn" onclick="dashSync()">
+      <svg viewBox="0 0 16 16"><path d="M14 8a6 6 0 1 1-1.5-4"/><polyline points="14,2 14,6 10,6"/></svg>
+      Sync
+    </button>
+  </div>
+
+  <div class="dash-body" id="dash-body">
+    <div class="dash-empty">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="7,12 10,8 13,11 16,7"/></svg>
+      <p>Click <strong>Sync</strong> to load the latest data from Excel.</p>
+    </div>
+  </div>
+
+  <!-- Moderators body — swaps with dash-body -->
+  <div class="dash-body" id="mods-body" style="display:none">
+    <div id="mods-grid-container">
+      <div class="mods-empty">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        <p>Click <strong>Sync</strong> to load moderator data.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
