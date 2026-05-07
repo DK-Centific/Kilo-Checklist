@@ -1701,7 +1701,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="toast" id="toast"><div class="toast-dot"></div><span id="toast-msg"></span></div>
 
 <script>
-const REG_PHONE_VIDEO = "https://digitaltechedge.sharepoint.com/:v:/r/sites/ProjectKiloModerators/Shared%20Documents/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Registration%20Session%20via%20Phone.mp4?csf=1&web=1&e=sVlkAV";
+const REG_PHONE_VIDEO = "https://digitaltechedge.sharepoint.com/:v:/r/sites/ProjectKiloModerators/Shared%20Documents/Learning%20Material/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Registration%20Session%20via%20Phone.mp4?csf=1&web=1&e=62Ho64";
 
 const TASK_VIDEOS = [
   "https://digitaltechedge.sharepoint.com/:v:/r/sites/ProjectKiloModerators/Shared%20Documents/Learning%20Material/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2001.mp4?csf=1&web=1&e=9ff68p",
@@ -1749,13 +1749,24 @@ let currentUser = null; // {modId, modName, firstName, location, email, phone, l
 const STORAGE_KEY = 'centific_progress_v1';
 
 // ── Date helpers ──────────────────────────────────────
-function getTodayISO(){ return new Date().toISOString().split('T')[0]; }
+function getTodayISO(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${dd}`;
+}
 function formatDateDisplay(isoStr){
-  if(!isoStr) return '';
+  if(!isoStr || !/^\d{4}-\d{2}-\d{2}/.test(isoStr)) return '';
   const d = new Date(isoStr + 'T00:00:00');
+  if(isNaN(d.getTime())) return '';
   return d.toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'});
 }
 function setDateField(isoVal){
+  // Validate — if not ISO format, fall back to today
+  if(!isoVal || !/^\d{4}-\d{2}-\d{2}/.test(isoVal)){
+    isoVal = getTodayISO();
+  }
   globalData.date = isoVal;
   const el = document.getElementById('g-date');
   if(el) el.value = formatDateDisplay(isoVal);
@@ -2043,7 +2054,8 @@ function updateProgress(){
 function syncGlobal(){
   globalData.participant=document.getElementById('g-participant').value;
   globalData.operator=document.getElementById('g-operator').value;
-  globalData.date=document.getElementById('g-date').value;
+  // globalData.date is NOT read from input — it's an ISO string set by setDateField()
+  // The input shows the display-formatted version ("May 7, 2026") which is read-only
   globalData.device=document.getElementById('g-device').value;
   saveProgress();
 }
