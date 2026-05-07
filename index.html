@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Centific Data Collection</title>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -389,6 +390,104 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .divider{height:.5px;background:var(--border);margin:24px 0 20px}
 .hidden{display:none!important}
 
+/* ── OCR camera button on Participant ID field ── */
+.entry-field-with-ocr{position:relative}
+.ocr-camera-btn{
+  position:absolute;right:6px;top:50%;transform:translateY(calc(-50% + 11px));
+  width:30px;height:30px;border-radius:8px;
+  background:rgba(239,67,179,.1);border:.5px solid rgba(239,67,179,.3);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .18s;color:var(--pink);
+  z-index:2;
+}
+.ocr-camera-btn:hover{background:rgba(239,67,179,.2);border-color:var(--pink);transform:translateY(calc(-50% + 11px)) scale(1.05)}
+.ocr-camera-btn:active{transform:translateY(calc(-50% + 11px)) scale(.92)}
+.ocr-camera-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.entry-field-with-ocr input{padding-right:42px}
+
+/* ── OCR Modal ── */
+.ocr-overlay{
+  position:fixed;inset:0;z-index:700;
+  background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.ocr-overlay.hidden{display:none!important}
+.ocr-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:480px;
+  box-shadow:var(--shadow-lg);overflow:hidden;
+  animation:fadeUp .35s cubic-bezier(.34,1.1,.64,1);
+}
+.ocr-header{padding:22px 24px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:.5px solid var(--border)}
+.ocr-title{font-size:18px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.ocr-subtitle{font-size:13px;color:var(--text3);margin-top:3px;font-weight:400;letter-spacing:-0.01em}
+.ocr-close{
+  width:30px;height:30px;border-radius:50%;border:.5px solid var(--border-strong);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;color:var(--text3);font-size:16px;transition:all .15s;
+}
+.ocr-close:hover{background:var(--bg4);color:var(--text)}
+
+.ocr-body{padding:20px 24px 24px;display:flex;flex-direction:column;gap:14px}
+.ocr-camera-input{display:none}
+
+.ocr-pick-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:18px;border-radius:var(--rl);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+.ocr-pick-btn:hover{background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.3)}
+.ocr-pick-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.ocr-preview-wrap{
+  border-radius:var(--rl);overflow:hidden;border:.5px solid var(--border);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  min-height:160px;max-height:280px;position:relative;
+}
+.ocr-preview-img{max-width:100%;max-height:280px;display:block;object-fit:contain}
+
+.ocr-progress{
+  display:flex;align-items:center;gap:10px;
+  padding:14px;background:var(--bg2);border:.5px solid var(--border);
+  border-radius:var(--r);font-size:13px;color:var(--text2);
+}
+.ocr-spinner-sm{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid var(--border-strong);border-top-color:var(--pink);
+  animation:spin .7s linear infinite;flex-shrink:0;
+}
+
+.ocr-result{
+  background:var(--bg2);border:1.5px solid var(--green);border-radius:var(--r);
+  padding:14px 16px;
+}
+.ocr-result-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--green);margin-bottom:6px}
+.ocr-result-value{
+  font-family:'Courier New',monospace;font-size:14px;color:var(--text);
+  word-break:break-all;letter-spacing:0.01em;line-height:1.5;
+}
+.ocr-result.error{border-color:var(--red)}
+.ocr-result.error .ocr-result-label{color:var(--red)}
+
+.ocr-actions{display:flex;gap:10px}
+.ocr-action-btn{
+  flex:1;padding:13px;border-radius:var(--r);
+  font-family:var(--font);font-size:14px;font-weight:500;letter-spacing:-0.01em;
+  cursor:pointer;border:none;transition:all .2s;
+}
+.ocr-action-btn.use{background:var(--green);color:#fff}
+.ocr-action-btn.use:hover{background:#16a34a}
+.ocr-action-btn.retry{background:var(--bg3);color:var(--text2);border:.5px solid var(--border-strong)}
+.ocr-action-btn.retry:hover{background:var(--bg4);color:var(--text)}
+
+.ocr-tip{
+  font-size:12px;color:var(--text3);text-align:center;margin-top:2px;line-height:1.5;
+}
+
+
 /* ── Session Complete Popup ── */
 .session-complete-overlay{
   position:fixed;inset:0;z-index:600;
@@ -397,6 +496,104 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   animation:fadeUp .3s cubic-bezier(.4,0,.2,1);
 }
 .session-complete-overlay.hidden{display:none!important}
+
+/* ── OCR camera button on Participant ID field ── */
+.entry-field-with-ocr{position:relative}
+.ocr-camera-btn{
+  position:absolute;right:6px;top:50%;transform:translateY(calc(-50% + 11px));
+  width:30px;height:30px;border-radius:8px;
+  background:rgba(239,67,179,.1);border:.5px solid rgba(239,67,179,.3);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .18s;color:var(--pink);
+  z-index:2;
+}
+.ocr-camera-btn:hover{background:rgba(239,67,179,.2);border-color:var(--pink);transform:translateY(calc(-50% + 11px)) scale(1.05)}
+.ocr-camera-btn:active{transform:translateY(calc(-50% + 11px)) scale(.92)}
+.ocr-camera-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.entry-field-with-ocr input{padding-right:42px}
+
+/* ── OCR Modal ── */
+.ocr-overlay{
+  position:fixed;inset:0;z-index:700;
+  background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.ocr-overlay.hidden{display:none!important}
+.ocr-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:480px;
+  box-shadow:var(--shadow-lg);overflow:hidden;
+  animation:fadeUp .35s cubic-bezier(.34,1.1,.64,1);
+}
+.ocr-header{padding:22px 24px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:.5px solid var(--border)}
+.ocr-title{font-size:18px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.ocr-subtitle{font-size:13px;color:var(--text3);margin-top:3px;font-weight:400;letter-spacing:-0.01em}
+.ocr-close{
+  width:30px;height:30px;border-radius:50%;border:.5px solid var(--border-strong);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;color:var(--text3);font-size:16px;transition:all .15s;
+}
+.ocr-close:hover{background:var(--bg4);color:var(--text)}
+
+.ocr-body{padding:20px 24px 24px;display:flex;flex-direction:column;gap:14px}
+.ocr-camera-input{display:none}
+
+.ocr-pick-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:18px;border-radius:var(--rl);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+.ocr-pick-btn:hover{background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.3)}
+.ocr-pick-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.ocr-preview-wrap{
+  border-radius:var(--rl);overflow:hidden;border:.5px solid var(--border);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  min-height:160px;max-height:280px;position:relative;
+}
+.ocr-preview-img{max-width:100%;max-height:280px;display:block;object-fit:contain}
+
+.ocr-progress{
+  display:flex;align-items:center;gap:10px;
+  padding:14px;background:var(--bg2);border:.5px solid var(--border);
+  border-radius:var(--r);font-size:13px;color:var(--text2);
+}
+.ocr-spinner-sm{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid var(--border-strong);border-top-color:var(--pink);
+  animation:spin .7s linear infinite;flex-shrink:0;
+}
+
+.ocr-result{
+  background:var(--bg2);border:1.5px solid var(--green);border-radius:var(--r);
+  padding:14px 16px;
+}
+.ocr-result-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--green);margin-bottom:6px}
+.ocr-result-value{
+  font-family:'Courier New',monospace;font-size:14px;color:var(--text);
+  word-break:break-all;letter-spacing:0.01em;line-height:1.5;
+}
+.ocr-result.error{border-color:var(--red)}
+.ocr-result.error .ocr-result-label{color:var(--red)}
+
+.ocr-actions{display:flex;gap:10px}
+.ocr-action-btn{
+  flex:1;padding:13px;border-radius:var(--r);
+  font-family:var(--font);font-size:14px;font-weight:500;letter-spacing:-0.01em;
+  cursor:pointer;border:none;transition:all .2s;
+}
+.ocr-action-btn.use{background:var(--green);color:#fff}
+.ocr-action-btn.use:hover{background:#16a34a}
+.ocr-action-btn.retry{background:var(--bg3);color:var(--text2);border:.5px solid var(--border-strong)}
+.ocr-action-btn.retry:hover{background:var(--bg4);color:var(--text)}
+
+.ocr-tip{
+  font-size:12px;color:var(--text3);text-align:center;margin-top:2px;line-height:1.5;
+}
+
 .session-complete-modal{
   background:var(--card-bg);border:.5px solid var(--border-strong);
   border-radius:24px;width:100%;max-width:400px;
@@ -445,6 +642,104 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 }
 .prereq-overlay.hidden{display:none!important}
 
+/* ── OCR camera button on Participant ID field ── */
+.entry-field-with-ocr{position:relative}
+.ocr-camera-btn{
+  position:absolute;right:6px;top:50%;transform:translateY(calc(-50% + 11px));
+  width:30px;height:30px;border-radius:8px;
+  background:rgba(239,67,179,.1);border:.5px solid rgba(239,67,179,.3);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .18s;color:var(--pink);
+  z-index:2;
+}
+.ocr-camera-btn:hover{background:rgba(239,67,179,.2);border-color:var(--pink);transform:translateY(calc(-50% + 11px)) scale(1.05)}
+.ocr-camera-btn:active{transform:translateY(calc(-50% + 11px)) scale(.92)}
+.ocr-camera-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.entry-field-with-ocr input{padding-right:42px}
+
+/* ── OCR Modal ── */
+.ocr-overlay{
+  position:fixed;inset:0;z-index:700;
+  background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.ocr-overlay.hidden{display:none!important}
+.ocr-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:480px;
+  box-shadow:var(--shadow-lg);overflow:hidden;
+  animation:fadeUp .35s cubic-bezier(.34,1.1,.64,1);
+}
+.ocr-header{padding:22px 24px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:.5px solid var(--border)}
+.ocr-title{font-size:18px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.ocr-subtitle{font-size:13px;color:var(--text3);margin-top:3px;font-weight:400;letter-spacing:-0.01em}
+.ocr-close{
+  width:30px;height:30px;border-radius:50%;border:.5px solid var(--border-strong);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;color:var(--text3);font-size:16px;transition:all .15s;
+}
+.ocr-close:hover{background:var(--bg4);color:var(--text)}
+
+.ocr-body{padding:20px 24px 24px;display:flex;flex-direction:column;gap:14px}
+.ocr-camera-input{display:none}
+
+.ocr-pick-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:18px;border-radius:var(--rl);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+.ocr-pick-btn:hover{background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.3)}
+.ocr-pick-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.ocr-preview-wrap{
+  border-radius:var(--rl);overflow:hidden;border:.5px solid var(--border);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  min-height:160px;max-height:280px;position:relative;
+}
+.ocr-preview-img{max-width:100%;max-height:280px;display:block;object-fit:contain}
+
+.ocr-progress{
+  display:flex;align-items:center;gap:10px;
+  padding:14px;background:var(--bg2);border:.5px solid var(--border);
+  border-radius:var(--r);font-size:13px;color:var(--text2);
+}
+.ocr-spinner-sm{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid var(--border-strong);border-top-color:var(--pink);
+  animation:spin .7s linear infinite;flex-shrink:0;
+}
+
+.ocr-result{
+  background:var(--bg2);border:1.5px solid var(--green);border-radius:var(--r);
+  padding:14px 16px;
+}
+.ocr-result-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--green);margin-bottom:6px}
+.ocr-result-value{
+  font-family:'Courier New',monospace;font-size:14px;color:var(--text);
+  word-break:break-all;letter-spacing:0.01em;line-height:1.5;
+}
+.ocr-result.error{border-color:var(--red)}
+.ocr-result.error .ocr-result-label{color:var(--red)}
+
+.ocr-actions{display:flex;gap:10px}
+.ocr-action-btn{
+  flex:1;padding:13px;border-radius:var(--r);
+  font-family:var(--font);font-size:14px;font-weight:500;letter-spacing:-0.01em;
+  cursor:pointer;border:none;transition:all .2s;
+}
+.ocr-action-btn.use{background:var(--green);color:#fff}
+.ocr-action-btn.use:hover{background:#16a34a}
+.ocr-action-btn.retry{background:var(--bg3);color:var(--text2);border:.5px solid var(--border-strong)}
+.ocr-action-btn.retry:hover{background:var(--bg4);color:var(--text)}
+
+.ocr-tip{
+  font-size:12px;color:var(--text3);text-align:center;margin-top:2px;line-height:1.5;
+}
+
+
 /* ── Session Complete Popup ── */
 .session-complete-overlay{
   position:fixed;inset:0;z-index:600;
@@ -453,6 +748,104 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   animation:fadeUp .3s cubic-bezier(.4,0,.2,1);
 }
 .session-complete-overlay.hidden{display:none!important}
+
+/* ── OCR camera button on Participant ID field ── */
+.entry-field-with-ocr{position:relative}
+.ocr-camera-btn{
+  position:absolute;right:6px;top:50%;transform:translateY(calc(-50% + 11px));
+  width:30px;height:30px;border-radius:8px;
+  background:rgba(239,67,179,.1);border:.5px solid rgba(239,67,179,.3);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .18s;color:var(--pink);
+  z-index:2;
+}
+.ocr-camera-btn:hover{background:rgba(239,67,179,.2);border-color:var(--pink);transform:translateY(calc(-50% + 11px)) scale(1.05)}
+.ocr-camera-btn:active{transform:translateY(calc(-50% + 11px)) scale(.92)}
+.ocr-camera-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.entry-field-with-ocr input{padding-right:42px}
+
+/* ── OCR Modal ── */
+.ocr-overlay{
+  position:fixed;inset:0;z-index:700;
+  background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.ocr-overlay.hidden{display:none!important}
+.ocr-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:480px;
+  box-shadow:var(--shadow-lg);overflow:hidden;
+  animation:fadeUp .35s cubic-bezier(.34,1.1,.64,1);
+}
+.ocr-header{padding:22px 24px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:.5px solid var(--border)}
+.ocr-title{font-size:18px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.ocr-subtitle{font-size:13px;color:var(--text3);margin-top:3px;font-weight:400;letter-spacing:-0.01em}
+.ocr-close{
+  width:30px;height:30px;border-radius:50%;border:.5px solid var(--border-strong);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;color:var(--text3);font-size:16px;transition:all .15s;
+}
+.ocr-close:hover{background:var(--bg4);color:var(--text)}
+
+.ocr-body{padding:20px 24px 24px;display:flex;flex-direction:column;gap:14px}
+.ocr-camera-input{display:none}
+
+.ocr-pick-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:18px;border-radius:var(--rl);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+.ocr-pick-btn:hover{background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.3)}
+.ocr-pick-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.ocr-preview-wrap{
+  border-radius:var(--rl);overflow:hidden;border:.5px solid var(--border);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  min-height:160px;max-height:280px;position:relative;
+}
+.ocr-preview-img{max-width:100%;max-height:280px;display:block;object-fit:contain}
+
+.ocr-progress{
+  display:flex;align-items:center;gap:10px;
+  padding:14px;background:var(--bg2);border:.5px solid var(--border);
+  border-radius:var(--r);font-size:13px;color:var(--text2);
+}
+.ocr-spinner-sm{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid var(--border-strong);border-top-color:var(--pink);
+  animation:spin .7s linear infinite;flex-shrink:0;
+}
+
+.ocr-result{
+  background:var(--bg2);border:1.5px solid var(--green);border-radius:var(--r);
+  padding:14px 16px;
+}
+.ocr-result-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--green);margin-bottom:6px}
+.ocr-result-value{
+  font-family:'Courier New',monospace;font-size:14px;color:var(--text);
+  word-break:break-all;letter-spacing:0.01em;line-height:1.5;
+}
+.ocr-result.error{border-color:var(--red)}
+.ocr-result.error .ocr-result-label{color:var(--red)}
+
+.ocr-actions{display:flex;gap:10px}
+.ocr-action-btn{
+  flex:1;padding:13px;border-radius:var(--r);
+  font-family:var(--font);font-size:14px;font-weight:500;letter-spacing:-0.01em;
+  cursor:pointer;border:none;transition:all .2s;
+}
+.ocr-action-btn.use{background:var(--green);color:#fff}
+.ocr-action-btn.use:hover{background:#16a34a}
+.ocr-action-btn.retry{background:var(--bg3);color:var(--text2);border:.5px solid var(--border-strong)}
+.ocr-action-btn.retry:hover{background:var(--bg4);color:var(--text)}
+
+.ocr-tip{
+  font-size:12px;color:var(--text3);text-align:center;margin-top:2px;line-height:1.5;
+}
+
 .session-complete-modal{
   background:var(--card-bg);border:.5px solid var(--border-strong);
   border-radius:24px;width:100%;max-width:400px;
@@ -823,6 +1216,104 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 #login-screen.visible{display:flex}
 #login-screen.hidden{display:none!important}
 
+/* ── OCR camera button on Participant ID field ── */
+.entry-field-with-ocr{position:relative}
+.ocr-camera-btn{
+  position:absolute;right:6px;top:50%;transform:translateY(calc(-50% + 11px));
+  width:30px;height:30px;border-radius:8px;
+  background:rgba(239,67,179,.1);border:.5px solid rgba(239,67,179,.3);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .18s;color:var(--pink);
+  z-index:2;
+}
+.ocr-camera-btn:hover{background:rgba(239,67,179,.2);border-color:var(--pink);transform:translateY(calc(-50% + 11px)) scale(1.05)}
+.ocr-camera-btn:active{transform:translateY(calc(-50% + 11px)) scale(.92)}
+.ocr-camera-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.entry-field-with-ocr input{padding-right:42px}
+
+/* ── OCR Modal ── */
+.ocr-overlay{
+  position:fixed;inset:0;z-index:700;
+  background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.ocr-overlay.hidden{display:none!important}
+.ocr-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:480px;
+  box-shadow:var(--shadow-lg);overflow:hidden;
+  animation:fadeUp .35s cubic-bezier(.34,1.1,.64,1);
+}
+.ocr-header{padding:22px 24px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:.5px solid var(--border)}
+.ocr-title{font-size:18px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.ocr-subtitle{font-size:13px;color:var(--text3);margin-top:3px;font-weight:400;letter-spacing:-0.01em}
+.ocr-close{
+  width:30px;height:30px;border-radius:50%;border:.5px solid var(--border-strong);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;color:var(--text3);font-size:16px;transition:all .15s;
+}
+.ocr-close:hover{background:var(--bg4);color:var(--text)}
+
+.ocr-body{padding:20px 24px 24px;display:flex;flex-direction:column;gap:14px}
+.ocr-camera-input{display:none}
+
+.ocr-pick-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:18px;border-radius:var(--rl);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+.ocr-pick-btn:hover{background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.3)}
+.ocr-pick-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.ocr-preview-wrap{
+  border-radius:var(--rl);overflow:hidden;border:.5px solid var(--border);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  min-height:160px;max-height:280px;position:relative;
+}
+.ocr-preview-img{max-width:100%;max-height:280px;display:block;object-fit:contain}
+
+.ocr-progress{
+  display:flex;align-items:center;gap:10px;
+  padding:14px;background:var(--bg2);border:.5px solid var(--border);
+  border-radius:var(--r);font-size:13px;color:var(--text2);
+}
+.ocr-spinner-sm{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid var(--border-strong);border-top-color:var(--pink);
+  animation:spin .7s linear infinite;flex-shrink:0;
+}
+
+.ocr-result{
+  background:var(--bg2);border:1.5px solid var(--green);border-radius:var(--r);
+  padding:14px 16px;
+}
+.ocr-result-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--green);margin-bottom:6px}
+.ocr-result-value{
+  font-family:'Courier New',monospace;font-size:14px;color:var(--text);
+  word-break:break-all;letter-spacing:0.01em;line-height:1.5;
+}
+.ocr-result.error{border-color:var(--red)}
+.ocr-result.error .ocr-result-label{color:var(--red)}
+
+.ocr-actions{display:flex;gap:10px}
+.ocr-action-btn{
+  flex:1;padding:13px;border-radius:var(--r);
+  font-family:var(--font);font-size:14px;font-weight:500;letter-spacing:-0.01em;
+  cursor:pointer;border:none;transition:all .2s;
+}
+.ocr-action-btn.use{background:var(--green);color:#fff}
+.ocr-action-btn.use:hover{background:#16a34a}
+.ocr-action-btn.retry{background:var(--bg3);color:var(--text2);border:.5px solid var(--border-strong)}
+.ocr-action-btn.retry:hover{background:var(--bg4);color:var(--text)}
+
+.ocr-tip{
+  font-size:12px;color:var(--text3);text-align:center;margin-top:2px;line-height:1.5;
+}
+
+
 /* ── Session Complete Popup ── */
 .session-complete-overlay{
   position:fixed;inset:0;z-index:600;
@@ -831,6 +1322,104 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   animation:fadeUp .3s cubic-bezier(.4,0,.2,1);
 }
 .session-complete-overlay.hidden{display:none!important}
+
+/* ── OCR camera button on Participant ID field ── */
+.entry-field-with-ocr{position:relative}
+.ocr-camera-btn{
+  position:absolute;right:6px;top:50%;transform:translateY(calc(-50% + 11px));
+  width:30px;height:30px;border-radius:8px;
+  background:rgba(239,67,179,.1);border:.5px solid rgba(239,67,179,.3);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .18s;color:var(--pink);
+  z-index:2;
+}
+.ocr-camera-btn:hover{background:rgba(239,67,179,.2);border-color:var(--pink);transform:translateY(calc(-50% + 11px)) scale(1.05)}
+.ocr-camera-btn:active{transform:translateY(calc(-50% + 11px)) scale(.92)}
+.ocr-camera-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.entry-field-with-ocr input{padding-right:42px}
+
+/* ── OCR Modal ── */
+.ocr-overlay{
+  position:fixed;inset:0;z-index:700;
+  background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.ocr-overlay.hidden{display:none!important}
+.ocr-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:480px;
+  box-shadow:var(--shadow-lg);overflow:hidden;
+  animation:fadeUp .35s cubic-bezier(.34,1.1,.64,1);
+}
+.ocr-header{padding:22px 24px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:.5px solid var(--border)}
+.ocr-title{font-size:18px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.ocr-subtitle{font-size:13px;color:var(--text3);margin-top:3px;font-weight:400;letter-spacing:-0.01em}
+.ocr-close{
+  width:30px;height:30px;border-radius:50%;border:.5px solid var(--border-strong);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;color:var(--text3);font-size:16px;transition:all .15s;
+}
+.ocr-close:hover{background:var(--bg4);color:var(--text)}
+
+.ocr-body{padding:20px 24px 24px;display:flex;flex-direction:column;gap:14px}
+.ocr-camera-input{display:none}
+
+.ocr-pick-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:18px;border-radius:var(--rl);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+.ocr-pick-btn:hover{background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.3)}
+.ocr-pick-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.ocr-preview-wrap{
+  border-radius:var(--rl);overflow:hidden;border:.5px solid var(--border);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  min-height:160px;max-height:280px;position:relative;
+}
+.ocr-preview-img{max-width:100%;max-height:280px;display:block;object-fit:contain}
+
+.ocr-progress{
+  display:flex;align-items:center;gap:10px;
+  padding:14px;background:var(--bg2);border:.5px solid var(--border);
+  border-radius:var(--r);font-size:13px;color:var(--text2);
+}
+.ocr-spinner-sm{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid var(--border-strong);border-top-color:var(--pink);
+  animation:spin .7s linear infinite;flex-shrink:0;
+}
+
+.ocr-result{
+  background:var(--bg2);border:1.5px solid var(--green);border-radius:var(--r);
+  padding:14px 16px;
+}
+.ocr-result-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--green);margin-bottom:6px}
+.ocr-result-value{
+  font-family:'Courier New',monospace;font-size:14px;color:var(--text);
+  word-break:break-all;letter-spacing:0.01em;line-height:1.5;
+}
+.ocr-result.error{border-color:var(--red)}
+.ocr-result.error .ocr-result-label{color:var(--red)}
+
+.ocr-actions{display:flex;gap:10px}
+.ocr-action-btn{
+  flex:1;padding:13px;border-radius:var(--r);
+  font-family:var(--font);font-size:14px;font-weight:500;letter-spacing:-0.01em;
+  cursor:pointer;border:none;transition:all .2s;
+}
+.ocr-action-btn.use{background:var(--green);color:#fff}
+.ocr-action-btn.use:hover{background:#16a34a}
+.ocr-action-btn.retry{background:var(--bg3);color:var(--text2);border:.5px solid var(--border-strong)}
+.ocr-action-btn.retry:hover{background:var(--bg4);color:var(--text)}
+
+.ocr-tip{
+  font-size:12px;color:var(--text3);text-align:center;margin-top:2px;line-height:1.5;
+}
+
 .session-complete-modal{
   background:var(--card-bg);border:.5px solid var(--border-strong);
   border-radius:24px;width:100%;max-width:400px;
@@ -879,6 +1468,104 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 }
 .prereq-overlay.hidden{display:none!important}
 
+/* ── OCR camera button on Participant ID field ── */
+.entry-field-with-ocr{position:relative}
+.ocr-camera-btn{
+  position:absolute;right:6px;top:50%;transform:translateY(calc(-50% + 11px));
+  width:30px;height:30px;border-radius:8px;
+  background:rgba(239,67,179,.1);border:.5px solid rgba(239,67,179,.3);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .18s;color:var(--pink);
+  z-index:2;
+}
+.ocr-camera-btn:hover{background:rgba(239,67,179,.2);border-color:var(--pink);transform:translateY(calc(-50% + 11px)) scale(1.05)}
+.ocr-camera-btn:active{transform:translateY(calc(-50% + 11px)) scale(.92)}
+.ocr-camera-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.entry-field-with-ocr input{padding-right:42px}
+
+/* ── OCR Modal ── */
+.ocr-overlay{
+  position:fixed;inset:0;z-index:700;
+  background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.ocr-overlay.hidden{display:none!important}
+.ocr-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:480px;
+  box-shadow:var(--shadow-lg);overflow:hidden;
+  animation:fadeUp .35s cubic-bezier(.34,1.1,.64,1);
+}
+.ocr-header{padding:22px 24px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:.5px solid var(--border)}
+.ocr-title{font-size:18px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.ocr-subtitle{font-size:13px;color:var(--text3);margin-top:3px;font-weight:400;letter-spacing:-0.01em}
+.ocr-close{
+  width:30px;height:30px;border-radius:50%;border:.5px solid var(--border-strong);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;color:var(--text3);font-size:16px;transition:all .15s;
+}
+.ocr-close:hover{background:var(--bg4);color:var(--text)}
+
+.ocr-body{padding:20px 24px 24px;display:flex;flex-direction:column;gap:14px}
+.ocr-camera-input{display:none}
+
+.ocr-pick-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:18px;border-radius:var(--rl);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+.ocr-pick-btn:hover{background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.3)}
+.ocr-pick-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.ocr-preview-wrap{
+  border-radius:var(--rl);overflow:hidden;border:.5px solid var(--border);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  min-height:160px;max-height:280px;position:relative;
+}
+.ocr-preview-img{max-width:100%;max-height:280px;display:block;object-fit:contain}
+
+.ocr-progress{
+  display:flex;align-items:center;gap:10px;
+  padding:14px;background:var(--bg2);border:.5px solid var(--border);
+  border-radius:var(--r);font-size:13px;color:var(--text2);
+}
+.ocr-spinner-sm{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid var(--border-strong);border-top-color:var(--pink);
+  animation:spin .7s linear infinite;flex-shrink:0;
+}
+
+.ocr-result{
+  background:var(--bg2);border:1.5px solid var(--green);border-radius:var(--r);
+  padding:14px 16px;
+}
+.ocr-result-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--green);margin-bottom:6px}
+.ocr-result-value{
+  font-family:'Courier New',monospace;font-size:14px;color:var(--text);
+  word-break:break-all;letter-spacing:0.01em;line-height:1.5;
+}
+.ocr-result.error{border-color:var(--red)}
+.ocr-result.error .ocr-result-label{color:var(--red)}
+
+.ocr-actions{display:flex;gap:10px}
+.ocr-action-btn{
+  flex:1;padding:13px;border-radius:var(--r);
+  font-family:var(--font);font-size:14px;font-weight:500;letter-spacing:-0.01em;
+  cursor:pointer;border:none;transition:all .2s;
+}
+.ocr-action-btn.use{background:var(--green);color:#fff}
+.ocr-action-btn.use:hover{background:#16a34a}
+.ocr-action-btn.retry{background:var(--bg3);color:var(--text2);border:.5px solid var(--border-strong)}
+.ocr-action-btn.retry:hover{background:var(--bg4);color:var(--text)}
+
+.ocr-tip{
+  font-size:12px;color:var(--text3);text-align:center;margin-top:2px;line-height:1.5;
+}
+
+
 /* ── Session Complete Popup ── */
 .session-complete-overlay{
   position:fixed;inset:0;z-index:600;
@@ -887,6 +1574,104 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   animation:fadeUp .3s cubic-bezier(.4,0,.2,1);
 }
 .session-complete-overlay.hidden{display:none!important}
+
+/* ── OCR camera button on Participant ID field ── */
+.entry-field-with-ocr{position:relative}
+.ocr-camera-btn{
+  position:absolute;right:6px;top:50%;transform:translateY(calc(-50% + 11px));
+  width:30px;height:30px;border-radius:8px;
+  background:rgba(239,67,179,.1);border:.5px solid rgba(239,67,179,.3);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .18s;color:var(--pink);
+  z-index:2;
+}
+.ocr-camera-btn:hover{background:rgba(239,67,179,.2);border-color:var(--pink);transform:translateY(calc(-50% + 11px)) scale(1.05)}
+.ocr-camera-btn:active{transform:translateY(calc(-50% + 11px)) scale(.92)}
+.ocr-camera-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.entry-field-with-ocr input{padding-right:42px}
+
+/* ── OCR Modal ── */
+.ocr-overlay{
+  position:fixed;inset:0;z-index:700;
+  background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.ocr-overlay.hidden{display:none!important}
+.ocr-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:480px;
+  box-shadow:var(--shadow-lg);overflow:hidden;
+  animation:fadeUp .35s cubic-bezier(.34,1.1,.64,1);
+}
+.ocr-header{padding:22px 24px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:.5px solid var(--border)}
+.ocr-title{font-size:18px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.ocr-subtitle{font-size:13px;color:var(--text3);margin-top:3px;font-weight:400;letter-spacing:-0.01em}
+.ocr-close{
+  width:30px;height:30px;border-radius:50%;border:.5px solid var(--border-strong);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;color:var(--text3);font-size:16px;transition:all .15s;
+}
+.ocr-close:hover{background:var(--bg4);color:var(--text)}
+
+.ocr-body{padding:20px 24px 24px;display:flex;flex-direction:column;gap:14px}
+.ocr-camera-input{display:none}
+
+.ocr-pick-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:18px;border-radius:var(--rl);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+.ocr-pick-btn:hover{background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.3)}
+.ocr-pick-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.ocr-preview-wrap{
+  border-radius:var(--rl);overflow:hidden;border:.5px solid var(--border);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  min-height:160px;max-height:280px;position:relative;
+}
+.ocr-preview-img{max-width:100%;max-height:280px;display:block;object-fit:contain}
+
+.ocr-progress{
+  display:flex;align-items:center;gap:10px;
+  padding:14px;background:var(--bg2);border:.5px solid var(--border);
+  border-radius:var(--r);font-size:13px;color:var(--text2);
+}
+.ocr-spinner-sm{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid var(--border-strong);border-top-color:var(--pink);
+  animation:spin .7s linear infinite;flex-shrink:0;
+}
+
+.ocr-result{
+  background:var(--bg2);border:1.5px solid var(--green);border-radius:var(--r);
+  padding:14px 16px;
+}
+.ocr-result-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--green);margin-bottom:6px}
+.ocr-result-value{
+  font-family:'Courier New',monospace;font-size:14px;color:var(--text);
+  word-break:break-all;letter-spacing:0.01em;line-height:1.5;
+}
+.ocr-result.error{border-color:var(--red)}
+.ocr-result.error .ocr-result-label{color:var(--red)}
+
+.ocr-actions{display:flex;gap:10px}
+.ocr-action-btn{
+  flex:1;padding:13px;border-radius:var(--r);
+  font-family:var(--font);font-size:14px;font-weight:500;letter-spacing:-0.01em;
+  cursor:pointer;border:none;transition:all .2s;
+}
+.ocr-action-btn.use{background:var(--green);color:#fff}
+.ocr-action-btn.use:hover{background:#16a34a}
+.ocr-action-btn.retry{background:var(--bg3);color:var(--text2);border:.5px solid var(--border-strong)}
+.ocr-action-btn.retry:hover{background:var(--bg4);color:var(--text)}
+
+.ocr-tip{
+  font-size:12px;color:var(--text3);text-align:center;margin-top:2px;line-height:1.5;
+}
+
 .session-complete-modal{
   background:var(--card-bg);border:.5px solid var(--border-strong);
   border-radius:24px;width:100%;max-width:400px;
@@ -1494,9 +2279,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
     <!-- Session fields -->
     <div class="entry-bar">
-      <div class="entry-field">
+      <div class="entry-field entry-field-with-ocr">
         <div class="entry-label">Participant ID <span style="color:var(--red)">*</span></div>
-        <input type="text" id="g-participant" class="entry-input" placeholder="e.g. P-001" oninput="syncGlobal();this.style.borderColor=''"/>
+        <input type="text" id="g-participant" class="entry-input" placeholder="Tap 📷 to scan" oninput="syncGlobal();this.style.borderColor=''"/>
+        <button type="button" class="ocr-camera-btn" onclick="openOCR()" title="Scan Participant ID from screen">
+          <svg viewBox="0 0 24 24"><path d="M5 7h2l1.5-2h7L17 7h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"/><circle cx="12" cy="13" r="3.5"/></svg>
+        </button>
       </div>
       <div class="entry-field">
         <div class="entry-label">Moderator <span style="color:var(--red)">*</span></div>
@@ -3992,6 +4780,144 @@ function startNewSession(){
     document.getElementById('main-panel').classList.add('hidden');
   }
 }
+
+
+// ══════════════════════════════════════════════════════════
+// ── OCR — Participant ID scanner via Tesseract.js ─────────
+// ══════════════════════════════════════════════════════════
+
+let ocrDetectedId = '';
+
+function openOCR(){
+  resetOCR();
+  document.getElementById('ocr-overlay').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeOCR(){
+  document.getElementById('ocr-overlay').classList.add('hidden');
+  document.body.style.overflow = '';
+  resetOCR();
+}
+
+function resetOCR(){
+  ocrDetectedId = '';
+  document.getElementById('ocr-camera-input').value = '';
+  const previewWrap = document.getElementById('ocr-preview-wrap');
+  const progress    = document.getElementById('ocr-progress');
+  const resultWrap  = document.getElementById('ocr-result-wrap');
+  const actions     = document.getElementById('ocr-actions');
+  const pickBtn     = document.getElementById('ocr-pick-btn');
+  previewWrap.style.display = 'none';
+  progress.style.display    = 'none';
+  resultWrap.style.display  = 'none';
+  actions.style.display     = 'none';
+  pickBtn.style.display     = 'flex';
+}
+
+async function onOCRImageSelected(event){
+  const file = event.target.files[0];
+  if(!file) return;
+
+  // Show preview
+  const img = document.getElementById('ocr-preview-img');
+  const previewWrap = document.getElementById('ocr-preview-wrap');
+  const progress    = document.getElementById('ocr-progress');
+  const progressText= document.getElementById('ocr-progress-text');
+  const resultWrap  = document.getElementById('ocr-result-wrap');
+  const result      = document.getElementById('ocr-result');
+  const resultLabel = document.getElementById('ocr-result-label');
+  const resultValue = document.getElementById('ocr-result-value');
+  const actions     = document.getElementById('ocr-actions');
+  const pickBtn     = document.getElementById('ocr-pick-btn');
+  const useBtn      = document.getElementById('ocr-use-btn');
+
+  pickBtn.style.display = 'none';
+  img.src = URL.createObjectURL(file);
+  previewWrap.style.display = 'flex';
+  progress.style.display = 'flex';
+  progressText.textContent = 'Loading OCR engine…';
+
+  if(typeof Tesseract === 'undefined'){
+    progress.style.display = 'none';
+    resultWrap.style.display = 'block';
+    actions.style.display = 'flex';
+    result.classList.add('error');
+    resultLabel.textContent = 'Error';
+    resultValue.textContent = 'OCR library failed to load. Check your internet connection.';
+    useBtn.disabled = true;
+    return;
+  }
+
+  try {
+    progressText.textContent = 'Reading text from image…';
+    const { data } = await Tesseract.recognize(file, 'eng', {
+      logger: m => {
+        if(m.status === 'recognizing text' && m.progress){
+          progressText.textContent = 'Reading text… ' + Math.round(m.progress * 100) + '%';
+        }
+      },
+      tessedit_char_whitelist: '0123456789abcdefABCDEF-'
+    });
+
+    const rawText = (data.text || '').toLowerCase();
+    console.log('[OCR] Raw text:', rawText);
+
+    // Match UUID pattern: 8-4-4-4-12 hex chars
+    const uuidRegex = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
+    const match = rawText.match(uuidRegex);
+
+    progress.style.display = 'none';
+    resultWrap.style.display = 'block';
+    actions.style.display = 'flex';
+
+    if(match){
+      ocrDetectedId = match[0];
+      result.classList.remove('error');
+      resultLabel.textContent = '✓ Detected Participant ID';
+      resultValue.textContent = ocrDetectedId;
+      useBtn.disabled = false;
+    } else {
+      // Try a more lenient match — find any long hex-and-dash sequence
+      const lenientMatch = rawText.match(/[0-9a-f]{6,}[-0-9a-f]{20,}/);
+      if(lenientMatch){
+        ocrDetectedId = lenientMatch[0];
+        result.classList.remove('error');
+        resultLabel.textContent = '⚠ Possible match (verify carefully)';
+        resultValue.textContent = ocrDetectedId;
+        useBtn.disabled = false;
+      } else {
+        result.classList.add('error');
+        resultLabel.textContent = 'No ID detected';
+        const cleaned = rawText.replace(/\s+/g,' ').trim().substring(0,200);
+        resultValue.textContent = cleaned ? ('Detected text: ' + cleaned) : 'Image was unclear. Please try again with better lighting and a sharper photo.';
+        useBtn.disabled = true;
+        ocrDetectedId = '';
+      }
+    }
+  } catch(err){
+    console.error('[OCR] Error:', err);
+    progress.style.display = 'none';
+    resultWrap.style.display = 'block';
+    actions.style.display = 'flex';
+    result.classList.add('error');
+    resultLabel.textContent = 'Error';
+    resultValue.textContent = err.message || 'OCR processing failed. Please try again.';
+    useBtn.disabled = true;
+  }
+}
+
+function useOCRResult(){
+  if(!ocrDetectedId) return;
+  const input = document.getElementById('g-participant');
+  if(input){
+    input.value = ocrDetectedId;
+    input.style.borderColor = '';
+    if(typeof syncGlobal === 'function') syncGlobal();
+  }
+  closeOCR();
+  if(typeof showToast === 'function') showToast('Participant ID scanned ✓');
+}
 </script>
 
 <!-- ── Admin Landing ── -->
@@ -4155,6 +5081,50 @@ function startNewSession(){
       <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><polyline points="6,5 6,11 11,8"/></svg>
       Start a New Session
     </button>
+  </div>
+</div>
+
+<!-- ── OCR Camera Modal ── -->
+<div class="ocr-overlay hidden" id="ocr-overlay" onclick="if(event.target===this)closeOCR()">
+  <div class="ocr-modal">
+    <div class="ocr-header">
+      <div>
+        <div class="ocr-title">Scan Participant ID</div>
+        <div class="ocr-subtitle">Take a clear photo of the ID on the screen</div>
+      </div>
+      <div class="ocr-close" onclick="closeOCR()">✕</div>
+    </div>
+    <div class="ocr-body">
+      <input type="file" accept="image/*" capture="environment" id="ocr-camera-input" class="ocr-camera-input" onchange="onOCRImageSelected(event)"/>
+
+      <button class="ocr-pick-btn" id="ocr-pick-btn" onclick="document.getElementById('ocr-camera-input').click()">
+        <svg viewBox="0 0 24 24"><path d="M5 7h2l1.5-2h7L17 7h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"/><circle cx="12" cy="13" r="3.5"/></svg>
+        Take Photo
+      </button>
+
+      <div class="ocr-tip">Hold your device steady and capture the ID clearly. Avoid glare and shadows for best results.</div>
+
+      <div id="ocr-preview-wrap" class="ocr-preview-wrap hidden" style="display:none">
+        <img id="ocr-preview-img" class="ocr-preview-img" alt=""/>
+      </div>
+
+      <div id="ocr-progress" class="ocr-progress hidden" style="display:none">
+        <div class="ocr-spinner-sm"></div>
+        <span id="ocr-progress-text">Reading text from image…</span>
+      </div>
+
+      <div id="ocr-result-wrap" class="hidden" style="display:none">
+        <div id="ocr-result" class="ocr-result">
+          <div class="ocr-result-label" id="ocr-result-label">Detected ID</div>
+          <div class="ocr-result-value" id="ocr-result-value">—</div>
+        </div>
+      </div>
+
+      <div id="ocr-actions" class="ocr-actions hidden" style="display:none">
+        <button class="ocr-action-btn retry" onclick="resetOCR()">Try Again</button>
+        <button class="ocr-action-btn use" id="ocr-use-btn" onclick="useOCRResult()">Use This ID</button>
+      </div>
+    </div>
   </div>
 </div>
 
