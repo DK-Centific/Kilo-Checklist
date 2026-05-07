@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Centific Data Collection</title>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -389,6 +389,123 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
 .divider{height:.5px;background:var(--border);margin:24px 0 20px}
 .hidden{display:none!important}
+
+/* ── Begin Session Button ── */
+.begin-session-btn{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:rgba(239,67,179,.08);color:var(--pink);
+  border:1.5px solid rgba(239,67,179,.3);border-radius:var(--rl);
+  padding:12px 24px;cursor:pointer;margin-top:4px;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+.begin-session-btn:hover{background:rgba(239,67,179,.15);border-color:var(--pink);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.18)}
+.begin-session-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Prerequisite Modal ── */
+.prereq-overlay{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.prereq-overlay.hidden{display:none!important}
+.prereq-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:520px;max-height:88vh;
+  overflow-y:auto;box-shadow:var(--shadow-lg);
+  animation:fadeUp .35s cubic-bezier(.34,1.1,.64,1);
+}
+.prereq-header{
+  padding:24px 26px 16px;border-bottom:.5px solid var(--border);
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  position:sticky;top:0;background:var(--card-bg);z-index:2;
+}
+.prereq-title{font-size:20px;font-weight:600;letter-spacing:-0.03em;color:var(--text)}
+.prereq-subtitle{font-size:13px;color:var(--text3);margin-top:3px;font-weight:400}
+.prereq-close{
+  width:30px;height:30px;border-radius:50%;border:.5px solid var(--border-strong);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;transition:all .15s;color:var(--text3);font-size:16px;
+}
+.prereq-close:hover{background:var(--bg4);color:var(--text)}
+.prereq-body{padding:20px 26px 24px;display:flex;flex-direction:column;gap:20px}
+.prereq-section{}
+.prereq-section-title{
+  display:flex;align-items:center;gap:10px;
+  font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--text);margin-bottom:12px;cursor:pointer;padding:10px 14px;
+  background:var(--bg2);border:.5px solid var(--border);border-radius:var(--r);
+  transition:all .18s;
+}
+.prereq-section-title:hover{border-color:var(--border-strong);background:var(--bg3)}
+.prereq-section-title .prereq-check-wrap{
+  width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border-strong);
+  background:var(--bg);display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:all .22s cubic-bezier(.34,1.2,.64,1);
+}
+.prereq-section-title.checked .prereq-check-wrap{background:var(--green);border-color:var(--green)}
+.prereq-section-title .prereq-check-wrap svg{width:10px;height:10px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity .15s}
+.prereq-section-title.checked .prereq-check-wrap svg{opacity:1}
+.prereq-section-title span{flex:1}
+.prereq-items{display:flex;flex-direction:column;gap:7px;padding:4px 2px 2px}
+.prereq-item{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:13px;color:var(--text2);line-height:1.5;padding:8px 12px;
+  background:var(--bg2);border:.5px solid var(--border);border-radius:var(--r);
+}
+.prereq-item-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--pink);
+  flex-shrink:0;margin-top:6px;
+}
+.prereq-confirm-wrap{
+  padding:0 26px 24px;
+  animation:fadeUp .3s cubic-bezier(.34,1.1,.64,1);
+}
+.prereq-confirm-btn{
+  width:100%;padding:15px;border-radius:var(--r);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.prereq-confirm-btn:hover{background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.3)}
+.prereq-confirm-btn:active{transform:scale(.98)}
+
+/* ── Session Complete Popup ── */
+.session-complete-overlay{
+  position:fixed;inset:0;z-index:600;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+  animation:fadeUp .3s cubic-bezier(.4,0,.2,1);
+}
+.session-complete-overlay.hidden{display:none!important}
+.session-complete-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:400px;
+  padding:40px 32px 32px;text-align:center;
+  box-shadow:var(--shadow-lg);
+  animation:fadeUp .4s cubic-bezier(.34,1.2,.64,1);
+}
+.session-complete-icon{
+  width:64px;height:64px;border-radius:50%;
+  background:rgba(34,197,94,.12);border:.5px solid rgba(34,197,94,.3);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 20px;
+}
+.session-complete-icon svg{width:28px;height:28px;stroke:var(--green);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.session-complete-title{font-size:24px;font-weight:600;letter-spacing:-0.03em;color:var(--text);margin-bottom:10px}
+.session-complete-sub{font-size:15px;font-weight:300;color:var(--text2);line-height:1.6;margin-bottom:28px;letter-spacing:-0.01em}
+.session-new-btn{
+  width:100%;padding:14px;border-radius:var(--r);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--green);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.session-new-btn:hover{background:#16a34a;transform:translateY(-1px);box-shadow:0 8px 24px rgba(34,197,94,.28)}
+.session-new-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
 .ocr-modal{
   background:var(--card-bg);border:.5px solid var(--border-strong);
   border-radius:24px;width:100%;max-width:480px;
@@ -570,6 +687,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
 .mods-body{padding:20px 24px;display:flex;flex-direction:column;gap:24px}
 .mods-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.mods-location-section{display:flex;flex-direction:column;gap:12px;margin-bottom:8px}
+.mods-location-header{display:flex;align-items:center;gap:8px;padding:6px 2px;border-bottom:.5px solid var(--border);margin-bottom:4px}
+.mods-location-header svg{width:14px;height:14px;stroke:var(--pink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.mods-location-header>span:nth-child(2){font-size:15px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.mods-location-count{font-size:12px;color:var(--text3)}
+.mods-location-online{font-size:11px;font-weight:600;color:var(--green);background:rgba(34,197,94,.1);border:.5px solid rgba(34,197,94,.25);border-radius:99px;padding:2px 8px}
 
 /* Moderator card */
 .mod-card{
@@ -842,6 +965,66 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .video-required-banner svg{width:16px;height:16px;stroke:var(--pink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-top:1px}
 .video-required-banner p{font-size:13px;color:var(--pink);font-weight:500;line-height:1.5}
 .video-watched-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--green);background:var(--green-bg);border:.5px solid #86efac;border-radius:20px;padding:3px 10px;margin-left:8px}
+
+/* ── OCR camera button on Participant ID field ── */
+.entry-field-with-ocr{position:relative}
+.ocr-camera-btn{
+  position:absolute;right:6px;top:50%;transform:translateY(calc(-50% + 11px));
+  width:30px;height:30px;border-radius:8px;
+  background:rgba(239,67,179,.1);border:.5px solid rgba(239,67,179,.3);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .18s;color:var(--pink);
+  z-index:2;
+}
+.ocr-camera-btn:hover{background:rgba(239,67,179,.2);border-color:var(--pink);transform:translateY(calc(-50% + 11px)) scale(1.05)}
+.ocr-camera-btn:active{transform:translateY(calc(-50% + 11px)) scale(.92)}
+.ocr-camera-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.entry-field-with-ocr input{padding-right:42px}
+
+/* ── OCR Modal ── */
+.ocr-overlay{
+  position:fixed;inset:0;z-index:700;
+  background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.ocr-overlay.hidden{display:none!important}
+.ocr-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:480px;
+  box-shadow:var(--shadow-lg);overflow:hidden;
+  animation:fadeUp .35s cubic-bezier(.34,1.1,.64,1);
+}
+.ocr-header{padding:22px 24px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:.5px solid var(--border)}
+.ocr-title{font-size:18px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.ocr-subtitle{font-size:13px;color:var(--text3);margin-top:3px;font-weight:400;letter-spacing:-0.01em}
+.ocr-close{
+  width:30px;height:30px;border-radius:50%;border:.5px solid var(--border-strong);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;color:var(--text3);font-size:16px;transition:all .15s;
+}
+.ocr-close:hover{background:var(--bg4);color:var(--text)}
+.ocr-body{padding:20px 24px 24px;display:flex;flex-direction:column;gap:14px}
+/* ── Login Screen ── */
+#login-screen{
+  position:fixed;inset:0;z-index:1000;
+  background:var(--bg);
+  display:none;align-items:center;justify-content:center;padding:24px;
+  animation:fadeUp .4s cubic-bezier(.4,0,.2,1);
+}
+#login-screen.visible{display:flex}
+#login-screen.hidden{display:none!important}
+.login-error{
+  font-size:13px;color:var(--red);font-weight:500;text-align:center;
+  margin-top:12px;min-height:18px;letter-spacing:-0.01em;
+  animation:fadeUp .2s ease-out;
+}
+.login-spinner{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
+  animation:spin .7s linear infinite;flex-shrink:0;
+}
+
 .login-card{
   background:var(--card-bg);border:.5px solid var(--border-strong);
   border-radius:24px;padding:40px 36px;width:100%;max-width:400px;
@@ -3608,9 +3791,9 @@ function resetOCR(){
 
 async function onOCRImageSelected(event){
   const file = event.target.files[0];
-  if(!file) return;
+  if(!file){ console.log('[OCR] No file selected'); return; }
 
-  const img = document.getElementById('ocr-preview-img');
+  const img         = document.getElementById('ocr-preview-img');
   const previewWrap = document.getElementById('ocr-preview-wrap');
   const progress    = document.getElementById('ocr-progress');
   const progressText= document.getElementById('ocr-progress-text');
@@ -3622,33 +3805,57 @@ async function onOCRImageSelected(event){
   const pickBtn     = document.getElementById('ocr-pick-btn');
   const useBtn      = document.getElementById('ocr-use-btn');
 
-  // Show preview, hide pick button, show progress
-  pickBtn.style.display = 'none';
-  img.src = URL.createObjectURL(file);
-  previewWrap.style.display = 'flex';
-  progress.style.display = 'flex';
-  resultWrap.style.display = 'none';
-  actions.style.display = 'none';
-  progressText.textContent = 'Loading OCR engine...';
+  console.log('[OCR] File received:', file.name, file.type, file.size, 'bytes');
 
-  if(typeof Tesseract === 'undefined'){
-    progress.style.display = 'none';
-    resultWrap.style.display = 'block';
-    actions.style.display = 'flex';
-    result.classList.add('error');
-    resultLabel.textContent = 'OCR Library Failed to Load';
-    resultValue.textContent = 'Tesseract.js could not load. Check your internet connection and refresh.';
-    useBtn.disabled = true;
+  // Show preview, hide pick button, show progress
+  if(pickBtn) pickBtn.style.display = 'none';
+  if(previewWrap){ previewWrap.style.display = 'flex'; previewWrap.classList.remove('hidden'); }
+  if(progress){ progress.style.display = 'flex'; progress.classList.remove('hidden'); }
+  if(resultWrap){ resultWrap.style.display = 'none'; resultWrap.classList.add('hidden'); }
+  if(actions){ actions.style.display = 'none'; actions.classList.add('hidden'); }
+  if(progressText) progressText.textContent = 'Reading image...';
+
+  // Convert file → base64 data URL (more reliable on iOS than File object)
+  const dataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('Failed to read image file'));
+    reader.readAsDataURL(file);
+  }).catch(err => {
+    console.error('[OCR] FileReader error:', err);
+    return null;
+  });
+
+  if(!dataUrl){
+    showOCRError('Could not read the image file. Please try again.', progress, resultWrap, actions, result, resultLabel, resultValue, useBtn);
     return;
   }
 
-  try {
-    console.log('[OCR] Processing image:', file.name, file.size, 'bytes');
+  if(img) img.src = dataUrl;
+  if(progressText) progressText.textContent = 'Loading OCR engine...';
 
-    // No char whitelist — let Tesseract see everything, we'll pattern-match after
-    const ocrResult = await Tesseract.recognize(file, 'eng', {
+  // Check if Tesseract is loaded
+  if(typeof Tesseract === 'undefined'){
+    console.error('[OCR] Tesseract not loaded');
+    showOCRError('OCR engine not loaded. Check your internet connection and refresh the page.', progress, resultWrap, actions, result, resultLabel, resultValue, useBtn);
+    return;
+  }
+
+  // Add 60-second timeout so it can't hang forever
+  let timeoutFired = false;
+  const timeout = setTimeout(() => {
+    timeoutFired = true;
+    console.error('[OCR] Timeout after 60s');
+    showOCRError('OCR took too long. Please try again with a clearer photo or stronger network.', progress, resultWrap, actions, result, resultLabel, resultValue, useBtn);
+  }, 60000);
+
+  try {
+    console.log('[OCR] Starting Tesseract.recognize...');
+    const ocrResult = await Tesseract.recognize(dataUrl, 'eng', {
       logger: m => {
+        if(timeoutFired) return;
         console.log('[OCR]', m.status, m.progress);
+        if(!progressText) return;
         if(m.status === 'loading tesseract core'){ progressText.textContent = 'Loading OCR engine...'; }
         else if(m.status === 'initializing tesseract'){ progressText.textContent = 'Initializing...'; }
         else if(m.status === 'loading language traineddata'){ progressText.textContent = 'Loading language pack...'; }
@@ -3660,6 +3867,9 @@ async function onOCRImageSelected(event){
       }
     });
 
+    clearTimeout(timeout);
+    if(timeoutFired) return;
+
     const rawText = (ocrResult && ocrResult.data && ocrResult.data.text) || '';
     const cleanText = rawText.toLowerCase();
     console.log('[OCR] Raw text:', JSON.stringify(rawText));
@@ -3667,50 +3877,58 @@ async function onOCRImageSelected(event){
     // Try strict UUID match
     const uuidRegex = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
     let match = cleanText.match(uuidRegex);
-
-    // Try removing whitespace if no match
     if(!match){
       const noSpaces = cleanText.replace(/\s/g, '');
       match = noSpaces.match(uuidRegex);
     }
 
-    progress.style.display = 'none';
-    resultWrap.style.display = 'block';
-    actions.style.display = 'flex';
+    // Hide progress, show result
+    if(progress){ progress.style.display = 'none'; progress.classList.add('hidden'); }
+    if(resultWrap){ resultWrap.style.display = 'block'; resultWrap.classList.remove('hidden'); }
+    if(actions){ actions.style.display = 'flex'; actions.classList.remove('hidden'); }
 
     if(match){
       ocrDetectedId = match[0].toLowerCase();
-      result.classList.remove('error');
-      resultLabel.textContent = 'Participant ID Detected';
-      resultValue.textContent = ocrDetectedId;
-      useBtn.disabled = false;
+      if(result) result.classList.remove('error');
+      if(resultLabel) resultLabel.textContent = 'Participant ID Detected';
+      if(resultValue) resultValue.textContent = ocrDetectedId;
+      if(useBtn) useBtn.disabled = false;
       console.log('[OCR] Matched UUID:', ocrDetectedId);
     } else {
-      result.classList.add('error');
-      resultLabel.textContent = 'No UUID Pattern Found';
+      if(result) result.classList.add('error');
+      if(resultLabel) resultLabel.textContent = 'No UUID Pattern Found';
       const trimmed = cleanText.replace(/\s+/g, ' ').trim();
-      if(trimmed){
-        resultValue.innerHTML = '<div style="font-weight:600;margin-bottom:6px;color:var(--text)">Raw text detected:</div>' +
-          '<div style="font-family:monospace;font-size:12px;word-break:break-all;color:var(--text2)">' +
-          trimmed.substring(0, 400).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])) +
-          '</div>' +
-          '<div style="margin-top:10px;font-size:12px;color:var(--text3)">Try a sharper close-up photo of just the ID.</div>';
-      } else {
-        resultValue.textContent = 'No text could be read from the image. Try better lighting and hold the camera steadier.';
+      if(resultValue){
+        if(trimmed){
+          resultValue.innerHTML = '<div style="font-weight:600;margin-bottom:6px;color:var(--text)">Raw text detected:</div>' +
+            '<div style="font-family:monospace;font-size:12px;word-break:break-all;color:var(--text2)">' +
+            trimmed.substring(0, 400).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])) +
+            '</div>' +
+            '<div style="margin-top:10px;font-size:12px;color:var(--text3)">Try a sharper close-up photo of just the ID.</div>';
+        } else {
+          resultValue.textContent = 'No text could be read. Try better lighting and hold steadier.';
+        }
       }
       ocrDetectedId = '';
-      useBtn.disabled = true;
+      if(useBtn) useBtn.disabled = true;
     }
   } catch(err){
+    clearTimeout(timeout);
+    if(timeoutFired) return;
     console.error('[OCR] Error:', err);
-    progress.style.display = 'none';
-    resultWrap.style.display = 'block';
-    actions.style.display = 'flex';
-    result.classList.add('error');
-    resultLabel.textContent = 'OCR Failed';
-    resultValue.textContent = (err && err.message) ? err.message : 'Recognition failed. Please try again.';
-    useBtn.disabled = true;
+    showOCRError('OCR failed: ' + ((err && err.message) || 'Unknown error'), progress, resultWrap, actions, result, resultLabel, resultValue, useBtn);
   }
+}
+
+function showOCRError(msg, progress, resultWrap, actions, result, resultLabel, resultValue, useBtn){
+  if(progress){ progress.style.display = 'none'; progress.classList.add('hidden'); }
+  if(resultWrap){ resultWrap.style.display = 'block'; resultWrap.classList.remove('hidden'); }
+  if(actions){ actions.style.display = 'flex'; actions.classList.remove('hidden'); }
+  if(result) result.classList.add('error');
+  if(resultLabel) resultLabel.textContent = 'OCR Error';
+  if(resultValue) resultValue.textContent = msg;
+  if(useBtn) useBtn.disabled = true;
+  ocrDetectedId = '';
 }
 
 function useOCRResult(){
