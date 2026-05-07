@@ -389,6 +389,165 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .divider{height:.5px;background:var(--border);margin:24px 0 20px}
 .hidden{display:none!important}
 
+/* ── Session Complete Popup ── */
+.session-complete-overlay{
+  position:fixed;inset:0;z-index:600;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+  animation:fadeUp .3s cubic-bezier(.4,0,.2,1);
+}
+.session-complete-overlay.hidden{display:none!important}
+.session-complete-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:400px;
+  padding:40px 32px 32px;text-align:center;
+  box-shadow:var(--shadow-lg);
+  animation:fadeUp .4s cubic-bezier(.34,1.2,.64,1);
+}
+.session-complete-icon{
+  width:64px;height:64px;border-radius:50%;
+  background:rgba(34,197,94,.12);border:.5px solid rgba(34,197,94,.3);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 20px;
+}
+.session-complete-icon svg{width:28px;height:28px;stroke:var(--green);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.session-complete-title{font-size:24px;font-weight:600;letter-spacing:-0.03em;color:var(--text);margin-bottom:10px}
+.session-complete-sub{font-size:15px;font-weight:300;color:var(--text2);line-height:1.6;margin-bottom:28px;letter-spacing:-0.01em}
+.session-new-btn{
+  width:100%;padding:14px;border-radius:var(--r);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--green);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.session-new-btn:hover{background:#16a34a;transform:translateY(-1px);box-shadow:0 8px 24px rgba(34,197,94,.28)}
+.session-new-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+
+/* ── Begin Session Button ── */
+.begin-session-btn{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:rgba(239,67,179,.08);color:var(--pink);
+  border:1.5px solid rgba(239,67,179,.3);border-radius:var(--rl);
+  padding:12px 24px;cursor:pointer;margin-top:4px;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+.begin-session-btn:hover{background:rgba(239,67,179,.15);border-color:var(--pink);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.18)}
+.begin-session-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Prerequisite Modal ── */
+.prereq-overlay{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.prereq-overlay.hidden{display:none!important}
+
+/* ── Session Complete Popup ── */
+.session-complete-overlay{
+  position:fixed;inset:0;z-index:600;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+  animation:fadeUp .3s cubic-bezier(.4,0,.2,1);
+}
+.session-complete-overlay.hidden{display:none!important}
+.session-complete-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:400px;
+  padding:40px 32px 32px;text-align:center;
+  box-shadow:var(--shadow-lg);
+  animation:fadeUp .4s cubic-bezier(.34,1.2,.64,1);
+}
+.session-complete-icon{
+  width:64px;height:64px;border-radius:50%;
+  background:rgba(34,197,94,.12);border:.5px solid rgba(34,197,94,.3);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 20px;
+}
+.session-complete-icon svg{width:28px;height:28px;stroke:var(--green);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.session-complete-title{font-size:24px;font-weight:600;letter-spacing:-0.03em;color:var(--text);margin-bottom:10px}
+.session-complete-sub{font-size:15px;font-weight:300;color:var(--text2);line-height:1.6;margin-bottom:28px;letter-spacing:-0.01em}
+.session-new-btn{
+  width:100%;padding:14px;border-radius:var(--r);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--green);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.session-new-btn:hover{background:#16a34a;transform:translateY(-1px);box-shadow:0 8px 24px rgba(34,197,94,.28)}
+.session-new-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.prereq-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:520px;max-height:88vh;
+  overflow-y:auto;box-shadow:var(--shadow-lg);
+  animation:fadeUp .35s cubic-bezier(.34,1.1,.64,1);
+}
+.prereq-header{
+  padding:24px 26px 16px;border-bottom:.5px solid var(--border);
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  position:sticky;top:0;background:var(--card-bg);z-index:2;
+}
+.prereq-title{font-size:20px;font-weight:600;letter-spacing:-0.03em;color:var(--text)}
+.prereq-subtitle{font-size:13px;color:var(--text3);margin-top:3px;font-weight:400}
+.prereq-close{
+  width:30px;height:30px;border-radius:50%;border:.5px solid var(--border-strong);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;transition:all .15s;color:var(--text3);font-size:16px;
+}
+.prereq-close:hover{background:var(--bg4);color:var(--text)}
+.prereq-body{padding:20px 26px 24px;display:flex;flex-direction:column;gap:20px}
+
+/* Section */
+.prereq-section{}
+.prereq-section-title{
+  display:flex;align-items:center;gap:10px;
+  font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--text);margin-bottom:12px;cursor:pointer;padding:10px 14px;
+  background:var(--bg2);border:.5px solid var(--border);border-radius:var(--r);
+  transition:all .18s;
+}
+.prereq-section-title:hover{border-color:var(--border-strong);background:var(--bg3)}
+.prereq-section-title .prereq-check-wrap{
+  width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border-strong);
+  background:var(--bg);display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:all .22s cubic-bezier(.34,1.2,.64,1);
+}
+.prereq-section-title.checked .prereq-check-wrap{background:var(--green);border-color:var(--green)}
+.prereq-section-title .prereq-check-wrap svg{width:10px;height:10px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity .15s}
+.prereq-section-title.checked .prereq-check-wrap svg{opacity:1}
+.prereq-section-title span{flex:1}
+
+/* Items */
+.prereq-items{display:flex;flex-direction:column;gap:7px;padding:4px 2px 2px}
+.prereq-item{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:13px;color:var(--text2);line-height:1.5;padding:8px 12px;
+  background:var(--bg2);border:.5px solid var(--border);border-radius:var(--r);
+}
+.prereq-item-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--pink);
+  flex-shrink:0;margin-top:6px;
+}
+
+/* Confirm button */
+.prereq-confirm-wrap{
+  padding:0 26px 24px;
+  animation:fadeUp .3s cubic-bezier(.34,1.1,.64,1);
+}
+.prereq-confirm-btn{
+  width:100%;padding:15px;border-radius:var(--r);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.prereq-confirm-btn:hover{background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.3)}
+.prereq-confirm-btn:active{transform:scale(.98)}
+
+
 /* ── Page toggle (Dashboard / Moderators) ── */
 .page-toggle{display:flex;background:var(--bg3);border:.5px solid var(--border);border-radius:99px;padding:3px;gap:2px}
 .page-toggle-btn{font-family:var(--font);font-size:12px;font-weight:500;color:var(--text3);background:none;border:none;border-radius:99px;padding:5px 14px;cursor:pointer;transition:all .18s ease;white-space:nowrap}
@@ -663,6 +822,165 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 }
 #login-screen.visible{display:flex}
 #login-screen.hidden{display:none!important}
+
+/* ── Session Complete Popup ── */
+.session-complete-overlay{
+  position:fixed;inset:0;z-index:600;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+  animation:fadeUp .3s cubic-bezier(.4,0,.2,1);
+}
+.session-complete-overlay.hidden{display:none!important}
+.session-complete-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:400px;
+  padding:40px 32px 32px;text-align:center;
+  box-shadow:var(--shadow-lg);
+  animation:fadeUp .4s cubic-bezier(.34,1.2,.64,1);
+}
+.session-complete-icon{
+  width:64px;height:64px;border-radius:50%;
+  background:rgba(34,197,94,.12);border:.5px solid rgba(34,197,94,.3);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 20px;
+}
+.session-complete-icon svg{width:28px;height:28px;stroke:var(--green);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.session-complete-title{font-size:24px;font-weight:600;letter-spacing:-0.03em;color:var(--text);margin-bottom:10px}
+.session-complete-sub{font-size:15px;font-weight:300;color:var(--text2);line-height:1.6;margin-bottom:28px;letter-spacing:-0.01em}
+.session-new-btn{
+  width:100%;padding:14px;border-radius:var(--r);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--green);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.session-new-btn:hover{background:#16a34a;transform:translateY(-1px);box-shadow:0 8px 24px rgba(34,197,94,.28)}
+.session-new-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+
+/* ── Begin Session Button ── */
+.begin-session-btn{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:rgba(239,67,179,.08);color:var(--pink);
+  border:1.5px solid rgba(239,67,179,.3);border-radius:var(--rl);
+  padding:12px 24px;cursor:pointer;margin-top:4px;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+.begin-session-btn:hover{background:rgba(239,67,179,.15);border-color:var(--pink);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.18)}
+.begin-session-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Prerequisite Modal ── */
+.prereq-overlay{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.prereq-overlay.hidden{display:none!important}
+
+/* ── Session Complete Popup ── */
+.session-complete-overlay{
+  position:fixed;inset:0;z-index:600;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+  animation:fadeUp .3s cubic-bezier(.4,0,.2,1);
+}
+.session-complete-overlay.hidden{display:none!important}
+.session-complete-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:400px;
+  padding:40px 32px 32px;text-align:center;
+  box-shadow:var(--shadow-lg);
+  animation:fadeUp .4s cubic-bezier(.34,1.2,.64,1);
+}
+.session-complete-icon{
+  width:64px;height:64px;border-radius:50%;
+  background:rgba(34,197,94,.12);border:.5px solid rgba(34,197,94,.3);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 20px;
+}
+.session-complete-icon svg{width:28px;height:28px;stroke:var(--green);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.session-complete-title{font-size:24px;font-weight:600;letter-spacing:-0.03em;color:var(--text);margin-bottom:10px}
+.session-complete-sub{font-size:15px;font-weight:300;color:var(--text2);line-height:1.6;margin-bottom:28px;letter-spacing:-0.01em}
+.session-new-btn{
+  width:100%;padding:14px;border-radius:var(--r);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--green);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.session-new-btn:hover{background:#16a34a;transform:translateY(-1px);box-shadow:0 8px 24px rgba(34,197,94,.28)}
+.session-new-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.prereq-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:520px;max-height:88vh;
+  overflow-y:auto;box-shadow:var(--shadow-lg);
+  animation:fadeUp .35s cubic-bezier(.34,1.1,.64,1);
+}
+.prereq-header{
+  padding:24px 26px 16px;border-bottom:.5px solid var(--border);
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  position:sticky;top:0;background:var(--card-bg);z-index:2;
+}
+.prereq-title{font-size:20px;font-weight:600;letter-spacing:-0.03em;color:var(--text)}
+.prereq-subtitle{font-size:13px;color:var(--text3);margin-top:3px;font-weight:400}
+.prereq-close{
+  width:30px;height:30px;border-radius:50%;border:.5px solid var(--border-strong);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;transition:all .15s;color:var(--text3);font-size:16px;
+}
+.prereq-close:hover{background:var(--bg4);color:var(--text)}
+.prereq-body{padding:20px 26px 24px;display:flex;flex-direction:column;gap:20px}
+
+/* Section */
+.prereq-section{}
+.prereq-section-title{
+  display:flex;align-items:center;gap:10px;
+  font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--text);margin-bottom:12px;cursor:pointer;padding:10px 14px;
+  background:var(--bg2);border:.5px solid var(--border);border-radius:var(--r);
+  transition:all .18s;
+}
+.prereq-section-title:hover{border-color:var(--border-strong);background:var(--bg3)}
+.prereq-section-title .prereq-check-wrap{
+  width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border-strong);
+  background:var(--bg);display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:all .22s cubic-bezier(.34,1.2,.64,1);
+}
+.prereq-section-title.checked .prereq-check-wrap{background:var(--green);border-color:var(--green)}
+.prereq-section-title .prereq-check-wrap svg{width:10px;height:10px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity .15s}
+.prereq-section-title.checked .prereq-check-wrap svg{opacity:1}
+.prereq-section-title span{flex:1}
+
+/* Items */
+.prereq-items{display:flex;flex-direction:column;gap:7px;padding:4px 2px 2px}
+.prereq-item{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:13px;color:var(--text2);line-height:1.5;padding:8px 12px;
+  background:var(--bg2);border:.5px solid var(--border);border-radius:var(--r);
+}
+.prereq-item-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--pink);
+  flex-shrink:0;margin-top:6px;
+}
+
+/* Confirm button */
+.prereq-confirm-wrap{
+  padding:0 26px 24px;
+  animation:fadeUp .3s cubic-bezier(.34,1.1,.64,1);
+}
+.prereq-confirm-btn{
+  width:100%;padding:15px;border-radius:var(--r);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.prereq-confirm-btn:hover{background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.3)}
+.prereq-confirm-btn:active{transform:scale(.98)}
+
 
 /* ── Page toggle (Dashboard / Moderators) ── */
 .page-toggle{display:flex;background:var(--bg3);border:.5px solid var(--border);border-radius:99px;padding:3px;gap:2px}
@@ -1199,7 +1517,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       <div class="welcome">
         <div class="welcome-icon"><svg viewBox="0 0 24 24"><polyline points="4,13 9,18 20,6"/></svg></div>
         <h2>Welcome to Project Kilo</h2>
-        <p>Select a task from the sidebar. Fill in the data fields, tick each step, then mark complete.</p>
+        <button class="begin-session-btn" onclick="openPrereqModal()">
+          <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><polyline points="6,5 6,11 11,8"/></svg>
+          Begin a new session
+        </button>
+        <p style="margin-top:8px">
+      <p style="margin-top:8px">Select a task from the sidebar. Fill in the data fields, tick each step, then mark complete.</p></p>
         <div class="welcome-reminders">
           <div class="welcome-section-label">Key Reminders</div>
           <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>Never move the device during a recording.</p></div>
@@ -1492,7 +1815,8 @@ function resetProgress(){
     <div class="welcome">
       <div class="welcome-icon"><svg viewBox="0 0 24 24"><polyline points="4,13 9,18 20,6"/></svg></div>
       <h2>${welcomeTitle}</h2>
-      <p>Select a task from the sidebar. Fill in the data fields, tick each step, then mark complete.</p>
+      <p><button class="begin-session-btn" onclick="openPrereqModal()"><svg viewBox="0 0 16 16" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><circle cx="8" cy="8" r="6"/><polyline points="6,5 6,11 11,8"/></svg> Begin a new session</button>
+      <p style="margin-top:8px">Select a task from the sidebar. Fill in the data fields, tick each step, then mark complete.</p></p>
       <div class="welcome-reminders">
         <div class="welcome-section-label">Key Reminders</div>
         <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>Never move the device during a recording.</p></div>
@@ -1895,7 +2219,7 @@ function renderDetail(i){
     html+=`<button class="cta-btn secondary" onclick="undoTask(${i})">Undo — reopen</button>`;
   }else{
     html+=`<button class="cta-btn primary" onclick="completeTask(${i})">Mark task complete</button>`;
-    if(paUrl) html+=`<button class="cta-btn sync-btn" onclick="manualSync(${i})"><svg viewBox="0 0 16 16"><path d="M14 8a6 6 0 1 1-1.5-4"/><polyline points="14,2 14,6 10,6"/></svg>Sync to Excel</button>`;
+    // Sync to Excel button removed
   }
   html+='</div>';
   document.getElementById('main-content').innerHTML=html;
@@ -1954,6 +2278,8 @@ async function completeTask(i){
   taskDone[i]=true;stepDone[i].fill(true);
   taskData[i].status='Complete';taskData[i].completedAt=new Date().toLocaleString();
   renderDetail(i);renderSidebar();updateProgress();saveProgress();await autoSync(i);
+  // Show session complete popup when Task 12 (index 12) is done
+  if(i === 12){ setTimeout(showSessionComplete, 600); }
 }
 function undoTask(i){
   taskDone[i]=false;stepDone[i].fill(false);taskSynced[i]=false;
@@ -3551,6 +3877,107 @@ function renderModeratorsPage(){
   container.innerHTML = groupedHTML;
 }
 
+
+// ── Prerequisite Modal ───────────────────────────────────
+const prereqChecked = {1: false, 2: false};
+
+function openPrereqModal(){
+  // Reset state
+  prereqChecked[1] = false;
+  prereqChecked[2] = false;
+  document.getElementById('prereq-title-1').classList.remove('checked');
+  document.getElementById('prereq-title-2').classList.remove('checked');
+  document.getElementById('prereq-confirm-wrap').classList.add('hidden');
+  document.getElementById('prereq-overlay').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePrereqModal(){
+  document.getElementById('prereq-overlay').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function togglePrereqSection(num){
+  prereqChecked[num] = !prereqChecked[num];
+  const titleEl = document.getElementById('prereq-title-' + num);
+  titleEl.classList.toggle('checked', prereqChecked[num]);
+  // Show confirm button only when both sections are checked
+  const bothDone = prereqChecked[1] && prereqChecked[2];
+  document.getElementById('prereq-confirm-wrap').classList.toggle('hidden', !bothDone);
+}
+
+function confirmPrereqAndBegin(){
+  closePrereqModal();
+  // Open Registration task directly
+  openRegistration();
+}
+
+// ── Session Complete ──────────────────────────────────────
+// Task 12 is TASKS index 12 (id:12). Check after completeTask.
+function showSessionComplete(){
+  document.getElementById('session-complete-overlay').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function startNewSession(){
+  // Hide modal
+  document.getElementById('session-complete-overlay').classList.add('hidden');
+  document.body.style.overflow = '';
+
+  // Reset progress but KEEP moderator, session date, device ID
+  const keepOperator = globalData.operator || '';
+  const keepDate     = globalData.date || '';
+  const keepDevice   = globalData.device || 'Device A';
+
+  localStorage.removeItem(STORAGE_KEY);
+  taskDone.fill(false);
+  stepDone.forEach(a => a.fill(false));
+  taskData.forEach(d => { d.lux=''; d.notes=''; d.status='Not Started'; d.completedAt=''; });
+  taskSynced.fill(false);
+
+  // Restore preserved fields — clear only Participant ID
+  globalData = {participant:'', operator: keepOperator, date: keepDate, device: keepDevice};
+  document.getElementById('g-participant').value = '';
+  document.getElementById('g-operator').value = keepOperator;
+  if(document.getElementById('g-date')) setDateField(keepDate);
+  document.getElementById('g-device').value = keepDevice;
+
+  // Reset to welcome screen
+  activeTask = null; activePanel = null;
+  PANEL_IDS.forEach(p => {
+    document.getElementById('panel-'+p).classList.remove('open');
+    document.getElementById(HD_IDS[p]).classList.remove('active');
+  });
+  document.getElementById('main-content').style.display = 'block';
+
+  const firstName = currentUser ? currentUser.firstName : '';
+  const welcomeTitle = firstName ? firstName + ', Welcome to Project Kilo!' : 'Welcome to Project Kilo';
+  document.getElementById('main-content').innerHTML = `
+    <div class="welcome">
+      <div class="welcome-icon"><svg viewBox="0 0 24 24"><polyline points="4,13 9,18 20,6"/></svg></div>
+      <h2>${welcomeTitle}</h2>
+      <button class="begin-session-btn" onclick="openPrereqModal()"><svg viewBox="0 0 16 16" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><circle cx="8" cy="8" r="6"/><polyline points="6,5 6,11 11,8"/></svg> Begin a new session</button>
+      <p style="margin-top:8px">Select a task from the sidebar. Fill in the data fields, tick each step, then mark complete.</p>
+      <div class="welcome-reminders">
+        <div class="welcome-section-label">Key Reminders</div>
+        <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>Never move the device during a recording.</p></div>
+        <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>Always measure and record lux before each task.</p></div>
+        <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>Participant ID must remain consistent across all tasks and devices.</p></div>
+        <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>Registration must be completed before any tasks.</p></div>
+        <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>No hats or caps during initial registration — Task 1 is the only registration with a hat.</p></div>
+        <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>All lux measurements must be taken on the participant's face, with the sensor facing the device.</p></div>
+        <div class="welcome-reminder-item"><span style="font-size:14px;flex-shrink:0">⚠️</span><p>Participants are encouraged to submit more than required if time allows.</p></div>
+      </div>
+    </div>`;
+
+  saveProgress();
+  renderSidebar();
+  updateProgress();
+  if(window.innerWidth <= 700){
+    document.getElementById('sidebar').classList.remove('hidden');
+    document.getElementById('main-panel').classList.add('hidden');
+  }
+}
 </script>
 
 <!-- ── Admin Landing ── -->
@@ -3643,6 +4070,77 @@ function renderModeratorsPage(){
         <p>Click <strong>Sync</strong> to load moderator data.</p>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ── Prerequisite Checklist Modal ── -->
+<div class="prereq-overlay hidden" id="prereq-overlay" onclick="if(event.target===this)closePrereqModal()">
+  <div class="prereq-modal" id="prereq-modal">
+    <div class="prereq-header">
+      <div>
+        <div class="prereq-title">Before You Begin</div>
+        <div class="prereq-subtitle">Confirm both sections are ready to start your session</div>
+      </div>
+      <div class="prereq-close" onclick="closePrereqModal()">✕</div>
+    </div>
+    <div class="prereq-body">
+
+      <!-- Section 1: Setting & Environment -->
+      <div class="prereq-section">
+        <div class="prereq-section-title" id="prereq-title-1" onclick="togglePrereqSection(1)">
+          <div class="prereq-check-wrap"><svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9.5 10.5,3"/></svg></div>
+          <span>Setting &amp; Environment</span>
+        </div>
+        <div class="prereq-items" id="prereq-items-1">
+          <div class="prereq-item"><div class="prereq-item-dot"></div><span><strong>Location:</strong> Indoor lab</span></div>
+          <div class="prereq-item"><div class="prereq-item-dot"></div><span><strong>Background:</strong> Typical home background (2–3 rooms)</span></div>
+          <div class="prereq-item"><div class="prereq-item-dot"></div><span><strong>Lighting:</strong> Artificial or natural — must allow accurate control of lux level on the participant's face</span></div>
+          <div class="prereq-item"><div class="prereq-item-dot"></div><span><strong>Lux Range:</strong> 0–10 lux on face for all tasks</span></div>
+          <div class="prereq-item"><div class="prereq-item-dot"></div><span><strong>Backlighting:</strong> Required for one task (see Task 6)</span></div>
+          <div class="prereq-item"><div class="prereq-item-dot"></div><span><strong>Device Height:</strong> 1.5–6 ft</span></div>
+        </div>
+      </div>
+
+      <!-- Section 2: Props Required -->
+      <div class="prereq-section">
+        <div class="prereq-section-title" id="prereq-title-2" onclick="togglePrereqSection(2)">
+          <div class="prereq-check-wrap"><svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9.5 10.5,3"/></svg></div>
+          <span>Props Required</span>
+        </div>
+        <div class="prereq-items" id="prereq-items-2">
+          <div class="prereq-item"><div class="prereq-item-dot"></div><span>Glasses</span></div>
+          <div class="prereq-item"><div class="prereq-item-dot"></div><span>Hat / baseball cap</span></div>
+          <div class="prereq-item"><div class="prereq-item-dot"></div><span>Secondary hair gear (e.g., headband, scarf — not a baseball cap)</span></div>
+          <div class="prereq-item"><div class="prereq-item-dot"></div><span>3 chairs (for seated tasks)</span></div>
+          <div class="prereq-item"><div class="prereq-item-dot"></div><span>Lux meter</span></div>
+          <div class="prereq-item"><div class="prereq-item-dot"></div><span>Cellphone</span></div>
+          <div class="prereq-item"><div class="prereq-item-dot"></div><span>Laptop (to upload cellphone selfie registrations)</span></div>
+        </div>
+      </div>
+
+    </div>
+    <!-- Confirm button — shown only when both checked -->
+    <div class="prereq-confirm-wrap hidden" id="prereq-confirm-wrap">
+      <button class="prereq-confirm-btn" onclick="confirmPrereqAndBegin()">
+        <svg viewBox="0 0 16 16" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="2,8 6,12 14,4"/></svg>
+        All set — Start Registration
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Session Complete Modal ── -->
+<div class="session-complete-overlay hidden" id="session-complete-overlay">
+  <div class="session-complete-modal">
+    <div class="session-complete-icon">
+      <svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
+    </div>
+    <div class="session-complete-title">Thank you for completing!</div>
+    <div class="session-complete-sub">When you are ready, press Start a New Session to continue with the next participant.</div>
+    <button class="session-new-btn" onclick="startNewSession()">
+      <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><polyline points="6,5 6,11 11,8"/></svg>
+      Start a New Session
+    </button>
   </div>
 </div>
 
