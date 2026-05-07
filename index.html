@@ -4819,7 +4819,6 @@ async function onOCRImageSelected(event){
   const file = event.target.files[0];
   if(!file) return;
 
-  // Show preview
   const img = document.getElementById('ocr-preview-img');
   const previewWrap = document.getElementById('ocr-preview-wrap');
   const progress    = document.getElementById('ocr-progress');
@@ -4832,68 +4831,84 @@ async function onOCRImageSelected(event){
   const pickBtn     = document.getElementById('ocr-pick-btn');
   const useBtn      = document.getElementById('ocr-use-btn');
 
+  // Show preview, hide pick button, show progress
   pickBtn.style.display = 'none';
   img.src = URL.createObjectURL(file);
   previewWrap.style.display = 'flex';
   progress.style.display = 'flex';
-  progressText.textContent = 'Loading OCR engine…';
+  resultWrap.style.display = 'none';
+  actions.style.display = 'none';
+  progressText.textContent = 'Loading OCR engine...';
 
   if(typeof Tesseract === 'undefined'){
     progress.style.display = 'none';
     resultWrap.style.display = 'block';
     actions.style.display = 'flex';
     result.classList.add('error');
-    resultLabel.textContent = 'Error';
-    resultValue.textContent = 'OCR library failed to load. Check your internet connection.';
+    resultLabel.textContent = 'OCR Library Failed to Load';
+    resultValue.textContent = 'Tesseract.js could not load. Check your internet connection and refresh.';
     useBtn.disabled = true;
     return;
   }
 
   try {
-    progressText.textContent = 'Reading text from image…';
-    const { data } = await Tesseract.recognize(file, 'eng', {
+    console.log('[OCR] Processing image:', file.name, file.size, 'bytes');
+
+    // No char whitelist — let Tesseract see everything, we'll pattern-match after
+    const ocrResult = await Tesseract.recognize(file, 'eng', {
       logger: m => {
-        if(m.status === 'recognizing text' && m.progress){
-          progressText.textContent = 'Reading text… ' + Math.round(m.progress * 100) + '%';
+        console.log('[OCR]', m.status, m.progress);
+        if(m.status === 'loading tesseract core'){ progressText.textContent = 'Loading OCR engine...'; }
+        else if(m.status === 'initializing tesseract'){ progressText.textContent = 'Initializing...'; }
+        else if(m.status === 'loading language traineddata'){ progressText.textContent = 'Loading language pack...'; }
+        else if(m.status === 'initializing api'){ progressText.textContent = 'Preparing scanner...'; }
+        else if(m.status === 'recognizing text'){
+          const pct = Math.round((m.progress || 0) * 100);
+          progressText.textContent = 'Reading text... ' + pct + '%';
         }
-      },
-      tessedit_char_whitelist: '0123456789abcdefABCDEF-'
+      }
     });
 
-    const rawText = (data.text || '').toLowerCase();
-    console.log('[OCR] Raw text:', rawText);
+    const rawText = (ocrResult && ocrResult.data && ocrResult.data.text) || '';
+    const cleanText = rawText.toLowerCase();
+    console.log('[OCR] Raw text:', JSON.stringify(rawText));
 
-    // Match UUID pattern: 8-4-4-4-12 hex chars
-    const uuidRegex = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
-    const match = rawText.match(uuidRegex);
+    // Try strict UUID match
+    const uuidRegex = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+    let match = cleanText.match(uuidRegex);
+
+    // Try removing whitespace if no match
+    if(!match){
+      const noSpaces = cleanText.replace(/\s/g, '');
+      match = noSpaces.match(uuidRegex);
+    }
 
     progress.style.display = 'none';
     resultWrap.style.display = 'block';
     actions.style.display = 'flex';
 
     if(match){
-      ocrDetectedId = match[0];
+      ocrDetectedId = match[0].toLowerCase();
       result.classList.remove('error');
-      resultLabel.textContent = '✓ Detected Participant ID';
+      resultLabel.textContent = 'Participant ID Detected';
       resultValue.textContent = ocrDetectedId;
       useBtn.disabled = false;
+      console.log('[OCR] Matched UUID:', ocrDetectedId);
     } else {
-      // Try a more lenient match — find any long hex-and-dash sequence
-      const lenientMatch = rawText.match(/[0-9a-f]{6,}[-0-9a-f]{20,}/);
-      if(lenientMatch){
-        ocrDetectedId = lenientMatch[0];
-        result.classList.remove('error');
-        resultLabel.textContent = '⚠ Possible match (verify carefully)';
-        resultValue.textContent = ocrDetectedId;
-        useBtn.disabled = false;
+      result.classList.add('error');
+      resultLabel.textContent = 'No UUID Pattern Found';
+      const trimmed = cleanText.replace(/\s+/g, ' ').trim();
+      if(trimmed){
+        resultValue.innerHTML = '<div style="font-weight:600;margin-bottom:6px;color:var(--text)">Raw text detected:</div>' +
+          '<div style="font-family:monospace;font-size:12px;word-break:break-all;color:var(--text2)">' +
+          trimmed.substring(0, 400).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])) +
+          '</div>' +
+          '<div style="margin-top:10px;font-size:12px;color:var(--text3)">Try a sharper close-up photo of just the ID.</div>';
       } else {
-        result.classList.add('error');
-        resultLabel.textContent = 'No ID detected';
-        const cleaned = rawText.replace(/\s+/g,' ').trim().substring(0,200);
-        resultValue.textContent = cleaned ? ('Detected text: ' + cleaned) : 'Image was unclear. Please try again with better lighting and a sharper photo.';
-        useBtn.disabled = true;
-        ocrDetectedId = '';
+        resultValue.textContent = 'No text could be read from the image. Try better lighting and hold the camera steadier.';
       }
+      ocrDetectedId = '';
+      useBtn.disabled = true;
     }
   } catch(err){
     console.error('[OCR] Error:', err);
@@ -4901,8 +4916,8 @@ async function onOCRImageSelected(event){
     resultWrap.style.display = 'block';
     actions.style.display = 'flex';
     result.classList.add('error');
-    resultLabel.textContent = 'Error';
-    resultValue.textContent = err.message || 'OCR processing failed. Please try again.';
+    resultLabel.textContent = 'OCR Failed';
+    resultValue.textContent = (err && err.message) ? err.message : 'Recognition failed. Please try again.';
     useBtn.disabled = true;
   }
 }
@@ -5122,7 +5137,7 @@ function useOCRResult(){
 
       <div id="ocr-actions" class="ocr-actions hidden" style="display:none">
         <button class="ocr-action-btn retry" onclick="resetOCR()">Try Again</button>
-        <button class="ocr-action-btn use" id="ocr-use-btn" onclick="useOCRResult()">Use This ID</button>
+        <button class="ocr-action-btn use" id="ocr-use-btn" onclick="useOCRResult()">Confirm</button>
       </div>
     </div>
   </div>
