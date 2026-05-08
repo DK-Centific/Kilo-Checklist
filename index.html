@@ -4137,6 +4137,8 @@ async function processCroppedImage(){
       if(input){ input.value = ocrDetectedId; input.classList.add('valid'); }
       if(hint){ hint.style.display = 'block'; hint.textContent = 'Looks valid — verify and tap Confirm'; }
       if(rawWrap){ rawWrap.style.display = 'none'; }
+      if(useBtn){ useBtn.disabled = false; useBtn.removeAttribute('disabled'); }
+      console.log('[OCR] Match found, Confirm enabled:', ocrDetectedId);
     } else {
       // No strict match — try to extract best guess and let user edit
       if(result) result.classList.remove('error'); // not an error, just imperfect
@@ -4196,21 +4198,33 @@ function showOCRError(msg){
 
 
 function useOCRResult(){
-  // Read current value from the editable input — user may have edited it
-  const ocrInput = document.getElementById('ocr-result-input');
-  const value = ocrInput ? ocrInput.value.trim().toLowerCase() : '';
-  if(!value){
-    if(typeof showToast === 'function') showToast('Please enter a Participant ID');
-    return;
+  try {
+    console.log('[OCR] Confirm clicked');
+    // Read current value from the editable input — user may have edited it
+    const ocrInput = document.getElementById('ocr-result-input');
+    const value = ocrInput ? ocrInput.value.trim().toLowerCase() : '';
+    console.log('[OCR] Confirming value:', value);
+    if(!value){
+      if(typeof showToast === 'function') showToast('Please enter a Participant ID');
+      return;
+    }
+    const targetInput = document.getElementById('g-participant');
+    if(targetInput){
+      targetInput.value = value;
+      targetInput.style.borderColor = '';
+      console.log('[OCR] Set g-participant to:', value);
+      if(typeof syncGlobal === 'function') {
+        try { syncGlobal(); } catch(e){ console.error('[OCR] syncGlobal error:', e); }
+      }
+    } else {
+      console.error('[OCR] g-participant not found');
+    }
+    closeOCR();
+    if(typeof showToast === 'function') showToast('Participant ID set ✓');
+  } catch(err){
+    console.error('[OCR] useOCRResult error:', err);
+    alert('Error confirming ID: ' + (err.message || err));
   }
-  const targetInput = document.getElementById('g-participant');
-  if(targetInput){
-    targetInput.value = value;
-    targetInput.style.borderColor = '';
-    if(typeof syncGlobal === 'function') syncGlobal();
-  }
-  closeOCR();
-  if(typeof showToast === 'function') showToast('Participant ID set ✓');
 }
 
 // Live validity check as user edits
