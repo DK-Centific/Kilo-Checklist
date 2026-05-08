@@ -389,6 +389,327 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .divider{height:.5px;background:var(--border);margin:24px 0 20px}
 .hidden{display:none!important}
 
+/* ── Notification Bell & Panel ── */
+.notif-bell{
+  position:relative;width:34px;height:34px;border-radius:50%;
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text2);transition:all .18s;flex-shrink:0;
+}
+.notif-bell:hover{background:var(--bg3);color:var(--text);border-color:var(--pink)}
+.notif-bell svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.notif-bell .notif-dot{
+  position:absolute;top:6px;right:6px;
+  width:8px;height:8px;border-radius:50%;background:var(--pink);
+  border:1.5px solid var(--bg2);
+  animation:pulse 2s infinite;
+}
+.notif-bell.has-unread svg{color:var(--pink)}
+@keyframes pulse{
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.2);opacity:.7}
+}
+
+.notif-panel{
+  position:absolute;top:calc(100% + 10px);right:0;
+  width:340px;max-width:calc(100vw - 32px);max-height:480px;
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:var(--rl);box-shadow:var(--shadow-lg);
+  z-index:300;overflow:hidden;display:flex;flex-direction:column;
+  animation:fadeUp .22s cubic-bezier(.34,1.1,.64,1);
+}
+.notif-panel.hidden{display:none!important}
+.notif-panel-header{
+  padding:14px 16px;border-bottom:.5px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  background:var(--card-bg);
+}
+.notif-panel-title{font-size:14px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.notif-mark-read{
+  font-size:11px;font-weight:500;color:var(--pink);background:none;border:none;
+  cursor:pointer;padding:4px 8px;border-radius:6px;transition:background .15s;
+}
+.notif-mark-read:hover{background:rgba(239,67,179,.1)}
+.notif-list{overflow-y:auto;flex:1;max-height:400px}
+.notif-item{
+  padding:13px 16px;border-bottom:.5px solid var(--border);
+  display:flex;flex-direction:column;gap:5px;
+  transition:background .15s;cursor:default;
+}
+.notif-item:last-child{border-bottom:none}
+.notif-item.unread{background:rgba(239,67,179,.04)}
+.notif-item.unread::before{
+  content:'';position:absolute;left:5px;top:50%;transform:translateY(-50%);
+  width:5px;height:5px;border-radius:50%;background:var(--pink);
+}
+.notif-item-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.notif-item-title{font-size:13px;font-weight:600;color:var(--text);letter-spacing:-0.01em;flex:1}
+.notif-item-time{font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0;font-weight:500}
+.notif-item-body{font-size:12px;color:var(--text2);line-height:1.5;letter-spacing:-0.01em}
+.notif-empty{
+  padding:36px 20px;text-align:center;color:var(--text3);font-size:13px;line-height:1.5;
+}
+
+
+
+/* Override trouble-table to 3 columns: Date | Issue | Resolution */
+.trouble-table .trouble-hdr,
+.trouble-table .trouble-row{
+  display:grid !important;
+  grid-template-columns: 110px minmax(140px,1.2fr) minmax(180px,2fr) !important;
+}
+.trouble-cell.date{
+  font-size:11px;color:var(--text3);font-weight:500;
+  letter-spacing:.02em;white-space:nowrap;
+}
+@media (max-width:600px){
+  .trouble-table .trouble-hdr,
+  .trouble-table .trouble-row{
+    grid-template-columns: 90px 1fr 1.4fr !important;
+  }
+  .trouble-cell.date{font-size:10px}
+}
+
+/* ── Dynamic Troubleshooting ── */
+.panel-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}
+.panel-title-row .panel-title{margin-bottom:2px}
+.panel-title-row .panel-sub{margin-bottom:0}
+.trouble-refresh-btn{
+  width:34px;height:34px;border-radius:var(--r);
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  color:var(--text3);cursor:pointer;transition:all .18s;
+}
+.trouble-refresh-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--pink)}
+.trouble-refresh-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.trouble-refresh-btn.loading svg{animation:spin .9s linear infinite}
+.trouble-last-sync{font-size:11px;color:var(--text3);margin:6px 0 14px;font-weight:400}
+.trouble-loading{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:40px 0;color:var(--text3);font-size:13px;
+}
+.trouble-spinner{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid var(--border-strong);border-top-color:var(--pink);
+  animation:spin .7s linear infinite;
+}
+.trouble-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;line-height:1.5}
+.trouble-error{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  padding:30px 20px;text-align:center;color:var(--red);font-size:13px;line-height:1.5;
+  background:rgba(239,68,68,.06);border:.5px solid rgba(239,68,68,.2);border-radius:var(--r);
+}
+.trouble-cell.date{
+  font-size:11px;color:var(--text3);font-weight:500;letter-spacing:.02em;
+  white-space:nowrap;
+}
+
+
+/* ── Bug Report Modal ── */
+.bug-overlay{
+  position:fixed;inset:0;z-index:550;
+  background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.bug-overlay.hidden{display:none!important}
+
+/* ── Notification Bell & Panel ── */
+.notif-bell{
+  position:relative;width:34px;height:34px;border-radius:50%;
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text2);transition:all .18s;flex-shrink:0;
+}
+.notif-bell:hover{background:var(--bg3);color:var(--text);border-color:var(--pink)}
+.notif-bell svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.notif-bell .notif-dot{
+  position:absolute;top:6px;right:6px;
+  width:8px;height:8px;border-radius:50%;background:var(--pink);
+  border:1.5px solid var(--bg2);
+  animation:pulse 2s infinite;
+}
+.notif-bell.has-unread svg{color:var(--pink)}
+@keyframes pulse{
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.2);opacity:.7}
+}
+
+.notif-panel{
+  position:absolute;top:calc(100% + 10px);right:0;
+  width:340px;max-width:calc(100vw - 32px);max-height:480px;
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:var(--rl);box-shadow:var(--shadow-lg);
+  z-index:300;overflow:hidden;display:flex;flex-direction:column;
+  animation:fadeUp .22s cubic-bezier(.34,1.1,.64,1);
+}
+.notif-panel.hidden{display:none!important}
+.notif-panel-header{
+  padding:14px 16px;border-bottom:.5px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  background:var(--card-bg);
+}
+.notif-panel-title{font-size:14px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.notif-mark-read{
+  font-size:11px;font-weight:500;color:var(--pink);background:none;border:none;
+  cursor:pointer;padding:4px 8px;border-radius:6px;transition:background .15s;
+}
+.notif-mark-read:hover{background:rgba(239,67,179,.1)}
+.notif-list{overflow-y:auto;flex:1;max-height:400px}
+.notif-item{
+  padding:13px 16px;border-bottom:.5px solid var(--border);
+  display:flex;flex-direction:column;gap:5px;
+  transition:background .15s;cursor:default;
+}
+.notif-item:last-child{border-bottom:none}
+.notif-item.unread{background:rgba(239,67,179,.04)}
+.notif-item.unread::before{
+  content:'';position:absolute;left:5px;top:50%;transform:translateY(-50%);
+  width:5px;height:5px;border-radius:50%;background:var(--pink);
+}
+.notif-item-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.notif-item-title{font-size:13px;font-weight:600;color:var(--text);letter-spacing:-0.01em;flex:1}
+.notif-item-time{font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0;font-weight:500}
+.notif-item-body{font-size:12px;color:var(--text2);line-height:1.5;letter-spacing:-0.01em}
+.notif-empty{
+  padding:36px 20px;text-align:center;color:var(--text3);font-size:13px;line-height:1.5;
+}
+
+
+
+/* Override trouble-table to 3 columns: Date | Issue | Resolution */
+.trouble-table .trouble-hdr,
+.trouble-table .trouble-row{
+  display:grid !important;
+  grid-template-columns: 110px minmax(140px,1.2fr) minmax(180px,2fr) !important;
+}
+.trouble-cell.date{
+  font-size:11px;color:var(--text3);font-weight:500;
+  letter-spacing:.02em;white-space:nowrap;
+}
+@media (max-width:600px){
+  .trouble-table .trouble-hdr,
+  .trouble-table .trouble-row{
+    grid-template-columns: 90px 1fr 1.4fr !important;
+  }
+  .trouble-cell.date{font-size:10px}
+}
+
+/* ── Dynamic Troubleshooting ── */
+.panel-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}
+.panel-title-row .panel-title{margin-bottom:2px}
+.panel-title-row .panel-sub{margin-bottom:0}
+.trouble-refresh-btn{
+  width:34px;height:34px;border-radius:var(--r);
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  color:var(--text3);cursor:pointer;transition:all .18s;
+}
+.trouble-refresh-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--pink)}
+.trouble-refresh-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.trouble-refresh-btn.loading svg{animation:spin .9s linear infinite}
+.trouble-last-sync{font-size:11px;color:var(--text3);margin:6px 0 14px;font-weight:400}
+.trouble-loading{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:40px 0;color:var(--text3);font-size:13px;
+}
+.trouble-spinner{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid var(--border-strong);border-top-color:var(--pink);
+  animation:spin .7s linear infinite;
+}
+.trouble-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;line-height:1.5}
+.trouble-error{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  padding:30px 20px;text-align:center;color:var(--red);font-size:13px;line-height:1.5;
+  background:rgba(239,68,68,.06);border:.5px solid rgba(239,68,68,.2);border-radius:var(--r);
+}
+.trouble-cell.date{
+  font-size:11px;color:var(--text3);font-weight:500;letter-spacing:.02em;
+  white-space:nowrap;
+}
+
+.bug-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:480px;max-height:88vh;
+  overflow-y:auto;box-shadow:var(--shadow-lg);
+  animation:fadeUp .35s cubic-bezier(.34,1.1,.64,1);
+}
+.bug-header{
+  padding:22px 24px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  border-bottom:.5px solid var(--border);
+  position:sticky;top:0;background:var(--card-bg);z-index:2;
+}
+.bug-title{font-size:20px;font-weight:600;letter-spacing:-0.03em;color:var(--text)}
+.bug-subtitle{font-size:13px;color:var(--text2);margin-top:6px;font-weight:400;line-height:1.5;letter-spacing:-0.01em}
+.bug-subtitle strong{color:var(--text);font-weight:600}
+.bug-warning{
+  font-size:12px;color:var(--amber);margin-top:8px;padding:10px 12px;
+  background:rgba(245,158,11,.08);border:.5px solid rgba(245,158,11,.25);
+  border-radius:var(--r);line-height:1.5;letter-spacing:-0.01em;
+}
+.bug-close{
+  width:30px;height:30px;border-radius:50%;border:.5px solid var(--border-strong);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;color:var(--text3);font-size:16px;transition:all .15s;
+}
+.bug-close:hover{background:var(--bg4);color:var(--text)}
+.bug-body{padding:18px 24px 22px;display:flex;flex-direction:column;gap:18px}
+.bug-field-label{
+  font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:8px;
+}
+.bug-field-label .req{color:var(--red);margin-left:2px}
+.bug-issue-options{display:flex;flex-direction:column;gap:7px}
+.bug-issue-opt{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;cursor:pointer;
+  background:var(--bg2);border:.5px solid var(--border);border-radius:var(--r);
+  transition:all .18s;font-size:14px;color:var(--text);font-weight:500;letter-spacing:-0.01em;
+}
+.bug-issue-opt:hover{border-color:var(--border-strong);background:var(--bg3)}
+.bug-issue-opt.selected{
+  background:rgba(239,67,179,.08);
+  border-color:var(--pink);
+  color:var(--text);
+}
+.bug-issue-radio{
+  width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all .15s;
+}
+.bug-issue-opt.selected .bug-issue-radio{border-color:var(--pink)}
+.bug-issue-radio::after{
+  content:'';width:8px;height:8px;border-radius:50%;background:var(--pink);
+  opacity:0;transition:opacity .15s;
+}
+.bug-issue-opt.selected .bug-issue-radio::after{opacity:1}
+.bug-textarea{
+  width:100%;min-height:110px;resize:vertical;
+  font-family:var(--font);font-size:14px;color:var(--text);
+  background:var(--input-bg);border:.5px solid var(--border-strong);border-radius:var(--r);
+  padding:12px 14px;outline:none;
+  transition:border-color .15s,box-shadow .15s;letter-spacing:-0.01em;line-height:1.5;
+}
+.bug-textarea:focus{border-color:var(--pink);box-shadow:0 0 0 4px rgba(239,67,179,.10)}
+.bug-textarea::placeholder{color:var(--text3)}
+.bug-submit-btn{
+  width:100%;padding:14px;border-radius:var(--r);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.bug-submit-btn:hover:not(:disabled){background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.3)}
+.bug-submit-btn:disabled{opacity:.5;cursor:not-allowed}
+.bug-submit-btn .bug-spinner{
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
+  animation:spin .7s linear infinite;
+}
+.bug-error{font-size:12px;color:var(--red);font-weight:500;text-align:center;min-height:14px}
+
+
 /* ── Begin Session Button ── */
 .begin-session-btn{
   display:flex;align-items:center;gap:8px;
@@ -409,6 +730,327 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
 }
 .prereq-overlay.hidden{display:none!important}
+
+/* ── Notification Bell & Panel ── */
+.notif-bell{
+  position:relative;width:34px;height:34px;border-radius:50%;
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text2);transition:all .18s;flex-shrink:0;
+}
+.notif-bell:hover{background:var(--bg3);color:var(--text);border-color:var(--pink)}
+.notif-bell svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.notif-bell .notif-dot{
+  position:absolute;top:6px;right:6px;
+  width:8px;height:8px;border-radius:50%;background:var(--pink);
+  border:1.5px solid var(--bg2);
+  animation:pulse 2s infinite;
+}
+.notif-bell.has-unread svg{color:var(--pink)}
+@keyframes pulse{
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.2);opacity:.7}
+}
+
+.notif-panel{
+  position:absolute;top:calc(100% + 10px);right:0;
+  width:340px;max-width:calc(100vw - 32px);max-height:480px;
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:var(--rl);box-shadow:var(--shadow-lg);
+  z-index:300;overflow:hidden;display:flex;flex-direction:column;
+  animation:fadeUp .22s cubic-bezier(.34,1.1,.64,1);
+}
+.notif-panel.hidden{display:none!important}
+.notif-panel-header{
+  padding:14px 16px;border-bottom:.5px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  background:var(--card-bg);
+}
+.notif-panel-title{font-size:14px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.notif-mark-read{
+  font-size:11px;font-weight:500;color:var(--pink);background:none;border:none;
+  cursor:pointer;padding:4px 8px;border-radius:6px;transition:background .15s;
+}
+.notif-mark-read:hover{background:rgba(239,67,179,.1)}
+.notif-list{overflow-y:auto;flex:1;max-height:400px}
+.notif-item{
+  padding:13px 16px;border-bottom:.5px solid var(--border);
+  display:flex;flex-direction:column;gap:5px;
+  transition:background .15s;cursor:default;
+}
+.notif-item:last-child{border-bottom:none}
+.notif-item.unread{background:rgba(239,67,179,.04)}
+.notif-item.unread::before{
+  content:'';position:absolute;left:5px;top:50%;transform:translateY(-50%);
+  width:5px;height:5px;border-radius:50%;background:var(--pink);
+}
+.notif-item-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.notif-item-title{font-size:13px;font-weight:600;color:var(--text);letter-spacing:-0.01em;flex:1}
+.notif-item-time{font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0;font-weight:500}
+.notif-item-body{font-size:12px;color:var(--text2);line-height:1.5;letter-spacing:-0.01em}
+.notif-empty{
+  padding:36px 20px;text-align:center;color:var(--text3);font-size:13px;line-height:1.5;
+}
+
+
+
+/* Override trouble-table to 3 columns: Date | Issue | Resolution */
+.trouble-table .trouble-hdr,
+.trouble-table .trouble-row{
+  display:grid !important;
+  grid-template-columns: 110px minmax(140px,1.2fr) minmax(180px,2fr) !important;
+}
+.trouble-cell.date{
+  font-size:11px;color:var(--text3);font-weight:500;
+  letter-spacing:.02em;white-space:nowrap;
+}
+@media (max-width:600px){
+  .trouble-table .trouble-hdr,
+  .trouble-table .trouble-row{
+    grid-template-columns: 90px 1fr 1.4fr !important;
+  }
+  .trouble-cell.date{font-size:10px}
+}
+
+/* ── Dynamic Troubleshooting ── */
+.panel-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}
+.panel-title-row .panel-title{margin-bottom:2px}
+.panel-title-row .panel-sub{margin-bottom:0}
+.trouble-refresh-btn{
+  width:34px;height:34px;border-radius:var(--r);
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  color:var(--text3);cursor:pointer;transition:all .18s;
+}
+.trouble-refresh-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--pink)}
+.trouble-refresh-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.trouble-refresh-btn.loading svg{animation:spin .9s linear infinite}
+.trouble-last-sync{font-size:11px;color:var(--text3);margin:6px 0 14px;font-weight:400}
+.trouble-loading{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:40px 0;color:var(--text3);font-size:13px;
+}
+.trouble-spinner{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid var(--border-strong);border-top-color:var(--pink);
+  animation:spin .7s linear infinite;
+}
+.trouble-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;line-height:1.5}
+.trouble-error{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  padding:30px 20px;text-align:center;color:var(--red);font-size:13px;line-height:1.5;
+  background:rgba(239,68,68,.06);border:.5px solid rgba(239,68,68,.2);border-radius:var(--r);
+}
+.trouble-cell.date{
+  font-size:11px;color:var(--text3);font-weight:500;letter-spacing:.02em;
+  white-space:nowrap;
+}
+
+
+/* ── Bug Report Modal ── */
+.bug-overlay{
+  position:fixed;inset:0;z-index:550;
+  background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.bug-overlay.hidden{display:none!important}
+
+/* ── Notification Bell & Panel ── */
+.notif-bell{
+  position:relative;width:34px;height:34px;border-radius:50%;
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text2);transition:all .18s;flex-shrink:0;
+}
+.notif-bell:hover{background:var(--bg3);color:var(--text);border-color:var(--pink)}
+.notif-bell svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.notif-bell .notif-dot{
+  position:absolute;top:6px;right:6px;
+  width:8px;height:8px;border-radius:50%;background:var(--pink);
+  border:1.5px solid var(--bg2);
+  animation:pulse 2s infinite;
+}
+.notif-bell.has-unread svg{color:var(--pink)}
+@keyframes pulse{
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.2);opacity:.7}
+}
+
+.notif-panel{
+  position:absolute;top:calc(100% + 10px);right:0;
+  width:340px;max-width:calc(100vw - 32px);max-height:480px;
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:var(--rl);box-shadow:var(--shadow-lg);
+  z-index:300;overflow:hidden;display:flex;flex-direction:column;
+  animation:fadeUp .22s cubic-bezier(.34,1.1,.64,1);
+}
+.notif-panel.hidden{display:none!important}
+.notif-panel-header{
+  padding:14px 16px;border-bottom:.5px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  background:var(--card-bg);
+}
+.notif-panel-title{font-size:14px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.notif-mark-read{
+  font-size:11px;font-weight:500;color:var(--pink);background:none;border:none;
+  cursor:pointer;padding:4px 8px;border-radius:6px;transition:background .15s;
+}
+.notif-mark-read:hover{background:rgba(239,67,179,.1)}
+.notif-list{overflow-y:auto;flex:1;max-height:400px}
+.notif-item{
+  padding:13px 16px;border-bottom:.5px solid var(--border);
+  display:flex;flex-direction:column;gap:5px;
+  transition:background .15s;cursor:default;
+}
+.notif-item:last-child{border-bottom:none}
+.notif-item.unread{background:rgba(239,67,179,.04)}
+.notif-item.unread::before{
+  content:'';position:absolute;left:5px;top:50%;transform:translateY(-50%);
+  width:5px;height:5px;border-radius:50%;background:var(--pink);
+}
+.notif-item-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.notif-item-title{font-size:13px;font-weight:600;color:var(--text);letter-spacing:-0.01em;flex:1}
+.notif-item-time{font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0;font-weight:500}
+.notif-item-body{font-size:12px;color:var(--text2);line-height:1.5;letter-spacing:-0.01em}
+.notif-empty{
+  padding:36px 20px;text-align:center;color:var(--text3);font-size:13px;line-height:1.5;
+}
+
+
+
+/* Override trouble-table to 3 columns: Date | Issue | Resolution */
+.trouble-table .trouble-hdr,
+.trouble-table .trouble-row{
+  display:grid !important;
+  grid-template-columns: 110px minmax(140px,1.2fr) minmax(180px,2fr) !important;
+}
+.trouble-cell.date{
+  font-size:11px;color:var(--text3);font-weight:500;
+  letter-spacing:.02em;white-space:nowrap;
+}
+@media (max-width:600px){
+  .trouble-table .trouble-hdr,
+  .trouble-table .trouble-row{
+    grid-template-columns: 90px 1fr 1.4fr !important;
+  }
+  .trouble-cell.date{font-size:10px}
+}
+
+/* ── Dynamic Troubleshooting ── */
+.panel-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}
+.panel-title-row .panel-title{margin-bottom:2px}
+.panel-title-row .panel-sub{margin-bottom:0}
+.trouble-refresh-btn{
+  width:34px;height:34px;border-radius:var(--r);
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  color:var(--text3);cursor:pointer;transition:all .18s;
+}
+.trouble-refresh-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--pink)}
+.trouble-refresh-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.trouble-refresh-btn.loading svg{animation:spin .9s linear infinite}
+.trouble-last-sync{font-size:11px;color:var(--text3);margin:6px 0 14px;font-weight:400}
+.trouble-loading{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:40px 0;color:var(--text3);font-size:13px;
+}
+.trouble-spinner{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid var(--border-strong);border-top-color:var(--pink);
+  animation:spin .7s linear infinite;
+}
+.trouble-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;line-height:1.5}
+.trouble-error{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  padding:30px 20px;text-align:center;color:var(--red);font-size:13px;line-height:1.5;
+  background:rgba(239,68,68,.06);border:.5px solid rgba(239,68,68,.2);border-radius:var(--r);
+}
+.trouble-cell.date{
+  font-size:11px;color:var(--text3);font-weight:500;letter-spacing:.02em;
+  white-space:nowrap;
+}
+
+.bug-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:480px;max-height:88vh;
+  overflow-y:auto;box-shadow:var(--shadow-lg);
+  animation:fadeUp .35s cubic-bezier(.34,1.1,.64,1);
+}
+.bug-header{
+  padding:22px 24px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  border-bottom:.5px solid var(--border);
+  position:sticky;top:0;background:var(--card-bg);z-index:2;
+}
+.bug-title{font-size:20px;font-weight:600;letter-spacing:-0.03em;color:var(--text)}
+.bug-subtitle{font-size:13px;color:var(--text2);margin-top:6px;font-weight:400;line-height:1.5;letter-spacing:-0.01em}
+.bug-subtitle strong{color:var(--text);font-weight:600}
+.bug-warning{
+  font-size:12px;color:var(--amber);margin-top:8px;padding:10px 12px;
+  background:rgba(245,158,11,.08);border:.5px solid rgba(245,158,11,.25);
+  border-radius:var(--r);line-height:1.5;letter-spacing:-0.01em;
+}
+.bug-close{
+  width:30px;height:30px;border-radius:50%;border:.5px solid var(--border-strong);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;color:var(--text3);font-size:16px;transition:all .15s;
+}
+.bug-close:hover{background:var(--bg4);color:var(--text)}
+.bug-body{padding:18px 24px 22px;display:flex;flex-direction:column;gap:18px}
+.bug-field-label{
+  font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:8px;
+}
+.bug-field-label .req{color:var(--red);margin-left:2px}
+.bug-issue-options{display:flex;flex-direction:column;gap:7px}
+.bug-issue-opt{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;cursor:pointer;
+  background:var(--bg2);border:.5px solid var(--border);border-radius:var(--r);
+  transition:all .18s;font-size:14px;color:var(--text);font-weight:500;letter-spacing:-0.01em;
+}
+.bug-issue-opt:hover{border-color:var(--border-strong);background:var(--bg3)}
+.bug-issue-opt.selected{
+  background:rgba(239,67,179,.08);
+  border-color:var(--pink);
+  color:var(--text);
+}
+.bug-issue-radio{
+  width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all .15s;
+}
+.bug-issue-opt.selected .bug-issue-radio{border-color:var(--pink)}
+.bug-issue-radio::after{
+  content:'';width:8px;height:8px;border-radius:50%;background:var(--pink);
+  opacity:0;transition:opacity .15s;
+}
+.bug-issue-opt.selected .bug-issue-radio::after{opacity:1}
+.bug-textarea{
+  width:100%;min-height:110px;resize:vertical;
+  font-family:var(--font);font-size:14px;color:var(--text);
+  background:var(--input-bg);border:.5px solid var(--border-strong);border-radius:var(--r);
+  padding:12px 14px;outline:none;
+  transition:border-color .15s,box-shadow .15s;letter-spacing:-0.01em;line-height:1.5;
+}
+.bug-textarea:focus{border-color:var(--pink);box-shadow:0 0 0 4px rgba(239,67,179,.10)}
+.bug-textarea::placeholder{color:var(--text3)}
+.bug-submit-btn{
+  width:100%;padding:14px;border-radius:var(--r);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.bug-submit-btn:hover:not(:disabled){background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.3)}
+.bug-submit-btn:disabled{opacity:.5;cursor:not-allowed}
+.bug-submit-btn .bug-spinner{
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
+  animation:spin .7s linear infinite;
+}
+.bug-error{font-size:12px;color:var(--red);font-weight:500;text-align:center;min-height:14px}
+
 .prereq-modal{
   background:var(--card-bg);border:.5px solid var(--border-strong);
   border-radius:24px;width:100%;max-width:520px;max-height:88vh;
@@ -479,6 +1121,327 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   animation:fadeUp .3s cubic-bezier(.4,0,.2,1);
 }
 .session-complete-overlay.hidden{display:none!important}
+
+/* ── Notification Bell & Panel ── */
+.notif-bell{
+  position:relative;width:34px;height:34px;border-radius:50%;
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text2);transition:all .18s;flex-shrink:0;
+}
+.notif-bell:hover{background:var(--bg3);color:var(--text);border-color:var(--pink)}
+.notif-bell svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.notif-bell .notif-dot{
+  position:absolute;top:6px;right:6px;
+  width:8px;height:8px;border-radius:50%;background:var(--pink);
+  border:1.5px solid var(--bg2);
+  animation:pulse 2s infinite;
+}
+.notif-bell.has-unread svg{color:var(--pink)}
+@keyframes pulse{
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.2);opacity:.7}
+}
+
+.notif-panel{
+  position:absolute;top:calc(100% + 10px);right:0;
+  width:340px;max-width:calc(100vw - 32px);max-height:480px;
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:var(--rl);box-shadow:var(--shadow-lg);
+  z-index:300;overflow:hidden;display:flex;flex-direction:column;
+  animation:fadeUp .22s cubic-bezier(.34,1.1,.64,1);
+}
+.notif-panel.hidden{display:none!important}
+.notif-panel-header{
+  padding:14px 16px;border-bottom:.5px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  background:var(--card-bg);
+}
+.notif-panel-title{font-size:14px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.notif-mark-read{
+  font-size:11px;font-weight:500;color:var(--pink);background:none;border:none;
+  cursor:pointer;padding:4px 8px;border-radius:6px;transition:background .15s;
+}
+.notif-mark-read:hover{background:rgba(239,67,179,.1)}
+.notif-list{overflow-y:auto;flex:1;max-height:400px}
+.notif-item{
+  padding:13px 16px;border-bottom:.5px solid var(--border);
+  display:flex;flex-direction:column;gap:5px;
+  transition:background .15s;cursor:default;
+}
+.notif-item:last-child{border-bottom:none}
+.notif-item.unread{background:rgba(239,67,179,.04)}
+.notif-item.unread::before{
+  content:'';position:absolute;left:5px;top:50%;transform:translateY(-50%);
+  width:5px;height:5px;border-radius:50%;background:var(--pink);
+}
+.notif-item-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.notif-item-title{font-size:13px;font-weight:600;color:var(--text);letter-spacing:-0.01em;flex:1}
+.notif-item-time{font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0;font-weight:500}
+.notif-item-body{font-size:12px;color:var(--text2);line-height:1.5;letter-spacing:-0.01em}
+.notif-empty{
+  padding:36px 20px;text-align:center;color:var(--text3);font-size:13px;line-height:1.5;
+}
+
+
+
+/* Override trouble-table to 3 columns: Date | Issue | Resolution */
+.trouble-table .trouble-hdr,
+.trouble-table .trouble-row{
+  display:grid !important;
+  grid-template-columns: 110px minmax(140px,1.2fr) minmax(180px,2fr) !important;
+}
+.trouble-cell.date{
+  font-size:11px;color:var(--text3);font-weight:500;
+  letter-spacing:.02em;white-space:nowrap;
+}
+@media (max-width:600px){
+  .trouble-table .trouble-hdr,
+  .trouble-table .trouble-row{
+    grid-template-columns: 90px 1fr 1.4fr !important;
+  }
+  .trouble-cell.date{font-size:10px}
+}
+
+/* ── Dynamic Troubleshooting ── */
+.panel-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}
+.panel-title-row .panel-title{margin-bottom:2px}
+.panel-title-row .panel-sub{margin-bottom:0}
+.trouble-refresh-btn{
+  width:34px;height:34px;border-radius:var(--r);
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  color:var(--text3);cursor:pointer;transition:all .18s;
+}
+.trouble-refresh-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--pink)}
+.trouble-refresh-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.trouble-refresh-btn.loading svg{animation:spin .9s linear infinite}
+.trouble-last-sync{font-size:11px;color:var(--text3);margin:6px 0 14px;font-weight:400}
+.trouble-loading{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:40px 0;color:var(--text3);font-size:13px;
+}
+.trouble-spinner{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid var(--border-strong);border-top-color:var(--pink);
+  animation:spin .7s linear infinite;
+}
+.trouble-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;line-height:1.5}
+.trouble-error{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  padding:30px 20px;text-align:center;color:var(--red);font-size:13px;line-height:1.5;
+  background:rgba(239,68,68,.06);border:.5px solid rgba(239,68,68,.2);border-radius:var(--r);
+}
+.trouble-cell.date{
+  font-size:11px;color:var(--text3);font-weight:500;letter-spacing:.02em;
+  white-space:nowrap;
+}
+
+
+/* ── Bug Report Modal ── */
+.bug-overlay{
+  position:fixed;inset:0;z-index:550;
+  background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.bug-overlay.hidden{display:none!important}
+
+/* ── Notification Bell & Panel ── */
+.notif-bell{
+  position:relative;width:34px;height:34px;border-radius:50%;
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text2);transition:all .18s;flex-shrink:0;
+}
+.notif-bell:hover{background:var(--bg3);color:var(--text);border-color:var(--pink)}
+.notif-bell svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.notif-bell .notif-dot{
+  position:absolute;top:6px;right:6px;
+  width:8px;height:8px;border-radius:50%;background:var(--pink);
+  border:1.5px solid var(--bg2);
+  animation:pulse 2s infinite;
+}
+.notif-bell.has-unread svg{color:var(--pink)}
+@keyframes pulse{
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.2);opacity:.7}
+}
+
+.notif-panel{
+  position:absolute;top:calc(100% + 10px);right:0;
+  width:340px;max-width:calc(100vw - 32px);max-height:480px;
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:var(--rl);box-shadow:var(--shadow-lg);
+  z-index:300;overflow:hidden;display:flex;flex-direction:column;
+  animation:fadeUp .22s cubic-bezier(.34,1.1,.64,1);
+}
+.notif-panel.hidden{display:none!important}
+.notif-panel-header{
+  padding:14px 16px;border-bottom:.5px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  background:var(--card-bg);
+}
+.notif-panel-title{font-size:14px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.notif-mark-read{
+  font-size:11px;font-weight:500;color:var(--pink);background:none;border:none;
+  cursor:pointer;padding:4px 8px;border-radius:6px;transition:background .15s;
+}
+.notif-mark-read:hover{background:rgba(239,67,179,.1)}
+.notif-list{overflow-y:auto;flex:1;max-height:400px}
+.notif-item{
+  padding:13px 16px;border-bottom:.5px solid var(--border);
+  display:flex;flex-direction:column;gap:5px;
+  transition:background .15s;cursor:default;
+}
+.notif-item:last-child{border-bottom:none}
+.notif-item.unread{background:rgba(239,67,179,.04)}
+.notif-item.unread::before{
+  content:'';position:absolute;left:5px;top:50%;transform:translateY(-50%);
+  width:5px;height:5px;border-radius:50%;background:var(--pink);
+}
+.notif-item-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.notif-item-title{font-size:13px;font-weight:600;color:var(--text);letter-spacing:-0.01em;flex:1}
+.notif-item-time{font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0;font-weight:500}
+.notif-item-body{font-size:12px;color:var(--text2);line-height:1.5;letter-spacing:-0.01em}
+.notif-empty{
+  padding:36px 20px;text-align:center;color:var(--text3);font-size:13px;line-height:1.5;
+}
+
+
+
+/* Override trouble-table to 3 columns: Date | Issue | Resolution */
+.trouble-table .trouble-hdr,
+.trouble-table .trouble-row{
+  display:grid !important;
+  grid-template-columns: 110px minmax(140px,1.2fr) minmax(180px,2fr) !important;
+}
+.trouble-cell.date{
+  font-size:11px;color:var(--text3);font-weight:500;
+  letter-spacing:.02em;white-space:nowrap;
+}
+@media (max-width:600px){
+  .trouble-table .trouble-hdr,
+  .trouble-table .trouble-row{
+    grid-template-columns: 90px 1fr 1.4fr !important;
+  }
+  .trouble-cell.date{font-size:10px}
+}
+
+/* ── Dynamic Troubleshooting ── */
+.panel-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}
+.panel-title-row .panel-title{margin-bottom:2px}
+.panel-title-row .panel-sub{margin-bottom:0}
+.trouble-refresh-btn{
+  width:34px;height:34px;border-radius:var(--r);
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  color:var(--text3);cursor:pointer;transition:all .18s;
+}
+.trouble-refresh-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--pink)}
+.trouble-refresh-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.trouble-refresh-btn.loading svg{animation:spin .9s linear infinite}
+.trouble-last-sync{font-size:11px;color:var(--text3);margin:6px 0 14px;font-weight:400}
+.trouble-loading{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:40px 0;color:var(--text3);font-size:13px;
+}
+.trouble-spinner{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid var(--border-strong);border-top-color:var(--pink);
+  animation:spin .7s linear infinite;
+}
+.trouble-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;line-height:1.5}
+.trouble-error{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  padding:30px 20px;text-align:center;color:var(--red);font-size:13px;line-height:1.5;
+  background:rgba(239,68,68,.06);border:.5px solid rgba(239,68,68,.2);border-radius:var(--r);
+}
+.trouble-cell.date{
+  font-size:11px;color:var(--text3);font-weight:500;letter-spacing:.02em;
+  white-space:nowrap;
+}
+
+.bug-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:480px;max-height:88vh;
+  overflow-y:auto;box-shadow:var(--shadow-lg);
+  animation:fadeUp .35s cubic-bezier(.34,1.1,.64,1);
+}
+.bug-header{
+  padding:22px 24px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  border-bottom:.5px solid var(--border);
+  position:sticky;top:0;background:var(--card-bg);z-index:2;
+}
+.bug-title{font-size:20px;font-weight:600;letter-spacing:-0.03em;color:var(--text)}
+.bug-subtitle{font-size:13px;color:var(--text2);margin-top:6px;font-weight:400;line-height:1.5;letter-spacing:-0.01em}
+.bug-subtitle strong{color:var(--text);font-weight:600}
+.bug-warning{
+  font-size:12px;color:var(--amber);margin-top:8px;padding:10px 12px;
+  background:rgba(245,158,11,.08);border:.5px solid rgba(245,158,11,.25);
+  border-radius:var(--r);line-height:1.5;letter-spacing:-0.01em;
+}
+.bug-close{
+  width:30px;height:30px;border-radius:50%;border:.5px solid var(--border-strong);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;color:var(--text3);font-size:16px;transition:all .15s;
+}
+.bug-close:hover{background:var(--bg4);color:var(--text)}
+.bug-body{padding:18px 24px 22px;display:flex;flex-direction:column;gap:18px}
+.bug-field-label{
+  font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:8px;
+}
+.bug-field-label .req{color:var(--red);margin-left:2px}
+.bug-issue-options{display:flex;flex-direction:column;gap:7px}
+.bug-issue-opt{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;cursor:pointer;
+  background:var(--bg2);border:.5px solid var(--border);border-radius:var(--r);
+  transition:all .18s;font-size:14px;color:var(--text);font-weight:500;letter-spacing:-0.01em;
+}
+.bug-issue-opt:hover{border-color:var(--border-strong);background:var(--bg3)}
+.bug-issue-opt.selected{
+  background:rgba(239,67,179,.08);
+  border-color:var(--pink);
+  color:var(--text);
+}
+.bug-issue-radio{
+  width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all .15s;
+}
+.bug-issue-opt.selected .bug-issue-radio{border-color:var(--pink)}
+.bug-issue-radio::after{
+  content:'';width:8px;height:8px;border-radius:50%;background:var(--pink);
+  opacity:0;transition:opacity .15s;
+}
+.bug-issue-opt.selected .bug-issue-radio::after{opacity:1}
+.bug-textarea{
+  width:100%;min-height:110px;resize:vertical;
+  font-family:var(--font);font-size:14px;color:var(--text);
+  background:var(--input-bg);border:.5px solid var(--border-strong);border-radius:var(--r);
+  padding:12px 14px;outline:none;
+  transition:border-color .15s,box-shadow .15s;letter-spacing:-0.01em;line-height:1.5;
+}
+.bug-textarea:focus{border-color:var(--pink);box-shadow:0 0 0 4px rgba(239,67,179,.10)}
+.bug-textarea::placeholder{color:var(--text3)}
+.bug-submit-btn{
+  width:100%;padding:14px;border-radius:var(--r);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.bug-submit-btn:hover:not(:disabled){background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.3)}
+.bug-submit-btn:disabled{opacity:.5;cursor:not-allowed}
+.bug-submit-btn .bug-spinner{
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
+  animation:spin .7s linear infinite;
+}
+.bug-error{font-size:12px;color:var(--red);font-weight:500;text-align:center;min-height:14px}
+
 .session-complete-modal{
   background:var(--card-bg);border:.5px solid var(--border-strong);
   border-radius:24px;width:100%;max-width:400px;
@@ -1044,6 +2007,327 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
 }
 .ocr-overlay.hidden{display:none!important}
+
+/* ── Notification Bell & Panel ── */
+.notif-bell{
+  position:relative;width:34px;height:34px;border-radius:50%;
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text2);transition:all .18s;flex-shrink:0;
+}
+.notif-bell:hover{background:var(--bg3);color:var(--text);border-color:var(--pink)}
+.notif-bell svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.notif-bell .notif-dot{
+  position:absolute;top:6px;right:6px;
+  width:8px;height:8px;border-radius:50%;background:var(--pink);
+  border:1.5px solid var(--bg2);
+  animation:pulse 2s infinite;
+}
+.notif-bell.has-unread svg{color:var(--pink)}
+@keyframes pulse{
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.2);opacity:.7}
+}
+
+.notif-panel{
+  position:absolute;top:calc(100% + 10px);right:0;
+  width:340px;max-width:calc(100vw - 32px);max-height:480px;
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:var(--rl);box-shadow:var(--shadow-lg);
+  z-index:300;overflow:hidden;display:flex;flex-direction:column;
+  animation:fadeUp .22s cubic-bezier(.34,1.1,.64,1);
+}
+.notif-panel.hidden{display:none!important}
+.notif-panel-header{
+  padding:14px 16px;border-bottom:.5px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  background:var(--card-bg);
+}
+.notif-panel-title{font-size:14px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.notif-mark-read{
+  font-size:11px;font-weight:500;color:var(--pink);background:none;border:none;
+  cursor:pointer;padding:4px 8px;border-radius:6px;transition:background .15s;
+}
+.notif-mark-read:hover{background:rgba(239,67,179,.1)}
+.notif-list{overflow-y:auto;flex:1;max-height:400px}
+.notif-item{
+  padding:13px 16px;border-bottom:.5px solid var(--border);
+  display:flex;flex-direction:column;gap:5px;
+  transition:background .15s;cursor:default;
+}
+.notif-item:last-child{border-bottom:none}
+.notif-item.unread{background:rgba(239,67,179,.04)}
+.notif-item.unread::before{
+  content:'';position:absolute;left:5px;top:50%;transform:translateY(-50%);
+  width:5px;height:5px;border-radius:50%;background:var(--pink);
+}
+.notif-item-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.notif-item-title{font-size:13px;font-weight:600;color:var(--text);letter-spacing:-0.01em;flex:1}
+.notif-item-time{font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0;font-weight:500}
+.notif-item-body{font-size:12px;color:var(--text2);line-height:1.5;letter-spacing:-0.01em}
+.notif-empty{
+  padding:36px 20px;text-align:center;color:var(--text3);font-size:13px;line-height:1.5;
+}
+
+
+
+/* Override trouble-table to 3 columns: Date | Issue | Resolution */
+.trouble-table .trouble-hdr,
+.trouble-table .trouble-row{
+  display:grid !important;
+  grid-template-columns: 110px minmax(140px,1.2fr) minmax(180px,2fr) !important;
+}
+.trouble-cell.date{
+  font-size:11px;color:var(--text3);font-weight:500;
+  letter-spacing:.02em;white-space:nowrap;
+}
+@media (max-width:600px){
+  .trouble-table .trouble-hdr,
+  .trouble-table .trouble-row{
+    grid-template-columns: 90px 1fr 1.4fr !important;
+  }
+  .trouble-cell.date{font-size:10px}
+}
+
+/* ── Dynamic Troubleshooting ── */
+.panel-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}
+.panel-title-row .panel-title{margin-bottom:2px}
+.panel-title-row .panel-sub{margin-bottom:0}
+.trouble-refresh-btn{
+  width:34px;height:34px;border-radius:var(--r);
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  color:var(--text3);cursor:pointer;transition:all .18s;
+}
+.trouble-refresh-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--pink)}
+.trouble-refresh-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.trouble-refresh-btn.loading svg{animation:spin .9s linear infinite}
+.trouble-last-sync{font-size:11px;color:var(--text3);margin:6px 0 14px;font-weight:400}
+.trouble-loading{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:40px 0;color:var(--text3);font-size:13px;
+}
+.trouble-spinner{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid var(--border-strong);border-top-color:var(--pink);
+  animation:spin .7s linear infinite;
+}
+.trouble-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;line-height:1.5}
+.trouble-error{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  padding:30px 20px;text-align:center;color:var(--red);font-size:13px;line-height:1.5;
+  background:rgba(239,68,68,.06);border:.5px solid rgba(239,68,68,.2);border-radius:var(--r);
+}
+.trouble-cell.date{
+  font-size:11px;color:var(--text3);font-weight:500;letter-spacing:.02em;
+  white-space:nowrap;
+}
+
+
+/* ── Bug Report Modal ── */
+.bug-overlay{
+  position:fixed;inset:0;z-index:550;
+  background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.bug-overlay.hidden{display:none!important}
+
+/* ── Notification Bell & Panel ── */
+.notif-bell{
+  position:relative;width:34px;height:34px;border-radius:50%;
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text2);transition:all .18s;flex-shrink:0;
+}
+.notif-bell:hover{background:var(--bg3);color:var(--text);border-color:var(--pink)}
+.notif-bell svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.notif-bell .notif-dot{
+  position:absolute;top:6px;right:6px;
+  width:8px;height:8px;border-radius:50%;background:var(--pink);
+  border:1.5px solid var(--bg2);
+  animation:pulse 2s infinite;
+}
+.notif-bell.has-unread svg{color:var(--pink)}
+@keyframes pulse{
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.2);opacity:.7}
+}
+
+.notif-panel{
+  position:absolute;top:calc(100% + 10px);right:0;
+  width:340px;max-width:calc(100vw - 32px);max-height:480px;
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:var(--rl);box-shadow:var(--shadow-lg);
+  z-index:300;overflow:hidden;display:flex;flex-direction:column;
+  animation:fadeUp .22s cubic-bezier(.34,1.1,.64,1);
+}
+.notif-panel.hidden{display:none!important}
+.notif-panel-header{
+  padding:14px 16px;border-bottom:.5px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  background:var(--card-bg);
+}
+.notif-panel-title{font-size:14px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.notif-mark-read{
+  font-size:11px;font-weight:500;color:var(--pink);background:none;border:none;
+  cursor:pointer;padding:4px 8px;border-radius:6px;transition:background .15s;
+}
+.notif-mark-read:hover{background:rgba(239,67,179,.1)}
+.notif-list{overflow-y:auto;flex:1;max-height:400px}
+.notif-item{
+  padding:13px 16px;border-bottom:.5px solid var(--border);
+  display:flex;flex-direction:column;gap:5px;
+  transition:background .15s;cursor:default;
+}
+.notif-item:last-child{border-bottom:none}
+.notif-item.unread{background:rgba(239,67,179,.04)}
+.notif-item.unread::before{
+  content:'';position:absolute;left:5px;top:50%;transform:translateY(-50%);
+  width:5px;height:5px;border-radius:50%;background:var(--pink);
+}
+.notif-item-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.notif-item-title{font-size:13px;font-weight:600;color:var(--text);letter-spacing:-0.01em;flex:1}
+.notif-item-time{font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0;font-weight:500}
+.notif-item-body{font-size:12px;color:var(--text2);line-height:1.5;letter-spacing:-0.01em}
+.notif-empty{
+  padding:36px 20px;text-align:center;color:var(--text3);font-size:13px;line-height:1.5;
+}
+
+
+
+/* Override trouble-table to 3 columns: Date | Issue | Resolution */
+.trouble-table .trouble-hdr,
+.trouble-table .trouble-row{
+  display:grid !important;
+  grid-template-columns: 110px minmax(140px,1.2fr) minmax(180px,2fr) !important;
+}
+.trouble-cell.date{
+  font-size:11px;color:var(--text3);font-weight:500;
+  letter-spacing:.02em;white-space:nowrap;
+}
+@media (max-width:600px){
+  .trouble-table .trouble-hdr,
+  .trouble-table .trouble-row{
+    grid-template-columns: 90px 1fr 1.4fr !important;
+  }
+  .trouble-cell.date{font-size:10px}
+}
+
+/* ── Dynamic Troubleshooting ── */
+.panel-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}
+.panel-title-row .panel-title{margin-bottom:2px}
+.panel-title-row .panel-sub{margin-bottom:0}
+.trouble-refresh-btn{
+  width:34px;height:34px;border-radius:var(--r);
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  color:var(--text3);cursor:pointer;transition:all .18s;
+}
+.trouble-refresh-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--pink)}
+.trouble-refresh-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.trouble-refresh-btn.loading svg{animation:spin .9s linear infinite}
+.trouble-last-sync{font-size:11px;color:var(--text3);margin:6px 0 14px;font-weight:400}
+.trouble-loading{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:40px 0;color:var(--text3);font-size:13px;
+}
+.trouble-spinner{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid var(--border-strong);border-top-color:var(--pink);
+  animation:spin .7s linear infinite;
+}
+.trouble-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;line-height:1.5}
+.trouble-error{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  padding:30px 20px;text-align:center;color:var(--red);font-size:13px;line-height:1.5;
+  background:rgba(239,68,68,.06);border:.5px solid rgba(239,68,68,.2);border-radius:var(--r);
+}
+.trouble-cell.date{
+  font-size:11px;color:var(--text3);font-weight:500;letter-spacing:.02em;
+  white-space:nowrap;
+}
+
+.bug-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:480px;max-height:88vh;
+  overflow-y:auto;box-shadow:var(--shadow-lg);
+  animation:fadeUp .35s cubic-bezier(.34,1.1,.64,1);
+}
+.bug-header{
+  padding:22px 24px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  border-bottom:.5px solid var(--border);
+  position:sticky;top:0;background:var(--card-bg);z-index:2;
+}
+.bug-title{font-size:20px;font-weight:600;letter-spacing:-0.03em;color:var(--text)}
+.bug-subtitle{font-size:13px;color:var(--text2);margin-top:6px;font-weight:400;line-height:1.5;letter-spacing:-0.01em}
+.bug-subtitle strong{color:var(--text);font-weight:600}
+.bug-warning{
+  font-size:12px;color:var(--amber);margin-top:8px;padding:10px 12px;
+  background:rgba(245,158,11,.08);border:.5px solid rgba(245,158,11,.25);
+  border-radius:var(--r);line-height:1.5;letter-spacing:-0.01em;
+}
+.bug-close{
+  width:30px;height:30px;border-radius:50%;border:.5px solid var(--border-strong);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;color:var(--text3);font-size:16px;transition:all .15s;
+}
+.bug-close:hover{background:var(--bg4);color:var(--text)}
+.bug-body{padding:18px 24px 22px;display:flex;flex-direction:column;gap:18px}
+.bug-field-label{
+  font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:8px;
+}
+.bug-field-label .req{color:var(--red);margin-left:2px}
+.bug-issue-options{display:flex;flex-direction:column;gap:7px}
+.bug-issue-opt{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;cursor:pointer;
+  background:var(--bg2);border:.5px solid var(--border);border-radius:var(--r);
+  transition:all .18s;font-size:14px;color:var(--text);font-weight:500;letter-spacing:-0.01em;
+}
+.bug-issue-opt:hover{border-color:var(--border-strong);background:var(--bg3)}
+.bug-issue-opt.selected{
+  background:rgba(239,67,179,.08);
+  border-color:var(--pink);
+  color:var(--text);
+}
+.bug-issue-radio{
+  width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all .15s;
+}
+.bug-issue-opt.selected .bug-issue-radio{border-color:var(--pink)}
+.bug-issue-radio::after{
+  content:'';width:8px;height:8px;border-radius:50%;background:var(--pink);
+  opacity:0;transition:opacity .15s;
+}
+.bug-issue-opt.selected .bug-issue-radio::after{opacity:1}
+.bug-textarea{
+  width:100%;min-height:110px;resize:vertical;
+  font-family:var(--font);font-size:14px;color:var(--text);
+  background:var(--input-bg);border:.5px solid var(--border-strong);border-radius:var(--r);
+  padding:12px 14px;outline:none;
+  transition:border-color .15s,box-shadow .15s;letter-spacing:-0.01em;line-height:1.5;
+}
+.bug-textarea:focus{border-color:var(--pink);box-shadow:0 0 0 4px rgba(239,67,179,.10)}
+.bug-textarea::placeholder{color:var(--text3)}
+.bug-submit-btn{
+  width:100%;padding:14px;border-radius:var(--r);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.bug-submit-btn:hover:not(:disabled){background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.3)}
+.bug-submit-btn:disabled{opacity:.5;cursor:not-allowed}
+.bug-submit-btn .bug-spinner{
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
+  animation:spin .7s linear infinite;
+}
+.bug-error{font-size:12px;color:var(--red);font-weight:500;text-align:center;min-height:14px}
+
 .ocr-modal{
   background:var(--card-bg);border:.5px solid var(--border-strong);
   border-radius:24px;width:100%;max-width:480px;
@@ -1069,6 +2353,327 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 }
 #login-screen.visible{display:flex}
 #login-screen.hidden{display:none!important}
+
+/* ── Notification Bell & Panel ── */
+.notif-bell{
+  position:relative;width:34px;height:34px;border-radius:50%;
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text2);transition:all .18s;flex-shrink:0;
+}
+.notif-bell:hover{background:var(--bg3);color:var(--text);border-color:var(--pink)}
+.notif-bell svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.notif-bell .notif-dot{
+  position:absolute;top:6px;right:6px;
+  width:8px;height:8px;border-radius:50%;background:var(--pink);
+  border:1.5px solid var(--bg2);
+  animation:pulse 2s infinite;
+}
+.notif-bell.has-unread svg{color:var(--pink)}
+@keyframes pulse{
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.2);opacity:.7}
+}
+
+.notif-panel{
+  position:absolute;top:calc(100% + 10px);right:0;
+  width:340px;max-width:calc(100vw - 32px);max-height:480px;
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:var(--rl);box-shadow:var(--shadow-lg);
+  z-index:300;overflow:hidden;display:flex;flex-direction:column;
+  animation:fadeUp .22s cubic-bezier(.34,1.1,.64,1);
+}
+.notif-panel.hidden{display:none!important}
+.notif-panel-header{
+  padding:14px 16px;border-bottom:.5px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  background:var(--card-bg);
+}
+.notif-panel-title{font-size:14px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.notif-mark-read{
+  font-size:11px;font-weight:500;color:var(--pink);background:none;border:none;
+  cursor:pointer;padding:4px 8px;border-radius:6px;transition:background .15s;
+}
+.notif-mark-read:hover{background:rgba(239,67,179,.1)}
+.notif-list{overflow-y:auto;flex:1;max-height:400px}
+.notif-item{
+  padding:13px 16px;border-bottom:.5px solid var(--border);
+  display:flex;flex-direction:column;gap:5px;
+  transition:background .15s;cursor:default;
+}
+.notif-item:last-child{border-bottom:none}
+.notif-item.unread{background:rgba(239,67,179,.04)}
+.notif-item.unread::before{
+  content:'';position:absolute;left:5px;top:50%;transform:translateY(-50%);
+  width:5px;height:5px;border-radius:50%;background:var(--pink);
+}
+.notif-item-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.notif-item-title{font-size:13px;font-weight:600;color:var(--text);letter-spacing:-0.01em;flex:1}
+.notif-item-time{font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0;font-weight:500}
+.notif-item-body{font-size:12px;color:var(--text2);line-height:1.5;letter-spacing:-0.01em}
+.notif-empty{
+  padding:36px 20px;text-align:center;color:var(--text3);font-size:13px;line-height:1.5;
+}
+
+
+
+/* Override trouble-table to 3 columns: Date | Issue | Resolution */
+.trouble-table .trouble-hdr,
+.trouble-table .trouble-row{
+  display:grid !important;
+  grid-template-columns: 110px minmax(140px,1.2fr) minmax(180px,2fr) !important;
+}
+.trouble-cell.date{
+  font-size:11px;color:var(--text3);font-weight:500;
+  letter-spacing:.02em;white-space:nowrap;
+}
+@media (max-width:600px){
+  .trouble-table .trouble-hdr,
+  .trouble-table .trouble-row{
+    grid-template-columns: 90px 1fr 1.4fr !important;
+  }
+  .trouble-cell.date{font-size:10px}
+}
+
+/* ── Dynamic Troubleshooting ── */
+.panel-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}
+.panel-title-row .panel-title{margin-bottom:2px}
+.panel-title-row .panel-sub{margin-bottom:0}
+.trouble-refresh-btn{
+  width:34px;height:34px;border-radius:var(--r);
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  color:var(--text3);cursor:pointer;transition:all .18s;
+}
+.trouble-refresh-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--pink)}
+.trouble-refresh-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.trouble-refresh-btn.loading svg{animation:spin .9s linear infinite}
+.trouble-last-sync{font-size:11px;color:var(--text3);margin:6px 0 14px;font-weight:400}
+.trouble-loading{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:40px 0;color:var(--text3);font-size:13px;
+}
+.trouble-spinner{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid var(--border-strong);border-top-color:var(--pink);
+  animation:spin .7s linear infinite;
+}
+.trouble-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;line-height:1.5}
+.trouble-error{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  padding:30px 20px;text-align:center;color:var(--red);font-size:13px;line-height:1.5;
+  background:rgba(239,68,68,.06);border:.5px solid rgba(239,68,68,.2);border-radius:var(--r);
+}
+.trouble-cell.date{
+  font-size:11px;color:var(--text3);font-weight:500;letter-spacing:.02em;
+  white-space:nowrap;
+}
+
+
+/* ── Bug Report Modal ── */
+.bug-overlay{
+  position:fixed;inset:0;z-index:550;
+  background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.bug-overlay.hidden{display:none!important}
+
+/* ── Notification Bell & Panel ── */
+.notif-bell{
+  position:relative;width:34px;height:34px;border-radius:50%;
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text2);transition:all .18s;flex-shrink:0;
+}
+.notif-bell:hover{background:var(--bg3);color:var(--text);border-color:var(--pink)}
+.notif-bell svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.notif-bell .notif-dot{
+  position:absolute;top:6px;right:6px;
+  width:8px;height:8px;border-radius:50%;background:var(--pink);
+  border:1.5px solid var(--bg2);
+  animation:pulse 2s infinite;
+}
+.notif-bell.has-unread svg{color:var(--pink)}
+@keyframes pulse{
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.2);opacity:.7}
+}
+
+.notif-panel{
+  position:absolute;top:calc(100% + 10px);right:0;
+  width:340px;max-width:calc(100vw - 32px);max-height:480px;
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:var(--rl);box-shadow:var(--shadow-lg);
+  z-index:300;overflow:hidden;display:flex;flex-direction:column;
+  animation:fadeUp .22s cubic-bezier(.34,1.1,.64,1);
+}
+.notif-panel.hidden{display:none!important}
+.notif-panel-header{
+  padding:14px 16px;border-bottom:.5px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  background:var(--card-bg);
+}
+.notif-panel-title{font-size:14px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.notif-mark-read{
+  font-size:11px;font-weight:500;color:var(--pink);background:none;border:none;
+  cursor:pointer;padding:4px 8px;border-radius:6px;transition:background .15s;
+}
+.notif-mark-read:hover{background:rgba(239,67,179,.1)}
+.notif-list{overflow-y:auto;flex:1;max-height:400px}
+.notif-item{
+  padding:13px 16px;border-bottom:.5px solid var(--border);
+  display:flex;flex-direction:column;gap:5px;
+  transition:background .15s;cursor:default;
+}
+.notif-item:last-child{border-bottom:none}
+.notif-item.unread{background:rgba(239,67,179,.04)}
+.notif-item.unread::before{
+  content:'';position:absolute;left:5px;top:50%;transform:translateY(-50%);
+  width:5px;height:5px;border-radius:50%;background:var(--pink);
+}
+.notif-item-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.notif-item-title{font-size:13px;font-weight:600;color:var(--text);letter-spacing:-0.01em;flex:1}
+.notif-item-time{font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0;font-weight:500}
+.notif-item-body{font-size:12px;color:var(--text2);line-height:1.5;letter-spacing:-0.01em}
+.notif-empty{
+  padding:36px 20px;text-align:center;color:var(--text3);font-size:13px;line-height:1.5;
+}
+
+
+
+/* Override trouble-table to 3 columns: Date | Issue | Resolution */
+.trouble-table .trouble-hdr,
+.trouble-table .trouble-row{
+  display:grid !important;
+  grid-template-columns: 110px minmax(140px,1.2fr) minmax(180px,2fr) !important;
+}
+.trouble-cell.date{
+  font-size:11px;color:var(--text3);font-weight:500;
+  letter-spacing:.02em;white-space:nowrap;
+}
+@media (max-width:600px){
+  .trouble-table .trouble-hdr,
+  .trouble-table .trouble-row{
+    grid-template-columns: 90px 1fr 1.4fr !important;
+  }
+  .trouble-cell.date{font-size:10px}
+}
+
+/* ── Dynamic Troubleshooting ── */
+.panel-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}
+.panel-title-row .panel-title{margin-bottom:2px}
+.panel-title-row .panel-sub{margin-bottom:0}
+.trouble-refresh-btn{
+  width:34px;height:34px;border-radius:var(--r);
+  background:var(--bg2);border:.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  color:var(--text3);cursor:pointer;transition:all .18s;
+}
+.trouble-refresh-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--pink)}
+.trouble-refresh-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.trouble-refresh-btn.loading svg{animation:spin .9s linear infinite}
+.trouble-last-sync{font-size:11px;color:var(--text3);margin:6px 0 14px;font-weight:400}
+.trouble-loading{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:40px 0;color:var(--text3);font-size:13px;
+}
+.trouble-spinner{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid var(--border-strong);border-top-color:var(--pink);
+  animation:spin .7s linear infinite;
+}
+.trouble-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;line-height:1.5}
+.trouble-error{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  padding:30px 20px;text-align:center;color:var(--red);font-size:13px;line-height:1.5;
+  background:rgba(239,68,68,.06);border:.5px solid rgba(239,68,68,.2);border-radius:var(--r);
+}
+.trouble-cell.date{
+  font-size:11px;color:var(--text3);font-weight:500;letter-spacing:.02em;
+  white-space:nowrap;
+}
+
+.bug-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:480px;max-height:88vh;
+  overflow-y:auto;box-shadow:var(--shadow-lg);
+  animation:fadeUp .35s cubic-bezier(.34,1.1,.64,1);
+}
+.bug-header{
+  padding:22px 24px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  border-bottom:.5px solid var(--border);
+  position:sticky;top:0;background:var(--card-bg);z-index:2;
+}
+.bug-title{font-size:20px;font-weight:600;letter-spacing:-0.03em;color:var(--text)}
+.bug-subtitle{font-size:13px;color:var(--text2);margin-top:6px;font-weight:400;line-height:1.5;letter-spacing:-0.01em}
+.bug-subtitle strong{color:var(--text);font-weight:600}
+.bug-warning{
+  font-size:12px;color:var(--amber);margin-top:8px;padding:10px 12px;
+  background:rgba(245,158,11,.08);border:.5px solid rgba(245,158,11,.25);
+  border-radius:var(--r);line-height:1.5;letter-spacing:-0.01em;
+}
+.bug-close{
+  width:30px;height:30px;border-radius:50%;border:.5px solid var(--border-strong);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;color:var(--text3);font-size:16px;transition:all .15s;
+}
+.bug-close:hover{background:var(--bg4);color:var(--text)}
+.bug-body{padding:18px 24px 22px;display:flex;flex-direction:column;gap:18px}
+.bug-field-label{
+  font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:8px;
+}
+.bug-field-label .req{color:var(--red);margin-left:2px}
+.bug-issue-options{display:flex;flex-direction:column;gap:7px}
+.bug-issue-opt{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;cursor:pointer;
+  background:var(--bg2);border:.5px solid var(--border);border-radius:var(--r);
+  transition:all .18s;font-size:14px;color:var(--text);font-weight:500;letter-spacing:-0.01em;
+}
+.bug-issue-opt:hover{border-color:var(--border-strong);background:var(--bg3)}
+.bug-issue-opt.selected{
+  background:rgba(239,67,179,.08);
+  border-color:var(--pink);
+  color:var(--text);
+}
+.bug-issue-radio{
+  width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all .15s;
+}
+.bug-issue-opt.selected .bug-issue-radio{border-color:var(--pink)}
+.bug-issue-radio::after{
+  content:'';width:8px;height:8px;border-radius:50%;background:var(--pink);
+  opacity:0;transition:opacity .15s;
+}
+.bug-issue-opt.selected .bug-issue-radio::after{opacity:1}
+.bug-textarea{
+  width:100%;min-height:110px;resize:vertical;
+  font-family:var(--font);font-size:14px;color:var(--text);
+  background:var(--input-bg);border:.5px solid var(--border-strong);border-radius:var(--r);
+  padding:12px 14px;outline:none;
+  transition:border-color .15s,box-shadow .15s;letter-spacing:-0.01em;line-height:1.5;
+}
+.bug-textarea:focus{border-color:var(--pink);box-shadow:0 0 0 4px rgba(239,67,179,.10)}
+.bug-textarea::placeholder{color:var(--text3)}
+.bug-submit-btn{
+  width:100%;padding:14px;border-radius:var(--r);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.bug-submit-btn:hover:not(:disabled){background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.3)}
+.bug-submit-btn:disabled{opacity:.5;cursor:not-allowed}
+.bug-submit-btn .bug-spinner{
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
+  animation:spin .7s linear infinite;
+}
+.bug-error{font-size:12px;color:var(--red);font-weight:500;text-align:center;min-height:14px}
+
 .login-error{
   font-size:13px;color:var(--red);font-weight:500;text-align:center;
   margin-top:12px;min-height:18px;letter-spacing:-0.01em;
@@ -1222,9 +2827,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       <div class="sync-dot"></div>
       <span class="sync-label" id="sync-label">Not configured</span>
     </div>
-    <button class="export-btn" onclick="exportToExcel()">
-      <svg viewBox="0 0 16 16"><path d="M13 10v3H3v-3M8 2v8M5 7l3 3 3-3"/></svg>
-      Export
+    <div class="notif-bell" id="notif-bell" onclick="toggleNotifPanel(event)" title="Notifications" style="position:relative">
+      <svg viewBox="0 0 16 16"><path d="M3 12h10l-1.5-2v-3a3.5 3.5 0 0 0-7 0v3z"/><path d="M6.5 13a1.5 1.5 0 0 0 3 0"/></svg>
+      <div class="notif-dot hidden" id="notif-dot"></div>
+      <div class="notif-panel hidden" id="notif-panel" onclick="event.stopPropagation()">
+        <div class="notif-panel-header">
+          <div class="notif-panel-title">Notifications</div>
+          <button class="notif-mark-read" onclick="markAllNotifsRead()">Mark all read</button>
+        </div>
+        <div class="notif-list" id="notif-list"></div>
+      </div>
+    </div>
+    <button class="export-btn" onclick="openBugReport()" title="Report a technical issue">
+      <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 5v3M8 11h.01"/></svg>
+      Report Bug
     </button>
     <button class="reset-nav-btn" onclick="resetProgress()" title="Reset all progress" id="nav-reset-btn">
       <svg viewBox="0 0 16 16"><path d="M14 8a6 6 0 1 1-1.5-4"/><polyline points="14,2 14,6 10,6"/></svg>
@@ -1296,7 +2912,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       </div>
     </div>
     <div class="sidebar-list" id="sidebar-list"></div>
-    <div class="sidebar-version">v 1.1</div>
+    <div class="sidebar-version">v 1.2 (050826)</div>
   </div>
 
   <!-- Main -->
@@ -1368,18 +2984,21 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
     <!-- ── Troubleshooting panel ── -->
     <div class="side-panel" id="panel-trouble">
-      <div class="panel-title">Troubleshooting</div>
-      <div class="panel-sub">Common issues and how to resolve them</div>
-      <div class="trouble-table">
-        <div class="trouble-hdr">
-          <div class="trouble-hdr-cell">Issue</div>
-          <div class="trouble-hdr-cell">Resolution</div>
+      <div class="panel-title-row">
+        <div>
+          <div class="panel-title">Troubleshooting</div>
+          <div class="panel-sub">Common issues and how to resolve them</div>
         </div>
-        <div class="trouble-row"><div class="trouble-cell issue">Developer Options not visible</div><div class="trouble-cell resolution">Tap Serial Number at bottom of Device Options 8 times</div></div>
-        <div class="trouble-row"><div class="trouble-cell issue">Privacy mode red light is on</div><div class="trouble-cell resolution">Press the privacy button (top left of Device B — Registration Only) to turn it off</div></div>
-        <div class="trouble-row"><div class="trouble-cell issue">Camera shutter appears closed</div><div class="trouble-cell resolution">Slide the shutter (top right) all the way to the left</div></div>
-        <div class="trouble-row"><div class="trouble-cell issue">Lux reading outside 0–10 range</div><div class="trouble-cell resolution">Adjust room lighting (dim lamps, close shades) until reading is within range</div></div>
-        <div class="trouble-row"><div class="trouble-cell issue">DC App not populating height metadata</div><div class="trouble-cell resolution">Re-enter placement height in the app setup screen</div></div>
+        <button class="trouble-refresh-btn" onclick="loadTroubleshooting(true)" title="Refresh from Excel">
+          <svg viewBox="0 0 16 16"><path d="M14 8a6 6 0 1 1-1.5-4"/><polyline points="14,2 14,6 10,6"/></svg>
+        </button>
+      </div>
+      <div class="trouble-last-sync" id="trouble-last-sync"></div>
+      <div id="trouble-table-container">
+        <div class="trouble-loading">
+          <div class="trouble-spinner"></div>
+          <span>Loading…</span>
+        </div>
       </div>
     </div>
 
@@ -1464,6 +3083,15 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
             <button class="pa-save-btn" onclick="saveLoginPaUrl()">Save</button>
           </div>
           <div class="pa-status" id="login-pa-status">No login URL saved yet</div>
+          <div class="divider"></div>
+
+          <div class="pa-card-title" style="margin-bottom:6px;font-size:15px">🛠 Troubleshooting URL</div>
+          <div class="pa-card-sub" style="margin-bottom:14px">PA flow that returns rows from the Troubleshooting Excel table.</div>
+          <div class="pa-url-row">
+            <input type="url" class="pa-url-input" id="trouble-pa-url-input" placeholder="https://... (Troubleshooting read flow)"/>
+            <button class="pa-save-btn" onclick="saveTroublePaUrl()">Save</button>
+          </div>
+          <div class="pa-status" id="trouble-pa-status">No troubleshooting URL saved yet</div>
           <div class="divider"></div>
           <div class="sec-label">Login flow setup (Power Automate)</div>
           <ul class="steps-guide" style="margin-bottom:20px">
@@ -2410,6 +4038,10 @@ function _onLoginSuccessInner(){
     document.querySelector('.layout').style.display = 'flex';
     updateWelcomeMessage();
   }
+  // Background-fetch troubleshooting so notifications can appear silently
+  setTimeout(() => {
+    if(typeof loadTroubleshooting === 'function') loadTroubleshooting(true);
+  }, 500);
 }
 
 function updateWelcomeMessage(){
@@ -2470,6 +4102,19 @@ function saveLoginPaUrl(){
   document.getElementById('login-pa-status').className = 'pa-status saved';
   document.getElementById('login-pa-url-input').classList.add('saved');
   showToast('Login URL saved');
+}
+
+function saveTroublePaUrl(){
+  const val = document.getElementById('trouble-pa-url-input').value.trim();
+  if(!val || !val.startsWith('http')){ showToast('Please enter a valid URL'); return; }
+  troublePaUrl = val;
+  localStorage.setItem('centific_trouble_pa_url', val);
+  document.getElementById('trouble-pa-status').textContent = '✓ Troubleshooting URL saved';
+  document.getElementById('trouble-pa-status').className = 'pa-status saved';
+  document.getElementById('trouble-pa-url-input').classList.add('saved');
+  showToast('Troubleshooting URL saved ✓');
+  // Auto-load fresh data
+  loadTroubleshooting(true);
 }
 
 
@@ -4115,6 +5760,423 @@ function onOCREditInput(){
     if(useBtn){ useBtn.disabled = false; useBtn.removeAttribute('disabled'); }
   }
 }
+
+
+// ══════════════════════════════════════════════════════════
+// ── BUG REPORT ────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+
+const BUG_REPORT_PA_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/3ef264e844544ff3a69ccb5ff1790a0f/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=llmzPLayjrYHC7PuU3O7E696s7g1xClielV2zzGaPeI';
+
+let bugSelectedIssue = '';
+
+function openBugReport(){
+  bugSelectedIssue = '';
+  document.querySelectorAll('#bug-issue-options .bug-issue-opt').forEach(el => el.classList.remove('selected'));
+  document.getElementById('bug-description').value = '';
+  document.getElementById('bug-error').textContent = '';
+  const btn = document.getElementById('bug-submit-btn');
+  if(btn){ btn.disabled = false; btn.innerHTML = '<span id="bug-submit-text">Submit Bug Report</span>'; }
+  document.getElementById('bug-overlay').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeBugReport(){
+  document.getElementById('bug-overlay').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function selectBugIssue(el){
+  document.querySelectorAll('#bug-issue-options .bug-issue-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  bugSelectedIssue = el.getAttribute('data-value') || '';
+  document.getElementById('bug-error').textContent = '';
+}
+
+async function submitBugReport(){
+  const description = document.getElementById('bug-description').value.trim();
+  const errEl = document.getElementById('bug-error');
+  const btn = document.getElementById('bug-submit-btn');
+
+  if(!bugSelectedIssue){
+    errEl.textContent = 'Please select an issue type';
+    return;
+  }
+  if(!description){
+    errEl.textContent = 'Please describe the issue';
+    document.getElementById('bug-description').focus();
+    return;
+  }
+  errEl.textContent = '';
+
+  // Show spinner
+  btn.disabled = true;
+  btn.innerHTML = '<div class="bug-spinner"></div><span>Submitting...</span>';
+
+  // Build payload
+  const loginId = (currentUser && currentUser.loginId) ? currentUser.loginId : 'Unknown';
+  const payload = {
+    loginId: loginId,
+    issueType: bugSelectedIssue,
+    description: description,
+    timesubmitted: new Date().toISOString()
+  };
+  console.log('[BugReport] Submitting:', payload);
+
+  // 15s timeout
+  let timedOut = false;
+  const controller = new AbortController();
+  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, 15000);
+
+  try {
+    const res = await fetch(BUG_REPORT_PA_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+    clearTimeout(timer);
+    if(timedOut) throw new Error('Request timed out');
+
+    console.log('[BugReport] Response status:', res.status);
+    if(!res.ok && res.status !== 200 && res.status !== 202){
+      throw new Error('HTTP ' + res.status);
+    }
+
+    closeBugReport();
+    if(typeof showToast === 'function') showToast('Bug report submitted ✓');
+  } catch(err){
+    clearTimeout(timer);
+    console.error('[BugReport] Error:', err);
+    if(err.name === 'AbortError' || timedOut){
+      errEl.textContent = 'Request timed out. Please try again.';
+    } else if(err.message && err.message.includes('Failed to fetch')){
+      errEl.textContent = 'Network error. Check your connection and try again.';
+    } else {
+      errEl.textContent = 'Submission failed: ' + (err.message || 'Unknown error');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<span id="bug-submit-text">Submit Bug Report</span>';
+  }
+}
+
+
+// ══════════════════════════════════════════════════════════
+// ── DYNAMIC TROUBLESHOOTING ───────────────────────────────
+// ══════════════════════════════════════════════════════════
+
+const DEFAULT_TROUBLE_PA_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f68467b603c44598b0eb6101be641c68/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=zPm3VkEhFZ2O_vDLnc5vPS80OO__YRk6hZpfnkuYG_4';
+// Always use the hardcoded URL — clear any stale override from previous versions
+localStorage.removeItem('centific_trouble_pa_url');
+let troublePaUrl = DEFAULT_TROUBLE_PA_URL;
+let troubleData = null;
+try { troubleData = JSON.parse(localStorage.getItem('centific_trouble_data') || 'null'); } catch(e) {}
+
+function setTroublePaUrl(url){
+  troublePaUrl = url;
+  localStorage.setItem('centific_trouble_pa_url', url);
+}
+
+function formatTroubleDate(val){
+  if(!val) return '';
+  const s = String(val).trim();
+  // Handle Excel serial number first (4-5 digits, range 40000-60000)
+  const serial = parseInt(s, 10);
+  if(!isNaN(serial) && String(serial) === s && serial > 40000 && serial < 60000){
+    const d = new Date(Math.round((serial - 25569) * 86400 * 1000));
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+  // ISO
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)){
+    const d = new Date(s + (s.includes('T') ? '' : 'T00:00:00'));
+    if(!isNaN(d.getTime())){
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+  }
+  // mm/dd/yyyy
+  const mdy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(mdy){
+    const d = new Date(parseInt(mdy[3]), parseInt(mdy[1]) - 1, parseInt(mdy[2]));
+    if(!isNaN(d.getTime())){
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+  }
+  return s;
+}
+
+function renderTroubleTable(rows){
+  const container = document.getElementById('trouble-table-container');
+  if(!container) return;
+  if(!rows || !rows.length){
+    container.innerHTML = '<div class="trouble-empty">No troubleshooting items found.<br>Add rows to the Troubleshooting table in Excel and tap refresh.</div>';
+    return;
+  }
+  // Sort by resolutionDate desc (newest first)
+  const sorted = [...rows].sort((a,b) => {
+    const ra = a.resolutionDate || a.ResolutionDate || a.resolutiondate || 0;
+    const rb = b.resolutionDate || b.ResolutionDate || b.resolutiondate || 0;
+    // Convert serial numbers to comparable values
+    const valA = (typeof ra === 'number' || /^\d+$/.test(String(ra))) ? Number(ra) : new Date(ra).getTime();
+    const valB = (typeof rb === 'number' || /^\d+$/.test(String(rb))) ? Number(rb) : new Date(rb).getTime();
+    return (valB || 0) - (valA || 0);
+  });
+
+  let html = '<div class="trouble-table"><div class="trouble-hdr">' +
+    '<div class="trouble-hdr-cell">Date</div>' +
+    '<div class="trouble-hdr-cell">Issue</div>' +
+    '<div class="trouble-hdr-cell">Resolution</div>' +
+    '</div>';
+  sorted.forEach(r => {
+    const issue       = (r.issue || r.Issue || '').toString();
+    const resolution  = (r.resolution || r.Resolution || '').toString();
+    const dateRaw     = r.resolutionDate || r.ResolutionDate || r.resolutiondate || '';
+    const dateDisplay = formatTroubleDate(dateRaw);
+    if(!issue && !resolution) return;
+    const escIssue = issue.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+    const escRes   = resolution.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+    html += `<div class="trouble-row">
+      <div class="trouble-cell date">${dateDisplay || '—'}</div>
+      <div class="trouble-cell issue">${escIssue}</div>
+      <div class="trouble-cell resolution">${escRes}</div>
+    </div>`;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+async function loadTroubleshooting(forceRefresh){
+  const container = document.getElementById('trouble-table-container');
+  const lastSyncEl = document.getElementById('trouble-last-sync');
+  const refreshBtn = document.querySelector('.trouble-refresh-btn');
+
+  // Show cached data immediately if not forcing refresh
+  if(!forceRefresh && troubleData){
+    renderTroubleTable(troubleData);
+    const ls = localStorage.getItem('centific_trouble_last_sync');
+    if(ls && lastSyncEl) lastSyncEl.textContent = 'Last updated: ' + ls;
+  }
+
+  if(!troublePaUrl){
+    if(container && (forceRefresh || !troubleData)){
+      container.innerHTML = '<div class="trouble-empty">Troubleshooting data is not configured yet.<br>Admin needs to set the URL in Settings.</div>';
+    }
+    return;
+  }
+
+  if(refreshBtn) refreshBtn.classList.add('loading');
+  if(container && (!troubleData || forceRefresh)){
+    container.innerHTML = '<div class="trouble-loading"><div class="trouble-spinner"></div><span>Loading…</span></div>';
+  }
+
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    const res = await fetch(troublePaUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+      signal: controller.signal
+    });
+    clearTimeout(timer);
+    if(!res.ok && res.status !== 200 && res.status !== 202) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    console.log('[Trouble] Response (first 300):', text.substring(0,300));
+    let data;
+    try { data = JSON.parse(text); }
+    catch(e){ throw new Error('Invalid response format'); }
+
+    // Accept multiple response shapes
+    // PA sometimes returns rows as a string due to "@{...}" wrapping in JSON
+    let rows = [];
+    if(Array.isArray(data)) rows = data;
+    else if(Array.isArray(data.rows)) rows = data.rows;
+    else if(Array.isArray(data.value)) rows = data.value;
+    else if(typeof data.rows === 'string'){
+      // PA wrapped the array as a string — parse it
+      try { rows = JSON.parse(data.rows); console.log('[Trouble] Parsed stringified rows'); }
+      catch(e){ console.error('[Trouble] Could not parse stringified rows:', e); }
+    } else if(typeof data.value === 'string'){
+      try { rows = JSON.parse(data.value); }
+      catch(e){ console.error('[Trouble] Could not parse stringified value:', e); }
+    }
+    if(!Array.isArray(rows)) rows = [];
+    console.log('[Trouble] Parsed rows count:', rows.length);
+    if(rows.length > 0) console.log('[Trouble] First row keys:', Object.keys(rows[0]));
+
+    // Strip @odata properties from rows
+    rows = rows.map(r => {
+      const clean = {};
+      Object.keys(r).forEach(k => { if(!k.startsWith('@odata') && k !== 'ItemInternalId') clean[k] = r[k]; });
+      return clean;
+    });
+
+    troubleData = rows;
+    localStorage.setItem('centific_trouble_data', JSON.stringify(rows));
+    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    localStorage.setItem('centific_trouble_last_sync', now);
+    if(lastSyncEl) lastSyncEl.textContent = 'Last updated: ' + now;
+
+    renderTroubleTable(rows);
+    // Update notification bell — new data may mean new notification
+    if(typeof renderNotifs === 'function') renderNotifs();
+  } catch(err){
+    console.error('[Trouble] Error:', err);
+    if(container && (!troubleData || forceRefresh)){
+      container.innerHTML = `<div class="trouble-error">
+        <div>Could not load troubleshooting data.</div>
+        <div style="font-size:12px;opacity:.8">${(err.message || 'Unknown error')}</div>
+      </div>`;
+    }
+  } finally {
+    if(refreshBtn) refreshBtn.classList.remove('loading');
+  }
+}
+
+// Auto-load when Troubleshooting panel is opened
+const _origOpenPanel = (typeof openPanel === 'function') ? openPanel : null;
+if(_origOpenPanel){
+  window.openPanel = function(name){
+    _origOpenPanel(name);
+    if(name === 'trouble') loadTroubleshooting(false);
+  };
+}
+
+
+// ══════════════════════════════════════════════════════════
+// ── NOTIFICATIONS ─────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════════
+// Notifications — only shows when Troubleshooting page has new updates
+// ══════════════════════════════════════════════════════════
+
+function getReadNotifs(){
+  try { return JSON.parse(localStorage.getItem('centific_notifs_read') || '[]'); }
+  catch(e){ return []; }
+}
+function setReadNotifs(arr){
+  localStorage.setItem('centific_notifs_read', JSON.stringify(arr));
+}
+
+// Build a stable signature for the current set of troubleshooting rows
+// so we can detect when something changes (new row, edited row, etc.)
+function getTroubleSignature(){
+  if(!troubleData || !Array.isArray(troubleData) || !troubleData.length) return '';
+  // Sort by some stable key, then hash
+  const sorted = [...troubleData].map(r => {
+    const date = r.resolutionDate || r.ResolutionDate || r.resolutiondate || '';
+    const issue = r.issue || r.Issue || '';
+    const resolution = r.resolution || r.Resolution || '';
+    return date + '|' + issue + '|' + resolution;
+  }).sort();
+  return sorted.join('||');
+}
+
+// Build the active notification list dynamically
+function getActiveNotifications(){
+  const sig = getTroubleSignature();
+  const lastSeenSig = localStorage.getItem('centific_trouble_seen_sig') || '';
+  if(!sig) return []; // no data yet — no notification
+  if(sig === lastSeenSig) return []; // nothing new since last "mark read"
+
+  const lastSync = localStorage.getItem('centific_trouble_last_sync') || '';
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const count = (troubleData && troubleData.length) || 0;
+  return [{
+    id: 'trouble-update-' + sig.length, // signature-derived ID
+    title: 'New update on Troubleshooting page',
+    body: 'There ' + (count === 1 ? 'is' : 'are') + ' ' + count + ' troubleshooting ' + (count === 1 ? 'item' : 'items') + ' available. Tap the Troubleshooting menu to view the latest details.',
+    date: today,
+  }];
+}
+
+function unreadCount(){
+  return getActiveNotifications().length;
+}
+
+function formatNotifTime(dateStr){
+  if(!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  if(isNaN(d.getTime())) return dateStr;
+  const now = new Date();
+  const diffDays = Math.floor((now - d) / (1000*60*60*24));
+  if(diffDays === 0) return 'Today';
+  if(diffDays === 1) return 'Yesterday';
+  if(diffDays < 7) return diffDays + 'd ago';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function renderNotifs(){
+  const list = document.getElementById('notif-list');
+  const dot = document.getElementById('notif-dot');
+  const bell = document.getElementById('notif-bell');
+  if(!list) return;
+
+  const active = getActiveNotifications();
+  if(!active.length){
+    list.innerHTML = '<div class="notif-empty">You\'re all caught up</div>';
+    if(dot) dot.classList.add('hidden');
+    if(bell) bell.classList.remove('has-unread');
+    return;
+  }
+
+  let h = '';
+  active.forEach(n => {
+    const esc = (s) => String(s).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+    h += `<div class="notif-item unread" style="position:relative">
+      <div class="notif-item-row">
+        <div class="notif-item-title">${esc(n.title)}</div>
+        <div class="notif-item-time">${formatNotifTime(n.date)}</div>
+      </div>
+      <div class="notif-item-body">${esc(n.body)}</div>
+    </div>`;
+  });
+  list.innerHTML = h;
+  if(dot) dot.classList.remove('hidden');
+  if(bell) bell.classList.add('has-unread');
+}
+
+function toggleNotifPanel(e){
+  if(e) e.stopPropagation();
+  const panel = document.getElementById('notif-panel');
+  if(!panel) return;
+  const wasHidden = panel.classList.contains('hidden');
+  panel.classList.toggle('hidden');
+  if(wasHidden){
+    renderNotifs();
+  }
+}
+
+function markAllNotifsRead(){
+  // Save the current troubleshooting signature as "seen"
+  // — next time the data changes, a new notification will appear
+  const sig = getTroubleSignature();
+  if(sig) localStorage.setItem('centific_trouble_seen_sig', sig);
+  renderNotifs();
+  if(typeof showToast === 'function') showToast('Notifications cleared');
+}
+
+// Close notif panel when clicking outside
+document.addEventListener('click', function(e){
+  const bell = document.getElementById('notif-bell');
+  const panel = document.getElementById('notif-panel');
+  if(!bell || !panel) return;
+  if(!bell.contains(e.target)){
+    panel.classList.add('hidden');
+  }
+});
+
+// Render on page load and after login
+(function initNotifs(){
+  function tryRender(){
+    if(document.getElementById('notif-list')){
+      renderNotifs();
+    } else {
+      setTimeout(tryRender, 100);
+    }
+  }
+  setTimeout(tryRender, 200);
+})();
 </script>
 
 <!-- ── Admin Landing ── -->
@@ -4326,6 +6388,50 @@ function onOCREditInput(){
         <button class="ocr-action-btn retry" onclick="resetOCR()">Try Again</button>
         <button class="ocr-action-btn use" id="ocr-use-btn" onclick="useOCRResult()">Confirm</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Bug Report Modal ── -->
+<div class="bug-overlay hidden" id="bug-overlay" onclick="if(event.target===this)closeBugReport()">
+  <div class="bug-modal">
+    <div class="bug-header">
+      <div style="flex:1">
+        <div class="bug-title">Bug Report</div>
+        <div class="bug-subtitle">Please use this to report technical issues related to the client-provided devices.</div>
+        <div class="bug-warning">⚠ Be sure the power is connected to a stable power source and network (Wi-Fi speed) is stable condition.</div>
+      </div>
+      <div class="bug-close" onclick="closeBugReport()">✕</div>
+    </div>
+    <div class="bug-body">
+      <div>
+        <div class="bug-field-label">Issue Type<span class="req">*</span></div>
+        <div class="bug-issue-options" id="bug-issue-options">
+          <div class="bug-issue-opt" data-value="Device A Issue" onclick="selectBugIssue(this)">
+            <div class="bug-issue-radio"></div>
+            <span>Device A Issue</span>
+          </div>
+          <div class="bug-issue-opt" data-value="Software Issue" onclick="selectBugIssue(this)">
+            <div class="bug-issue-radio"></div>
+            <span>Software Issue</span>
+          </div>
+          <div class="bug-issue-opt" data-value="Uploading Issue" onclick="selectBugIssue(this)">
+            <div class="bug-issue-radio"></div>
+            <span>Uploading Issue</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="bug-field-label">Description<span class="req">*</span></div>
+        <textarea id="bug-description" class="bug-textarea" placeholder="Describe the issue in detail. Include what you were doing when it happened and any error messages you saw."></textarea>
+      </div>
+
+      <div class="bug-error" id="bug-error"></div>
+
+      <button class="bug-submit-btn" id="bug-submit-btn" onclick="submitBugReport()">
+        <span id="bug-submit-text">Submit Bug Report</span>
+      </button>
     </div>
   </div>
 </div>
