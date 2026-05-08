@@ -576,6 +576,32 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .ocr-action-btn.retry{background:var(--bg3);color:var(--text2);border:.5px solid var(--border-strong)}
 .ocr-action-btn.retry:hover{background:var(--bg4);color:var(--text)}
 
+
+.ocr-result-input{
+  width:100%;font-family:'Courier New',monospace;font-size:14px;
+  background:var(--bg);color:var(--text);
+  border:1px solid var(--border-strong);border-radius:var(--r);
+  padding:11px 13px;margin-top:8px;
+  letter-spacing:0.02em;outline:none;
+  transition:border-color .15s,box-shadow .15s;
+}
+.ocr-result-input:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(239,67,179,.15)}
+.ocr-result-input.valid{border-color:var(--green);box-shadow:0 0 0 3px rgba(34,197,94,.12)}
+.ocr-result-hint{font-size:11px;color:var(--text3);margin-top:4px;font-weight:400}
+.ocr-result-raw{
+  margin-top:10px;padding:10px 12px;
+  background:var(--bg);border:.5px solid var(--border);border-radius:var(--r);
+  font-family:'Courier New',monospace;font-size:11px;color:var(--text3);
+  word-break:break-all;line-height:1.5;
+}
+.ocr-result-raw-label{
+  display:block;font-family:var(--font);font-size:10px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;
+}
+.ocr-validity{font-size:12px;margin-top:8px;font-weight:500;letter-spacing:-0.01em}
+.ocr-validity.valid{color:var(--green)}
+.ocr-validity.invalid{color:var(--amber)}
+
 .ocr-tip{
   font-size:12px;color:var(--text3);text-align:center;margin-top:2px;line-height:1.5;
 }
@@ -4097,29 +4123,51 @@ async function processCroppedImage(){
     if(resultWrap){ resultWrap.style.display = 'block'; resultWrap.classList.remove('hidden'); }
     if(actions){ actions.style.display = 'flex'; actions.classList.remove('hidden'); }
 
+    // Always show editable input, prefilled with best guess
+    const input    = document.getElementById('ocr-result-input');
+    const rawWrap  = document.getElementById('ocr-result-raw');
+    const hint     = document.getElementById('ocr-result-hint');
+    const trimmed  = cleanText.replace(/\s+/g, ' ').trim();
+
     if(match){
+      // Strict UUID match found
       ocrDetectedId = match[0].toLowerCase();
       if(result) result.classList.remove('error');
-      if(resultLabel) resultLabel.textContent = 'Participant ID Detected';
-      if(resultValue) resultValue.textContent = ocrDetectedId;
-      if(useBtn) useBtn.disabled = false;
+      if(resultLabel) resultLabel.textContent = '✓ Participant ID Detected';
+      if(input){ input.value = ocrDetectedId; input.classList.add('valid'); }
+      if(hint){ hint.style.display = 'block'; hint.textContent = 'Looks valid — verify and tap Confirm'; }
+      if(rawWrap){ rawWrap.style.display = 'none'; }
     } else {
-      if(result) result.classList.add('error');
-      if(resultLabel) resultLabel.textContent = 'No UUID Found in Crop';
-      const trimmed = cleanText.replace(/\s+/g, ' ').trim();
-      if(resultValue){
-        if(trimmed){
-          resultValue.innerHTML = '<div style="font-weight:600;margin-bottom:6px;color:var(--text)">Detected text:</div>' +
-            '<div style="font-family:monospace;font-size:12px;word-break:break-all;color:var(--text2)">' +
-            trimmed.substring(0,400).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])) +
-            '</div><div style="margin-top:10px;font-size:12px;color:var(--text3)">Try cropping more tightly to the ID.</div>';
-        } else {
-          resultValue.textContent = 'No text could be read. Try a tighter crop.';
+      // No strict match — try to extract best guess and let user edit
+      if(result) result.classList.remove('error'); // not an error, just imperfect
+      if(resultLabel) resultLabel.textContent = 'Review & Edit';
+
+      // Try to find a UUID-ish substring (any hex+dash sequence with right total length)
+      let bestGuess = '';
+      const hexish = trimmed.match(/[0-9a-f][0-9a-f\-\s]{30,50}[0-9a-f]/i);
+      if(hexish){
+        // Strip spaces, keep dashes and hex
+        bestGuess = hexish[0].replace(/\s+/g,'').toLowerCase();
+        // If it's exactly 32 hex chars without dashes, format it
+        const hexOnly = bestGuess.replace(/-/g,'');
+        if(/^[0-9a-f]{32}$/.test(hexOnly)){
+          bestGuess = hexOnly.substring(0,8) + '-' + hexOnly.substring(8,12) + '-' +
+                      hexOnly.substring(12,16) + '-' + hexOnly.substring(16,20) + '-' + hexOnly.substring(20,32);
         }
       }
-      ocrDetectedId = '';
-      if(useBtn) useBtn.disabled = true;
+      if(input){
+        input.value = bestGuess;
+        input.classList.remove('valid');
+      }
+      if(hint){ hint.style.display = 'block'; hint.textContent = 'Edit the ID below if it looks wrong, then tap Confirm'; }
+      if(rawWrap && trimmed){
+        rawWrap.style.display = 'block';
+        rawWrap.innerHTML = '<span class="ocr-result-raw-label">Raw text from photo</span>' +
+          trimmed.substring(0,400).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+      }
     }
+    // Run validity check on whatever's in the input now
+    onOCREditInput();
   } catch(err){
     clearTimeout(timer);
     if(timedOut) return;
@@ -4146,158 +4194,51 @@ function showOCRError(msg){
   ocrDetectedId = '';
 }
 
-async function onOCRImageSelected(event){
-  const file = event.target.files[0];
-  if(!file){ console.log('[OCR] No file selected'); return; }
-
-  const img         = document.getElementById('ocr-preview-img');
-  const previewWrap = document.getElementById('ocr-preview-wrap');
-  const progress    = document.getElementById('ocr-progress');
-  const progressText= document.getElementById('ocr-progress-text');
-  const resultWrap  = document.getElementById('ocr-result-wrap');
-  const result      = document.getElementById('ocr-result');
-  const resultLabel = document.getElementById('ocr-result-label');
-  const resultValue = document.getElementById('ocr-result-value');
-  const actions     = document.getElementById('ocr-actions');
-  const pickBtn     = document.getElementById('ocr-pick-btn');
-  const useBtn      = document.getElementById('ocr-use-btn');
-
-  console.log('[OCR] File received:', file.name, file.type, file.size, 'bytes');
-
-  // Show preview, hide pick button, show progress
-  if(pickBtn) pickBtn.style.display = 'none';
-  if(previewWrap){ previewWrap.style.display = 'flex'; previewWrap.classList.remove('hidden'); }
-  if(progress){ progress.style.display = 'flex'; progress.classList.remove('hidden'); }
-  if(resultWrap){ resultWrap.style.display = 'none'; resultWrap.classList.add('hidden'); }
-  if(actions){ actions.style.display = 'none'; actions.classList.add('hidden'); }
-  if(progressText) progressText.textContent = 'Reading image...';
-
-  // Convert file → base64 data URL (more reliable on iOS than File object)
-  const dataUrl = await new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload  = () => resolve(reader.result);
-    reader.onerror = () => reject(new Error('Failed to read image file'));
-    reader.readAsDataURL(file);
-  }).catch(err => {
-    console.error('[OCR] FileReader error:', err);
-    return null;
-  });
-
-  if(!dataUrl){
-    showOCRError('Could not read the image file. Please try again.', progress, resultWrap, actions, result, resultLabel, resultValue, useBtn);
-    return;
-  }
-
-  if(img) img.src = dataUrl;
-  if(progressText) progressText.textContent = 'Loading OCR engine...';
-
-  // Check if Tesseract is loaded
-  if(typeof Tesseract === 'undefined'){
-    console.error('[OCR] Tesseract not loaded');
-    showOCRError('OCR engine not loaded. Check your internet connection and refresh the page.', progress, resultWrap, actions, result, resultLabel, resultValue, useBtn);
-    return;
-  }
-
-  // Add 60-second timeout so it can't hang forever
-  let timeoutFired = false;
-  const timeout = setTimeout(() => {
-    timeoutFired = true;
-    console.error('[OCR] Timeout after 60s');
-    showOCRError('OCR took too long. Please try again with a clearer photo or stronger network.', progress, resultWrap, actions, result, resultLabel, resultValue, useBtn);
-  }, 60000);
-
-  try {
-    console.log('[OCR] Starting Tesseract.recognize...');
-    const ocrResult = await Tesseract.recognize(dataUrl, 'eng', {
-      logger: m => {
-        if(timeoutFired) return;
-        console.log('[OCR]', m.status, m.progress);
-        if(!progressText) return;
-        if(m.status === 'loading tesseract core'){ progressText.textContent = 'Loading OCR engine...'; }
-        else if(m.status === 'initializing tesseract'){ progressText.textContent = 'Initializing...'; }
-        else if(m.status === 'loading language traineddata'){ progressText.textContent = 'Loading language pack...'; }
-        else if(m.status === 'initializing api'){ progressText.textContent = 'Preparing scanner...'; }
-        else if(m.status === 'recognizing text'){
-          const pct = Math.round((m.progress || 0) * 100);
-          progressText.textContent = 'Reading text... ' + pct + '%';
-        }
-      }
-    });
-
-    clearTimeout(timeout);
-    if(timeoutFired) return;
-
-    const rawText = (ocrResult && ocrResult.data && ocrResult.data.text) || '';
-    const cleanText = rawText.toLowerCase();
-    console.log('[OCR] Raw text:', JSON.stringify(rawText));
-
-    // Try strict UUID match
-    const uuidRegex = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
-    let match = cleanText.match(uuidRegex);
-    if(!match){
-      const noSpaces = cleanText.replace(/\s/g, '');
-      match = noSpaces.match(uuidRegex);
-    }
-
-    // Hide progress, show result
-    if(progress){ progress.style.display = 'none'; progress.classList.add('hidden'); }
-    if(resultWrap){ resultWrap.style.display = 'block'; resultWrap.classList.remove('hidden'); }
-    if(actions){ actions.style.display = 'flex'; actions.classList.remove('hidden'); }
-
-    if(match){
-      ocrDetectedId = match[0].toLowerCase();
-      if(result) result.classList.remove('error');
-      if(resultLabel) resultLabel.textContent = 'Participant ID Detected';
-      if(resultValue) resultValue.textContent = ocrDetectedId;
-      if(useBtn) useBtn.disabled = false;
-      console.log('[OCR] Matched UUID:', ocrDetectedId);
-    } else {
-      if(result) result.classList.add('error');
-      if(resultLabel) resultLabel.textContent = 'No UUID Pattern Found';
-      const trimmed = cleanText.replace(/\s+/g, ' ').trim();
-      if(resultValue){
-        if(trimmed){
-          resultValue.innerHTML = '<div style="font-weight:600;margin-bottom:6px;color:var(--text)">Raw text detected:</div>' +
-            '<div style="font-family:monospace;font-size:12px;word-break:break-all;color:var(--text2)">' +
-            trimmed.substring(0, 400).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])) +
-            '</div>' +
-            '<div style="margin-top:10px;font-size:12px;color:var(--text3)">Try a sharper close-up photo of just the ID.</div>';
-        } else {
-          resultValue.textContent = 'No text could be read. Try better lighting and hold steadier.';
-        }
-      }
-      ocrDetectedId = '';
-      if(useBtn) useBtn.disabled = true;
-    }
-  } catch(err){
-    clearTimeout(timeout);
-    if(timeoutFired) return;
-    console.error('[OCR] Error:', err);
-    showOCRError('OCR failed: ' + ((err && err.message) || 'Unknown error'), progress, resultWrap, actions, result, resultLabel, resultValue, useBtn);
-  }
-}
-
-function showOCRError(msg, progress, resultWrap, actions, result, resultLabel, resultValue, useBtn){
-  if(progress){ progress.style.display = 'none'; progress.classList.add('hidden'); }
-  if(resultWrap){ resultWrap.style.display = 'block'; resultWrap.classList.remove('hidden'); }
-  if(actions){ actions.style.display = 'flex'; actions.classList.remove('hidden'); }
-  if(result) result.classList.add('error');
-  if(resultLabel) resultLabel.textContent = 'OCR Error';
-  if(resultValue) resultValue.textContent = msg;
-  if(useBtn) useBtn.disabled = true;
-  ocrDetectedId = '';
-}
 
 function useOCRResult(){
-  if(!ocrDetectedId) return;
-  const input = document.getElementById('g-participant');
-  if(input){
-    input.value = ocrDetectedId;
-    input.style.borderColor = '';
+  // Read current value from the editable input — user may have edited it
+  const ocrInput = document.getElementById('ocr-result-input');
+  const value = ocrInput ? ocrInput.value.trim().toLowerCase() : '';
+  if(!value){
+    if(typeof showToast === 'function') showToast('Please enter a Participant ID');
+    return;
+  }
+  const targetInput = document.getElementById('g-participant');
+  if(targetInput){
+    targetInput.value = value;
+    targetInput.style.borderColor = '';
     if(typeof syncGlobal === 'function') syncGlobal();
   }
   closeOCR();
-  if(typeof showToast === 'function') showToast('Participant ID scanned ✓');
+  if(typeof showToast === 'function') showToast('Participant ID set ✓');
+}
+
+// Live validity check as user edits
+function onOCREditInput(){
+  const input = document.getElementById('ocr-result-input');
+  const validity = document.getElementById('ocr-validity');
+  const useBtn = document.getElementById('ocr-use-btn');
+  if(!input) return;
+  const v = input.value.trim().toLowerCase();
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const isValidUUID = uuidRegex.test(v);
+
+  if(!v){
+    input.classList.remove('valid');
+    if(validity){ validity.textContent = ''; validity.className = 'ocr-validity'; }
+    if(useBtn) useBtn.disabled = true;
+  } else if(isValidUUID){
+    input.classList.add('valid');
+    if(validity){ validity.textContent = '✓ Valid UUID format'; validity.className = 'ocr-validity valid'; }
+    if(useBtn) useBtn.disabled = false;
+  } else {
+    input.classList.remove('valid');
+    if(validity){
+      validity.textContent = '⚠ Doesn\'t match UUID format (8-4-4-4-12 hex chars). You can still confirm if you\'re sure.';
+      validity.className = 'ocr-validity invalid';
+    }
+    if(useBtn) useBtn.disabled = false; // let user confirm anyway — they may know better
+  }
 }
 </script>
 
@@ -4509,7 +4450,10 @@ function useOCRResult(){
       <div id="ocr-result-wrap" class="hidden" style="display:none">
         <div id="ocr-result" class="ocr-result">
           <div class="ocr-result-label" id="ocr-result-label">Detected ID</div>
-          <div class="ocr-result-value" id="ocr-result-value">—</div>
+          <div class="ocr-result-hint" id="ocr-result-hint" style="display:none">Edit if needed, then tap Confirm</div>
+          <input type="text" id="ocr-result-input" class="ocr-result-input" placeholder="Enter or paste Participant ID" oninput="onOCREditInput()" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"/>
+          <div class="ocr-result-raw" id="ocr-result-raw" style="display:none"></div>
+          <div class="ocr-validity" id="ocr-validity"></div>
         </div>
       </div>
 
