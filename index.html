@@ -579,6 +579,36 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .ocr-tip{
   font-size:12px;color:var(--text3);text-align:center;margin-top:2px;line-height:1.5;
 }
+/* ── OCR Crop UI ── */
+.ocr-crop-stage{
+  position:relative;background:#000;border-radius:var(--rl);
+  overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none;
+  display:flex;align-items:center;justify-content:center;
+  max-height:60vh;min-height:200px;
+}
+.ocr-crop-canvas{
+  display:block;max-width:100%;max-height:60vh;
+  cursor:crosshair;
+}
+.ocr-crop-overlay{
+  position:absolute;inset:0;pointer-events:none;
+}
+.ocr-crop-instructions{
+  font-size:13px;color:var(--text2);text-align:center;
+  padding:0 4px;line-height:1.5;letter-spacing:-0.01em;
+}
+.ocr-crop-actions{display:flex;gap:10px}
+.ocr-crop-btn{
+  flex:1;padding:13px;border-radius:var(--r);
+  font-family:var(--font);font-size:14px;font-weight:500;letter-spacing:-0.01em;
+  cursor:pointer;border:none;transition:all .2s;
+}
+.ocr-crop-btn.process{background:var(--pink);color:#fff}
+.ocr-crop-btn.process:hover{background:var(--pink-dim)}
+.ocr-crop-btn.process:disabled{opacity:.5;cursor:not-allowed}
+.ocr-crop-btn.cancel{background:var(--bg3);color:var(--text2);border:.5px solid var(--border-strong)}
+.ocr-crop-btn.cancel:hover{background:var(--bg4);color:var(--text)}
+
 
 .session-complete-modal{
   background:var(--card-bg);border:.5px solid var(--border-strong);
@@ -3776,17 +3806,344 @@ function closeOCR(){
 
 function resetOCR(){
   ocrDetectedId = '';
+  ocrSourceImage = null;
+  ocrCropRect = null;
+  ocrIsDrawing = false;
   document.getElementById('ocr-camera-input').value = '';
   const previewWrap = document.getElementById('ocr-preview-wrap');
   const progress    = document.getElementById('ocr-progress');
   const resultWrap  = document.getElementById('ocr-result-wrap');
   const actions     = document.getElementById('ocr-actions');
   const pickBtn     = document.getElementById('ocr-pick-btn');
-  previewWrap.style.display = 'none';
-  progress.style.display    = 'none';
-  resultWrap.style.display  = 'none';
-  actions.style.display     = 'none';
-  pickBtn.style.display     = 'flex';
+  const cropSec     = document.getElementById('ocr-crop-section');
+  const tip         = document.getElementById('ocr-tip');
+  if(previewWrap){ previewWrap.style.display = 'none'; previewWrap.classList.add('hidden'); }
+  if(progress){ progress.style.display = 'none'; progress.classList.add('hidden'); }
+  if(resultWrap){ resultWrap.style.display = 'none'; resultWrap.classList.add('hidden'); }
+  if(actions){ actions.style.display = 'none'; actions.classList.add('hidden'); }
+  if(cropSec){ cropSec.style.display = 'none'; cropSec.classList.add('hidden'); }
+  if(pickBtn) pickBtn.style.display = 'flex';
+  if(tip) tip.style.display = 'block';
+}
+
+// ── Crop state ─────────────────────────────────────────────
+let ocrSourceImage = null;       // HTMLImageElement loaded from photo
+let ocrCropRect = null;          // {x,y,w,h} in source image coords
+let ocrCanvasScale = 1;          // canvas-display to source pixel ratio
+let ocrIsDrawing = false;
+let ocrDrawStart = null;
+
+async function onOCRImageSelected(event){
+  const file = event.target.files[0];
+  if(!file){ console.log('[OCR] No file'); return; }
+  console.log('[OCR] File:', file.name, file.type, file.size, 'bytes');
+
+  const tip       = document.getElementById('ocr-tip');
+  const pickBtn   = document.getElementById('ocr-pick-btn');
+  const cropSec   = document.getElementById('ocr-crop-section');
+
+  if(pickBtn) pickBtn.style.display = 'none';
+  if(tip) tip.style.display = 'none';
+
+  // Read file as data URL
+  const dataUrl = await new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = () => reject(new Error('Failed to read image'));
+    r.readAsDataURL(file);
+  }).catch(err => { console.error('[OCR] Read error:', err); return null; });
+
+  if(!dataUrl){ alert('Could not read image. Please try again.'); resetOCR(); return; }
+
+  // Load into Image
+  ocrSourceImage = new Image();
+  ocrSourceImage.onload = () => {
+    console.log('[OCR] Image loaded:', ocrSourceImage.naturalWidth, 'x', ocrSourceImage.naturalHeight);
+    if(cropSec){ cropSec.style.display = 'flex'; cropSec.classList.remove('hidden'); }
+    drawCropCanvas();
+  };
+  ocrSourceImage.onerror = () => { alert('Failed to load image.'); resetOCR(); };
+  ocrSourceImage.src = dataUrl;
+}
+
+function drawCropCanvas(){
+  const canvas = document.getElementById('ocr-crop-canvas');
+  if(!canvas || !ocrSourceImage) return;
+  const stage = document.getElementById('ocr-crop-stage');
+  const stageW = stage.clientWidth || 360;
+  const maxH = Math.min(window.innerHeight * 0.6, 500);
+
+  // Compute display size — fit within stage width and max height
+  let dw = ocrSourceImage.naturalWidth;
+  let dh = ocrSourceImage.naturalHeight;
+  const scaleW = stageW / dw;
+  const scaleH = maxH / dh;
+  const scale = Math.min(scaleW, scaleH, 1);
+  dw = Math.round(dw * scale);
+  dh = Math.round(dh * scale);
+
+  canvas.width = dw;
+  canvas.height = dh;
+  ocrCanvasScale = ocrSourceImage.naturalWidth / dw; // source/display ratio
+
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(ocrSourceImage, 0, 0, dw, dh);
+
+  // Overlay current crop rect if any
+  if(ocrCropRect){
+    const r = ocrCropRect;
+    const dx = r.x / ocrCanvasScale;
+    const dy = r.y / ocrCanvasScale;
+    const dW = r.w / ocrCanvasScale;
+    const dH = r.h / ocrCanvasScale;
+    // dim everything outside the crop
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillRect(0, 0, dw, dy);
+    ctx.fillRect(0, dy + dH, dw, dh - (dy + dH));
+    ctx.fillRect(0, dy, dx, dH);
+    ctx.fillRect(dx + dW, dy, dw - (dx + dW), dH);
+    // border
+    ctx.strokeStyle = '#EF43B3';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.strokeRect(dx, dy, dW, dH);
+    ctx.setLineDash([]);
+    // corner handles
+    ctx.fillStyle = '#EF43B3';
+    [[dx,dy],[dx+dW,dy],[dx,dy+dH],[dx+dW,dy+dH]].forEach(([cx,cy])=>{
+      ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI*2); ctx.fill();
+    });
+  }
+
+  attachCanvasHandlers(canvas);
+  updateProcessBtn();
+}
+
+function attachCanvasHandlers(canvas){
+  // Remove old handlers by cloning
+  if(canvas._ocrHandlersAttached) return;
+  canvas._ocrHandlersAttached = true;
+
+  function getPos(evt){
+    const rect = canvas.getBoundingClientRect();
+    const t = evt.touches ? evt.touches[0] : evt;
+    return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+  }
+
+  function onStart(evt){
+    evt.preventDefault();
+    const p = getPos(evt);
+    ocrIsDrawing = true;
+    ocrDrawStart = p;
+    ocrCropRect = null;
+  }
+  function onMove(evt){
+    if(!ocrIsDrawing) return;
+    evt.preventDefault();
+    const p = getPos(evt);
+    const x1 = Math.min(ocrDrawStart.x, p.x);
+    const y1 = Math.min(ocrDrawStart.y, p.y);
+    const x2 = Math.max(ocrDrawStart.x, p.x);
+    const y2 = Math.max(ocrDrawStart.y, p.y);
+    // Convert display → source coords
+    ocrCropRect = {
+      x: Math.round(x1 * ocrCanvasScale),
+      y: Math.round(y1 * ocrCanvasScale),
+      w: Math.round((x2 - x1) * ocrCanvasScale),
+      h: Math.round((y2 - y1) * ocrCanvasScale),
+    };
+    drawCropCanvas();
+  }
+  function onEnd(evt){
+    if(!ocrIsDrawing) return;
+    ocrIsDrawing = false;
+    if(ocrCropRect && (ocrCropRect.w < 10 || ocrCropRect.h < 10)){
+      ocrCropRect = null;
+      drawCropCanvas();
+    }
+    updateProcessBtn();
+  }
+
+  canvas.addEventListener('mousedown', onStart);
+  canvas.addEventListener('mousemove', onMove);
+  canvas.addEventListener('mouseup', onEnd);
+  canvas.addEventListener('mouseleave', onEnd);
+  canvas.addEventListener('touchstart', onStart, {passive:false});
+  canvas.addEventListener('touchmove', onMove, {passive:false});
+  canvas.addEventListener('touchend', onEnd);
+  canvas.addEventListener('touchcancel', onEnd);
+}
+
+function updateProcessBtn(){
+  const btn = document.getElementById('ocr-process-btn');
+  const inst = document.getElementById('ocr-crop-instructions');
+  if(btn) btn.disabled = !ocrCropRect;
+  if(inst){
+    if(ocrCropRect){
+      inst.textContent = 'Crop: ' + ocrCropRect.w + ' × ' + ocrCropRect.h + ' px — tap "Scan ID" to read';
+    } else {
+      inst.textContent = 'Drag to draw a box around just the Participant ID';
+    }
+  }
+}
+
+async function processCroppedImage(){
+  if(!ocrSourceImage || !ocrCropRect){ return; }
+
+  const cropSec    = document.getElementById('ocr-crop-section');
+  const previewWrap= document.getElementById('ocr-preview-wrap');
+  const previewImg = document.getElementById('ocr-preview-img');
+  const progress   = document.getElementById('ocr-progress');
+  const progressTxt= document.getElementById('ocr-progress-text');
+  const resultWrap = document.getElementById('ocr-result-wrap');
+  const result     = document.getElementById('ocr-result');
+  const resultLabel= document.getElementById('ocr-result-label');
+  const resultValue= document.getElementById('ocr-result-value');
+  const actions    = document.getElementById('ocr-actions');
+  const useBtn     = document.getElementById('ocr-use-btn');
+
+  // Hide crop UI, show progress
+  if(cropSec){ cropSec.style.display = 'none'; cropSec.classList.add('hidden'); }
+  if(progress){ progress.style.display = 'flex'; progress.classList.remove('hidden'); }
+  if(progressTxt) progressTxt.textContent = 'Preparing image...';
+  if(resultWrap){ resultWrap.style.display = 'none'; resultWrap.classList.add('hidden'); }
+  if(actions){ actions.style.display = 'none'; actions.classList.add('hidden'); }
+
+  // Build cropped + preprocessed canvas
+  const r = ocrCropRect;
+  // Upscale crop to at least 800px wide for OCR (Tesseract works better on larger images)
+  const targetW = Math.max(800, r.w);
+  const scale   = targetW / r.w;
+  const targetH = Math.round(r.h * scale);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = targetW;
+  canvas.height = targetH;
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(ocrSourceImage, r.x, r.y, r.w, r.h, 0, 0, targetW, targetH);
+
+  // Preprocess: grayscale + contrast boost + threshold (binarization)
+  const imgData = ctx.getImageData(0, 0, targetW, targetH);
+  const d = imgData.data;
+  // Compute mean brightness for adaptive threshold
+  let sum = 0;
+  for(let i = 0; i < d.length; i += 4){
+    const gray = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+    sum += gray;
+  }
+  const mean = sum / (d.length / 4);
+  const threshold = mean * 0.85; // slightly below mean
+
+  for(let i = 0; i < d.length; i += 4){
+    const gray = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+    const v = gray < threshold ? 0 : 255;
+    d[i] = d[i+1] = d[i+2] = v;
+  }
+  ctx.putImageData(imgData, 0, 0);
+
+  // Show preview of preprocessed crop
+  const dataUrl = canvas.toDataURL('image/png');
+  if(previewImg) previewImg.src = dataUrl;
+  if(previewWrap){ previewWrap.style.display = 'flex'; previewWrap.classList.remove('hidden'); }
+
+  if(typeof Tesseract === 'undefined'){
+    showOCRError('OCR engine failed to load. Refresh and try again.');
+    return;
+  }
+
+  // 60s timeout
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    showOCRError('OCR took too long. Try a smaller crop or better photo.');
+  }, 60000);
+
+  try {
+    if(progressTxt) progressTxt.textContent = 'Loading OCR engine...';
+    console.log('[OCR] Starting recognize on', targetW, 'x', targetH, 'preprocessed crop');
+
+    const ocrResult = await Tesseract.recognize(dataUrl, 'eng', {
+      logger: m => {
+        if(timedOut) return;
+        console.log('[OCR]', m.status, m.progress);
+        if(!progressTxt) return;
+        if(m.status === 'recognizing text'){
+          progressTxt.textContent = 'Reading text... ' + Math.round((m.progress || 0) * 100) + '%';
+        } else if(m.status === 'loading tesseract core'){
+          progressTxt.textContent = 'Loading OCR engine...';
+        } else if(m.status === 'loading language traineddata'){
+          progressTxt.textContent = 'Loading language pack...';
+        }
+      }
+    });
+
+    clearTimeout(timer);
+    if(timedOut) return;
+
+    const rawText = (ocrResult && ocrResult.data && ocrResult.data.text) || '';
+    const cleanText = rawText.toLowerCase();
+    console.log('[OCR] Raw:', JSON.stringify(rawText));
+
+    const uuidRegex = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+    let match = cleanText.match(uuidRegex);
+    if(!match){
+      const noSpaces = cleanText.replace(/\s/g, '');
+      match = noSpaces.match(uuidRegex);
+    }
+
+    if(progress){ progress.style.display = 'none'; progress.classList.add('hidden'); }
+    if(resultWrap){ resultWrap.style.display = 'block'; resultWrap.classList.remove('hidden'); }
+    if(actions){ actions.style.display = 'flex'; actions.classList.remove('hidden'); }
+
+    if(match){
+      ocrDetectedId = match[0].toLowerCase();
+      if(result) result.classList.remove('error');
+      if(resultLabel) resultLabel.textContent = 'Participant ID Detected';
+      if(resultValue) resultValue.textContent = ocrDetectedId;
+      if(useBtn) useBtn.disabled = false;
+    } else {
+      if(result) result.classList.add('error');
+      if(resultLabel) resultLabel.textContent = 'No UUID Found in Crop';
+      const trimmed = cleanText.replace(/\s+/g, ' ').trim();
+      if(resultValue){
+        if(trimmed){
+          resultValue.innerHTML = '<div style="font-weight:600;margin-bottom:6px;color:var(--text)">Detected text:</div>' +
+            '<div style="font-family:monospace;font-size:12px;word-break:break-all;color:var(--text2)">' +
+            trimmed.substring(0,400).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])) +
+            '</div><div style="margin-top:10px;font-size:12px;color:var(--text3)">Try cropping more tightly to the ID.</div>';
+        } else {
+          resultValue.textContent = 'No text could be read. Try a tighter crop.';
+        }
+      }
+      ocrDetectedId = '';
+      if(useBtn) useBtn.disabled = true;
+    }
+  } catch(err){
+    clearTimeout(timer);
+    if(timedOut) return;
+    console.error('[OCR] Error:', err);
+    showOCRError('OCR failed: ' + (err.message || 'Unknown error'));
+  }
+}
+
+function showOCRError(msg){
+  const progress   = document.getElementById('ocr-progress');
+  const resultWrap = document.getElementById('ocr-result-wrap');
+  const result     = document.getElementById('ocr-result');
+  const resultLabel= document.getElementById('ocr-result-label');
+  const resultValue= document.getElementById('ocr-result-value');
+  const actions    = document.getElementById('ocr-actions');
+  const useBtn     = document.getElementById('ocr-use-btn');
+  if(progress){ progress.style.display = 'none'; progress.classList.add('hidden'); }
+  if(resultWrap){ resultWrap.style.display = 'block'; resultWrap.classList.remove('hidden'); }
+  if(actions){ actions.style.display = 'flex'; actions.classList.remove('hidden'); }
+  if(result) result.classList.add('error');
+  if(resultLabel) resultLabel.textContent = 'OCR Error';
+  if(resultValue) resultValue.textContent = msg;
+  if(useBtn) useBtn.disabled = true;
+  ocrDetectedId = '';
 }
 
 async function onOCRImageSelected(event){
@@ -4126,7 +4483,19 @@ function useOCRResult(){
         Take Photo
       </button>
 
-      <div class="ocr-tip">Hold your device steady and capture the ID clearly. Avoid glare and shadows for best results.</div>
+      <div class="ocr-tip" id="ocr-tip">Hold your device steady and capture the ID clearly. Avoid glare and shadows for best results.</div>
+
+      <!-- Crop stage — shown after photo capture, before OCR -->
+      <div id="ocr-crop-section" class="hidden" style="display:none;flex-direction:column;gap:12px">
+        <div class="ocr-crop-instructions" id="ocr-crop-instructions">Drag to draw a box around just the Participant ID</div>
+        <div class="ocr-crop-stage" id="ocr-crop-stage">
+          <canvas id="ocr-crop-canvas" class="ocr-crop-canvas"></canvas>
+        </div>
+        <div class="ocr-crop-actions">
+          <button class="ocr-crop-btn cancel" onclick="resetOCR()">Retake</button>
+          <button class="ocr-crop-btn process" id="ocr-process-btn" onclick="processCroppedImage()" disabled>Scan ID</button>
+        </div>
+      </div>
 
       <div id="ocr-preview-wrap" class="ocr-preview-wrap hidden" style="display:none">
         <img id="ocr-preview-img" class="ocr-preview-img" alt=""/>
