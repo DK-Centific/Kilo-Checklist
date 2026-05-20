@@ -7346,6 +7346,10 @@ function gotoChecklist(){
   const la=_layout(); if(la) la.style.display='flex';
   sessionStorage.setItem('centific_admin_view','checklist');
   updateAdminSwitchBtn();
+  // Trigger inventory picker for admin entering checklist (if not already decided this session)
+  if(typeof checkInventoryEligibility === 'function'){
+    setTimeout(() => checkInventoryEligibility(), 400);
+  }
 }
 
 function gotoDashboard(){
@@ -9202,8 +9206,13 @@ let inventorySelected = null; // currently selected set object
 
 function shouldShowInventoryCheck(){
   if(!currentUser) return false;
-  if(currentUser.isAdmin) return false;          // Admins skip
+  // Hardcoded Admin-Kilo bypass — never show (it's the emergency admin, not a real moderator)
   if(currentUser.loginId === ADMIN_LOGIN_ID) return false;
+  // For admins from PA login: only show when they're in the checklist view, not on the admin landing
+  if(currentUser.isAdmin){
+    const view = sessionStorage.getItem('centific_admin_view');
+    if(view !== 'checklist') return false;
+  }
   // Already decided in THIS browser session (handles page refresh — don't re-prompt)
   if(sessionStorage.getItem('centific_inv_decision_made')) return false;
   return true;
@@ -9472,8 +9481,10 @@ function getActiveSetInfo(){
 }
 
 function renderActiveSetIndicator(){
-  // Only show for non-admin moderators
-  if(!currentUser || currentUser.isAdmin) return '';
+  // Show for any logged-in user who has confirmed a set
+  if(!currentUser) return '';
+  // Hardcoded Admin-Kilo never sees this (no set picker shown to them)
+  if(currentUser.loginId === ADMIN_LOGIN_ID) return '';
   const set = getActiveSetInfo();
   if(!set || !set.setName) return '';
   const safeName = String(set.setName).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
