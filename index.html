@@ -6967,7 +6967,7 @@ function renderRegistration(i) {
     out += '</ul></div>';
     // Part 2: local 1-based numbering, participant steps 6 and 7
     var part2Participant = new Set([6, 7]);
-    out += '<div class="capture-card"><div class="steps-label-row"><div class="capture-card-title" style="margin-bottom:0">Part 2 — Registration for Device A</div><div class="steps-participant-note"><span class="pip">P</span> Steps marked blue are participant actions</div></div><ul class="steps-list">';
+    out += '<div class="capture-card"><div class="steps-label-row"><div class="capture-card-title" style="margin-bottom:0">Part 2 — Registration (IR Enabled)</div><div class="steps-participant-note"><span class="pip">P</span> Steps marked blue are participant actions</div></div><ul class="steps-list">';
     for (var j = 0; j < part2Steps.length; j++) {
       var overallIdx = part1Steps.length + j;
       var isDone2 = devSteps[overallIdx] || false;
@@ -7045,7 +7045,7 @@ const REG_DEVICE_STEPS = [
   "Participant stands/sits 2–4 ft from the device.",
   {t:"Perform the following head movements in sequence:",s:["Front → Left → Front → Right → Front → Upward → Front → Downward → Front"]},
   "Tap START to begin recording, then STOP SESSION when complete.",
-  {t:"Part 3 — Registration (IR Enabled — High Resolution)", section:true},
+  {t:"Part 3 — Registration (IR Enabled and High Resolution Enabled)", section:true},
   {t:"📺 Enable High Resolution before continuing. Set Device A to 2104×1560 mode.", reminder:"highRes"},
   "Go to START SESSION → select Registration.",
   "Enter first name.",
@@ -7226,7 +7226,7 @@ function renderRegistration(){
       // Part 2 — IR Disabled. Reminder first, then numbered steps.
       html2 += `<div class="capture-card">
         <div class="steps-label-row">
-          <div class="capture-card-title" style="margin-bottom:0">Part 2 — Registration (IR Disabled)</div>
+          <div class="capture-card-title" style="margin-bottom:0">Part 2 — Registration (IR Enabled)</div>
           <div class="steps-participant-note"><span class="pip">P</span> Steps marked blue are participant actions</div>
         </div>`;
       let p2Num = 0;
@@ -7247,7 +7247,7 @@ function renderRegistration(){
       // Part 3 — IR Enabled. Reminder first, then numbered steps.
       html2 += `<div class="capture-card">
         <div class="steps-label-row">
-          <div class="capture-card-title" style="margin-bottom:0">Part 3 — Registration (IR Enabled)</div>
+          <div class="capture-card-title" style="margin-bottom:0">Part 3 — Registration (IR Enabled and High Resolution Enabled)</div>
           <div class="steps-participant-note"><span class="pip">P</span> Steps marked blue are participant actions</div>
         </div>`;
       part3Items.forEach(({s,j})=>{
