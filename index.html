@@ -5324,15 +5324,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .ir-mode-chip.off{
   background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.35);color:var(--red);
 }
+.ir-mode-chip.highres{
+  background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.35);color:var(--blue,#3b82f6);
+}
 .ir-mode-chip:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
 .ir-mode-chip.on:hover{background:rgba(245,158,11,.18);border-color:var(--amber)}
 .ir-mode-chip.off:hover{background:rgba(239,68,68,.18);border-color:var(--red)}
+.ir-mode-chip.highres:hover{background:rgba(59,130,246,.18);border-color:var(--blue,#3b82f6)}
 .ir-mode-chip-icon{
   width:18px;height:18px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;flex-shrink:0;
 }
 .ir-mode-chip.on .ir-mode-chip-icon{background:var(--amber);color:#fff}
 .ir-mode-chip.off .ir-mode-chip-icon{background:var(--red);color:#fff}
+.ir-mode-chip.highres .ir-mode-chip-icon{background:var(--blue,#3b82f6);color:#fff}
 .ir-mode-chip-icon svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
@@ -6192,6 +6197,12 @@ function openTask(i){
       setTimeout(showIRDisableReminder, 300);
     }
   }
+  // High Resolution reminder — required for ALL tasks. Show once per session on first task open.
+  if(i >= 1 && i <= 14 && !sessionStorage.getItem('centific_highres_shown')){
+    sessionStorage.setItem('centific_highres_shown', '1');
+    // Delay slightly longer than IR popup so they don't overlap if both fire
+    setTimeout(showHighResReminder, 1500);
+  }
   activeTask=i;
   activePanel=null;
   PANEL_IDS.forEach(p=>{
@@ -6244,6 +6255,10 @@ function renderDetail(i){
         }
         return '';
       })()}
+      <span class="ir-mode-chip highres" onclick="showHighResReminder()" title="How to enable High Resolution">
+        <span class="ir-mode-chip-icon"><svg viewBox="0 0 16 16"><rect x="2" y="4" width="12" height="9" rx="1"/><path d="M5 13v1M11 13v1M2 11h12"/></svg></span>
+        High Resolution: ON
+      </span>
     </div>
   </div>`;
   if(t.warn) html+=`<div class="warn-box"><svg viewBox="0 0 16 16"><path d="M8 2L15 13H1L8 2z"/><line x1="8" y1="7" x2="8" y2="10"/></svg><p>${t.warn}</p></div>`;
@@ -8296,6 +8311,7 @@ function startNewSession(){
   sessionStorage.removeItem('centific_session_prereq_done');
   // Keep inv decision/set — same moderator, same set still valid within 24h
   sessionStorage.removeItem('centific_ir_shown');
+  sessionStorage.removeItem('centific_highres_shown');
   if(typeof clearIRReminderFlags === 'function') clearIRReminderFlags();
   sessionStorage.removeItem('centific_ir_disable_shown');
   const keepOperator = globalData.operator || '';
@@ -9256,6 +9272,7 @@ function autoLogoutAfterCheckout(){
   sessionStorage.removeItem('centific_session_prereq_done');
   // Keep inv decision/set — same moderator, same set still valid within 24h
   sessionStorage.removeItem('centific_ir_shown');
+  sessionStorage.removeItem('centific_highres_shown');
   if(typeof clearIRReminderFlags === 'function') clearIRReminderFlags();
   sessionStorage.removeItem('centific_ir_disable_shown');
   try {
