@@ -7270,7 +7270,13 @@ function renderRegistration(){
       // Part 2 — IR Disabled. Reminder first, then numbered steps.
       html2 += `<div class="capture-card">
         <div class="steps-label-row">
-          <div class="capture-card-title" style="margin-bottom:0">Part 2 — Registration (IR Enabled)</div>
+          <div>
+            <div class="capture-card-title" style="margin-bottom:6px">Part 2 — Registration (IR Enabled)</div>
+            <div class="meta-row" style="margin-bottom:0">
+              <span class="meta-chip">2–4 ft</span>
+              <span class="meta-chip">50–300 lux</span>
+            </div>
+          </div>
           <div class="steps-participant-note"><span class="pip">P</span> Steps marked blue are participant actions</div>
         </div>`;
       let p2Num = 0;
@@ -7291,7 +7297,13 @@ function renderRegistration(){
       // Part 3 — IR Enabled. Reminder first, then numbered steps.
       html2 += `<div class="capture-card">
         <div class="steps-label-row">
-          <div class="capture-card-title" style="margin-bottom:0">Part 3 — Registration (IR Disabled)</div>
+          <div>
+            <div class="capture-card-title" style="margin-bottom:6px">Part 3 — Registration (IR Disabled)</div>
+            <div class="meta-row" style="margin-bottom:0">
+              <span class="meta-chip">2–4 ft</span>
+              <span class="meta-chip">50–300 lux</span>
+            </div>
+          </div>
           <div class="steps-participant-note"><span class="pip">P</span> Steps marked blue are participant actions</div>
         </div>`;
       part3Items.forEach(({s,j})=>{
