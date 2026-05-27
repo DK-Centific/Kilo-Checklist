@@ -5339,6 +5339,64 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .ir-mode-chip.off .ir-mode-chip-icon{background:var(--red);color:#fff}
 .ir-mode-chip.highres .ir-mode-chip-icon{background:var(--blue,#3b82f6);color:#fff}
 .ir-mode-chip-icon svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Registration Reminder Popup ── */
+.reg-popup-overlay{
+  position:fixed;inset:0;z-index:580;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.reg-popup-overlay.hidden{display:none!important}
+.reg-popup-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:440px;
+  padding:30px 28px 24px;
+  box-shadow:var(--shadow-lg);position:relative;
+  animation:fadeUp .35s cubic-bezier(.34,1.2,.64,1);
+}
+.reg-popup-close{
+  position:absolute;top:14px;right:14px;
+  width:30px;height:30px;border-radius:50%;border:.5px solid var(--border-strong);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text3);font-size:16px;transition:all .15s;
+}
+.reg-popup-close:hover{background:var(--bg4);color:var(--text)}
+.reg-popup-icon{
+  width:60px;height:60px;border-radius:50%;
+  background:rgba(245,158,11,.12);border:.5px solid rgba(245,158,11,.3);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
+}
+.reg-popup-icon svg{width:28px;height:28px;stroke:var(--amber);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.reg-popup-title{font-size:19px;font-weight:600;letter-spacing:-0.03em;color:var(--text);margin-bottom:6px;text-align:center}
+.reg-popup-subtitle{font-size:12px;color:var(--text3);text-align:center;margin-bottom:18px;letter-spacing:.02em;text-transform:uppercase;font-weight:600}
+.reg-popup-list-row{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:12px 14px;border-radius:var(--rl);margin-bottom:8px;
+}
+.reg-popup-list-row.allowed{background:rgba(34,197,94,.08);border:.5px solid rgba(34,197,94,.25)}
+.reg-popup-list-row.not-allowed{background:rgba(239,68,68,.08);border:.5px solid rgba(239,68,68,.25)}
+.reg-popup-list-icon{
+  width:24px;height:24px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;
+}
+.reg-popup-list-row.allowed .reg-popup-list-icon{background:var(--green)}
+.reg-popup-list-row.not-allowed .reg-popup-list-icon{background:var(--red)}
+.reg-popup-list-icon svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.reg-popup-list-content{flex:1}
+.reg-popup-list-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+.reg-popup-list-row.allowed .reg-popup-list-label{color:var(--green)}
+.reg-popup-list-row.not-allowed .reg-popup-list-label{color:var(--red)}
+.reg-popup-list-text{font-size:13px;color:var(--text);line-height:1.5;letter-spacing:-0.01em}
+.reg-popup-confirm-btn{
+  width:100%;padding:14px;border-radius:var(--r);margin-top:14px;
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.reg-popup-confirm-btn:hover{background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.28)}
+.reg-popup-confirm-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
 <body>
@@ -5736,10 +5794,10 @@ const TASKS=[
   {id:5,title:"Unengaged",cat:"Movement",distance:"Variable (within FOV)",lux:"0–10",duration:"~1.5 min",warn:"Participant should NOT look at or engage with the screen at any point.",note:"",steps:["Tap SET CAMERA → IR LED MODE → select ON, then IR LED POWER MODE → select MANUAL HIGH","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Press START SESSION → select Visual ID","Select Unengaged from the dropdown. Complete metadata.","Measure lux at 2 different locations the participant will move through, both facing the device. Confirm 0–10 lux.","Enter the average of the two lux readings","Start recording","Enter the scene from outside the field of view without looking at the screen","Move around the scene doing random activities for ~1.5 minutes","Exit the scene"]},
   {id:6,title:"Fast Movement",cat:"Movement",distance:"2–8 ft",lux:"0–10",duration:"Auto 2 min",warn:"",note:"",steps:["Tap SET CAMERA → IR LED MODE → select ON, then IR LED POWER MODE → select MANUAL HIGH","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Press START SESSION → select Visual ID","Select Fast Movement from the dropdown. Complete metadata.","Measure lux at 8 ft and 2 ft, both facing the device. Confirm 0–10 lux.","Enter the average of the two readings","Start recording","Enter from outside the field of view, walk fast (>4 ft/sec) into the scene","Move close to the device (~3 ft), look at screen for 2–3 seconds","Move away (face still toward device) to 8 ft","Move quickly back toward the screen (>4 ft/sec), face toward device","Move quickly around the scene randomly (>4 ft/sec), occasionally looking away","Exit the field of view ~10 seconds before video ends"]},
   {id:7,title:"Walk Toward Device (Low Lighting)",cat:"Movement",distance:"2–8 ft",lux:"0–10",duration:"30 sec",warn:"",note:"Priority: P1",steps:["Tap SET CAMERA → IR LED MODE → select ON, then IR LED POWER MODE → select MANUAL HIGH","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Participant stands 8 ft from the device","Measure lux on face facing the device. Confirm 0–10 lux.","Press START SESSION → select NV Visual ID","Set recording duration to 30 seconds","Select Walk Toward Device - Good-lighting from the dropdown. Complete metadata.","Enter lux value","Start recording","Walk toward the device at a comfortable speed from 8 ft","Stop at approximately 2 ft","Look at the device most of the time; may occasionally glance away"]},
-  {id:8,title:"Appearance Change — Glasses",cat:"Appearance",distance:"2–3 ft & 6–8 ft",lux:"0–10",duration:"Auto 2 min",warn:"",note:"",steps:["Tap SET CAMERA → IR LED MODE → select ON, then IR LED POWER MODE → select MANUAL HIGH","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Press START SESSION → select NV Visual ID","Select Appearance change - wearing glasses from the dropdown. Complete metadata.","Participant puts on glasses and stands within arm's reach of the device","Measure lux at 2–3 ft facing the device. Confirm 0–10 lux. Enter value.","Start recording",{t:"AT 2–3 FT (do not move during this portion):",s:["Reach out and pretend to touch the device screen, then retract hand","Rotate head Front → Left → Front → Right → Front → Upward → Front → Downward → Front (turning gaze 90° in all 4 directions)","Wink left eye, then right eye. Open and close mouth."]},{t:"MOVE TO 6–8 FT (do not move during this portion):",s:["Rotate head Front → Left → Front → Right → Front → Upward → Front → Downward → Front (turning gaze 90° in all 4 directions)","Wink left eye, then right eye. Open and close mouth."]},"Recording auto-ends after 2 minutes"]},
-  {id:9,title:"Appearance Change — Baseball Cap",cat:"Appearance",distance:"2–3 ft & 6–8 ft",lux:"0–10",duration:"Auto 2 min",warn:"",note:"",steps:["Tap SET CAMERA → IR LED MODE → select ON, then IR LED POWER MODE → select MANUAL HIGH","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Press START SESSION → select NV Visual ID","Select Appearance change - wearing baseball cap from the dropdown. Complete metadata.","Participant puts on a baseball cap and stands within arm's reach of the device","Measure lux at 2–3 ft facing the device. Confirm 0–10 lux. Enter value.","Start recording",{t:"AT 2–3 FT (do not move during this portion):",s:["Reach out and pretend to touch the device screen, then retract hand","Rotate head Front → Left → Front → Right → Front → Upward → Front → Downward → Front (turning gaze 90° in all 4 directions)","Wink left eye, then right eye. Open and close mouth."]},{t:"MOVE TO 6–8 FT (do not move during this portion):",s:["Rotate head Front → Left → Front → Right → Front → Upward → Front → Downward → Front (turning gaze 90° in all 4 directions)","Wink left eye, then right eye. Open and close mouth."]},"Recording auto-ends after 2 minutes"]},
-  {id:10,title:"Appearance Change — Hair Gear",cat:"Appearance",distance:"2–3 ft & 6–8 ft",lux:"0–10",duration:"Auto 2 min",warn:"",note:"",steps:["Tap SET CAMERA → IR LED MODE → select ON, then IR LED POWER MODE → select MANUAL HIGH","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Press START SESSION → select NV Visual ID","Select Appearance change - wearing secondary hair gear from the dropdown. Complete metadata.","Participant puts on a hair gear item other than a baseball cap (e.g., headband, scarf), provided by the operators, and stands within arm's reach of the device","Measure lux at 2–3 ft facing the device. Confirm 0–10 lux. Enter value.","Start recording",{t:"AT 2–3 FT (do not move during this portion):",s:["Reach out and pretend to touch the device screen, then retract hand","Rotate head Front → Left → Front → Right → Front → Upward → Front → Downward → Front (turning gaze 90° in all 4 directions)","Wink left eye, then right eye. Open and close mouth."]},{t:"MOVE TO 6–8 FT (do not move during this portion):",s:["Rotate head Front → Left → Front → Right → Front → Upward → Front → Downward → Front (turning gaze 90° in all 4 directions)","Wink left eye, then right eye. Open and close mouth."]},"Recording auto-ends after 2 minutes"]},
-  {id:11,title:"Appearance Change — Hairstyle",cat:"Appearance",distance:"2–3 ft & 6–8 ft",lux:"0–10",duration:"Auto 2 min",warn:"",note:"Only for participants who can easily change their hairstyle.",steps:["Tap SET CAMERA → IR LED MODE → select ON, then IR LED POWER MODE → select MANUAL HIGH","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Press START SESSION → select NV Visual ID","Select Appearance change - wearing secondary hairstyle from the dropdown. Complete metadata.","Participant changes their hairstyle to something different from all other tasks (e.g., loosen ponytail, comb hair differently, use a different hair band) and stands within arm's reach of the device","Measure lux at 2–3 ft facing the device. Confirm 0–10 lux. Enter value.","Start recording",{t:"AT 2–3 FT (do not move during this portion):",s:["Reach out and pretend to touch the device screen, then retract hand","Rotate head Front → Left → Front → Right → Front → Upward → Front → Downward → Front (turning gaze 90° in all 4 directions)","Wink left eye, then right eye. Open and close mouth."]},{t:"MOVE TO 6–8 FT (do not move during this portion):",s:["Rotate head Front → Left → Front → Right → Front → Upward → Front → Downward → Front (turning gaze 90° in all 4 directions)","Wink left eye, then right eye. Open and close mouth."]},"Recording auto-ends after 2 minutes"]},
+  {id:8,title:"Appearance Change — Glasses",cat:"Appearance",distance:"2–3 ft & 6–8 ft",lux:"0–10",duration:"Auto 2 min",warn:"",note:"",steps:["Tap SET CAMERA → IR LED MODE → select ON, then IR LED POWER MODE → select MANUAL HIGH","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Press START SESSION → select NV Visual ID","Select Appearance change - wearing glasses from the dropdown. Complete metadata.","Participant puts on glasses and stands within arm's reach of the device <span style=\"color:var(--red);font-weight:600\">(Please do not touch the device screen)</span>","Measure lux at 2–3 ft facing the device. Confirm 0–10 lux. Enter value.","Start recording",{t:"AT 2–3 FT (do not move during this portion):",s:["Reach out and pretend to touch the device screen, then retract hand","Rotate head Front → Left → Front → Right → Front → Upward → Front → Downward → Front (turning gaze 90° in all 4 directions)","Wink left eye, then right eye. Open and close mouth."]},{t:"MOVE TO 6–8 FT (do not move during this portion):",s:["Rotate head Front → Left → Front → Right → Front → Upward → Front → Downward → Front (turning gaze 90° in all 4 directions)","Wink left eye, then right eye. Open and close mouth."]},"Recording auto-ends after 2 minutes"]},
+  {id:9,title:"Appearance Change — Baseball Cap",cat:"Appearance",distance:"2–3 ft & 6–8 ft",lux:"0–10",duration:"Auto 2 min",warn:"",note:"",steps:["Tap SET CAMERA → IR LED MODE → select ON, then IR LED POWER MODE → select MANUAL HIGH","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Press START SESSION → select NV Visual ID","Select Appearance change - wearing baseball cap from the dropdown. Complete metadata.","Participant puts on a baseball cap and stands within arm's reach of the device <span style=\"color:var(--red);font-weight:600\">(Please do not touch the device screen)</span>","Measure lux at 2–3 ft facing the device. Confirm 0–10 lux. Enter value.","Start recording",{t:"AT 2–3 FT (do not move during this portion):",s:["Reach out and pretend to touch the device screen, then retract hand","Rotate head Front → Left → Front → Right → Front → Upward → Front → Downward → Front (turning gaze 90° in all 4 directions)","Wink left eye, then right eye. Open and close mouth."]},{t:"MOVE TO 6–8 FT (do not move during this portion):",s:["Rotate head Front → Left → Front → Right → Front → Upward → Front → Downward → Front (turning gaze 90° in all 4 directions)","Wink left eye, then right eye. Open and close mouth."]},"Recording auto-ends after 2 minutes"]},
+  {id:10,title:"Appearance Change — Hair Gear",cat:"Appearance",distance:"2–3 ft & 6–8 ft",lux:"0–10",duration:"Auto 2 min",warn:"",note:"",steps:["Tap SET CAMERA → IR LED MODE → select ON, then IR LED POWER MODE → select MANUAL HIGH","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Press START SESSION → select NV Visual ID","Select Appearance change - wearing secondary hair gear from the dropdown. Complete metadata.","Participant puts on a hair gear item other than a baseball cap (e.g., headband, scarf), provided by the operators, and stands within arm's reach of the device <span style=\"color:var(--red);font-weight:600\">(Please do not touch the device screen)</span>","Measure lux at 2–3 ft facing the device. Confirm 0–10 lux. Enter value.","Start recording",{t:"AT 2–3 FT (do not move during this portion):",s:["Reach out and pretend to touch the device screen, then retract hand","Rotate head Front → Left → Front → Right → Front → Upward → Front → Downward → Front (turning gaze 90° in all 4 directions)","Wink left eye, then right eye. Open and close mouth."]},{t:"MOVE TO 6–8 FT (do not move during this portion):",s:["Rotate head Front → Left → Front → Right → Front → Upward → Front → Downward → Front (turning gaze 90° in all 4 directions)","Wink left eye, then right eye. Open and close mouth."]},"Recording auto-ends after 2 minutes"]},
+  {id:11,title:"Appearance Change — Hairstyle",cat:"Appearance",distance:"2–3 ft & 6–8 ft",lux:"0–10",duration:"Auto 2 min",warn:"",note:"Only for participants who can easily change their hairstyle.",steps:["Tap SET CAMERA → IR LED MODE → select ON, then IR LED POWER MODE → select MANUAL HIGH","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Press START SESSION → select NV Visual ID","Select Appearance change - wearing secondary hairstyle from the dropdown. Complete metadata.","Participant changes their hairstyle to something different from all other tasks (e.g., loosen ponytail, comb hair differently, use a different hair band) and stands within arm's reach of the device <span style=\"color:var(--red);font-weight:600\">(Please do not touch the device screen)</span>","Measure lux at 2–3 ft facing the device. Confirm 0–10 lux. Enter value.","Start recording",{t:"AT 2–3 FT (do not move during this portion):",s:["Reach out and pretend to touch the device screen, then retract hand","Rotate head Front → Left → Front → Right → Front → Upward → Front → Downward → Front (turning gaze 90° in all 4 directions)","Wink left eye, then right eye. Open and close mouth."]},{t:"MOVE TO 6–8 FT (do not move during this portion):",s:["Rotate head Front → Left → Front → Right → Front → Upward → Front → Downward → Front (turning gaze 90° in all 4 directions)","Wink left eye, then right eye. Open and close mouth."]},"Recording auto-ends after 2 minutes"]},
   {id:12,title:"Seated — 0–10 Lux at 4 ft",cat:"Seated",distance:"~4 ft",lux:"0–10",duration:"Auto 30 sec",warn:"",note:"",steps:["Place a chair approximately 4 ft from the device","Tap SET CAMERA → IR LED MODE → select ON, then IR LED POWER MODE → select MANUAL HIGH","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Press START SESSION → select Visual ID","Select Seated-0-10lux-4ft. Complete metadata.","Participant sits facing the camera","Measure lux on face. Confirm 0–10 lux. Enter value.","Start recording","Look straight for >3 seconds","Turn face to the left","Turn back, look straight for >3 seconds","Turn face to the right","Turn back, look straight for >3 seconds","Recording auto-ends after 30 seconds"]},
   {id:13,title:"Seated — 0–10 Lux at 8 ft",cat:"Seated",distance:"~8 ft",lux:"0–10",duration:"Auto 30 sec",warn:"",note:"",steps:["Place a chair approximately 8 ft from the device","Tap SET CAMERA → IR LED MODE → select ON, then IR LED POWER MODE → select MANUAL HIGH","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Press START SESSION → select Visual ID","Select Seated-0-10lux-8ft. Complete metadata.","Participant sits facing the camera","Measure lux on face. Confirm 0–10 lux. Enter value.","Start recording","Look straight for >3 seconds","Turn face to the left","Turn back, look straight for >3 seconds","Turn face to the right","Turn back, look straight for >3 seconds","Recording auto-ends after 30 seconds"]},
   {id:14,title:"Seated — 30–50 Lux at 4 ft",cat:"Seated",distance:"~4 ft",lux:"30–50",duration:"Auto 30 sec",warn:"",note:"",steps:["Place a chair approximately 4 ft from the device","Tap SET CAMERA → IR LED MODE → select OFF, then IR LED POWER MODE → select AUTO","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Press START SESSION → select Visual ID","Select Seated-30-50lux-4ft. Complete metadata.","Participant sits facing the camera","Measure lux on face. Confirm 30–50 lux. Enter value.","Start recording","Look straight for >3 seconds","Turn face to the left","Turn back, look straight for >3 seconds","Turn face to the right","Turn back, look straight for >3 seconds","Recording auto-ends after 30 seconds"]}
@@ -6833,6 +6891,7 @@ function doLogout(){
   // Clear inventory state — next login will re-prompt
   sessionStorage.removeItem('centific_inv_decision_made');
   sessionStorage.removeItem('centific_inv_set');
+  sessionStorage.removeItem('centific_reg_popup_shown');
   // Hide dashboard/landing pages
   document.getElementById('admin-landing').classList.remove('visible');
   document.getElementById('dashboard-page').classList.remove('visible');
@@ -7116,6 +7175,8 @@ function openRegistration(){
   }
   renderSidebar();
   renderRegistration();
+  // Show participant appearance reminder once per session
+  if(typeof maybeShowRegPopup === 'function') maybeShowRegPopup();
 }
 
 function renderRegistration(){
@@ -9314,6 +9375,7 @@ function autoLogoutAfterCheckout(){
   // Clear inventory state — next login (this moderator or another) will re-prompt for set selection
   sessionStorage.removeItem('centific_inv_decision_made');
   sessionStorage.removeItem('centific_inv_set');
+  sessionStorage.removeItem('centific_reg_popup_shown');
   sessionStorage.removeItem('centific_ir_shown');
   sessionStorage.removeItem('centific_highres_shown');
   if(typeof clearIRReminderFlags === 'function') clearIRReminderFlags();
@@ -9743,6 +9805,29 @@ function clearIRReminderFlags(){
     }
   }
   keys.forEach(k => sessionStorage.removeItem(k));
+}
+
+
+// ══════════════════════════════════════════════════════════
+// ── REGISTRATION PRE-REMINDER POPUP ───────────────────────
+// ══════════════════════════════════════════════════════════
+function showRegPopup(){
+  const ov = document.getElementById('reg-popup-overlay');
+  if(!ov) return;
+  ov.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+function closeRegPopup(){
+  const ov = document.getElementById('reg-popup-overlay');
+  if(!ov) return;
+  ov.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+function maybeShowRegPopup(){
+  // Show once per session when entering Registration
+  if(sessionStorage.getItem('centific_reg_popup_shown')) return;
+  sessionStorage.setItem('centific_reg_popup_shown', '1');
+  setTimeout(showRegPopup, 300);
 }
 </script>
 
@@ -10183,6 +10268,36 @@ function clearIRReminderFlags(){
         <span id="inv-confirm-label">Select a set first</span>
       </button>
     </div>
+  </div>
+</div>
+
+<!-- ── Registration Pre-Reminder Modal (Device A Registration) ── -->
+<div class="reg-popup-overlay hidden" id="reg-popup-overlay" onclick="if(event.target===this)closeRegPopup()">
+  <div class="reg-popup-modal">
+    <div class="reg-popup-close" onclick="closeRegPopup()">✕</div>
+    <div class="reg-popup-icon">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+    </div>
+    <div class="reg-popup-title">Before You Begin Registration</div>
+    <div class="reg-popup-subtitle">Participant Appearance — Registration Only</div>
+    <div class="reg-popup-list-row allowed">
+      <div class="reg-popup-list-icon"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg></div>
+      <div class="reg-popup-list-content">
+        <div class="reg-popup-list-label">Allowed</div>
+        <div class="reg-popup-list-text">Prescribed glasses (for participants who normally wear them)</div>
+      </div>
+    </div>
+    <div class="reg-popup-list-row not-allowed">
+      <div class="reg-popup-list-icon"><svg viewBox="0 0 16 16"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg></div>
+      <div class="reg-popup-list-content">
+        <div class="reg-popup-list-label">Not Allowed</div>
+        <div class="reg-popup-list-text">Sunglasses, hats, baseball caps, or any other head wear</div>
+      </div>
+    </div>
+    <button class="reg-popup-confirm-btn" onclick="closeRegPopup()">
+      <svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>
+      Got It — Begin Registration
+    </button>
   </div>
 </div>
 
