@@ -5376,17 +5376,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 }
 .reg-popup-list-row.allowed{background:rgba(34,197,94,.08);border:.5px solid rgba(34,197,94,.25)}
 .reg-popup-list-row.not-allowed{background:rgba(239,68,68,.08);border:.5px solid rgba(239,68,68,.25)}
+.reg-popup-list-row.name-format{background:rgba(239,67,179,.08);border:.5px solid rgba(239,67,179,.25)}
 .reg-popup-list-icon{
   width:24px;height:24px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;
 }
 .reg-popup-list-row.allowed .reg-popup-list-icon{background:var(--green)}
 .reg-popup-list-row.not-allowed .reg-popup-list-icon{background:var(--red)}
+.reg-popup-list-row.name-format .reg-popup-list-icon{background:var(--pink)}
 .reg-popup-list-icon svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .reg-popup-list-content{flex:1}
 .reg-popup-list-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
 .reg-popup-list-row.allowed .reg-popup-list-label{color:var(--green)}
 .reg-popup-list-row.not-allowed .reg-popup-list-label{color:var(--red)}
+.reg-popup-list-row.name-format .reg-popup-list-label{color:var(--pink)}
 .reg-popup-list-text{font-size:13px;color:var(--text);line-height:1.5;letter-spacing:-0.01em}
 .reg-popup-confirm-btn{
   width:100%;padding:14px;border-radius:var(--r);margin-top:14px;
@@ -10292,6 +10295,13 @@ function maybeShowRegPopup(){
       <div class="reg-popup-list-content">
         <div class="reg-popup-list-label">Not Allowed</div>
         <div class="reg-popup-list-text">Sunglasses, hats, baseball caps, or any other head wear</div>
+      </div>
+    </div>
+    <div class="reg-popup-list-row name-format">
+      <div class="reg-popup-list-icon"><svg viewBox="0 0 16 16"><path d="M2 4h12v8H2z"/><line x1="5" y1="8" x2="11" y2="8"/></svg></div>
+      <div class="reg-popup-list-content">
+        <div class="reg-popup-list-label">Participant First Name</div>
+        <div class="reg-popup-list-text">Append <code style="background:rgba(239,67,179,.12);color:var(--pink);padding:1px 6px;border-radius:5px;font-weight:600;font-family:'Courier New',monospace;font-size:12px">_vid</code> to the participant's first name when entering it — e.g. <strong>David_vid</strong></div>
       </div>
     </div>
     <button class="reg-popup-confirm-btn" onclick="closeRegPopup()">
