@@ -6757,10 +6757,10 @@ function _onLoginSuccessInner(){
   document.getElementById('nav-user-avatar').textContent = (currentUser.firstName[0]||'?').toUpperCase();
   document.getElementById('nav-user-name').textContent = currentUser.firstName;
   chip.style.display = 'flex';
-  // Prefill moderator field
+  // Always set moderator field to PA-provided modName (overrides any saved value)
   const modField = document.getElementById('g-operator');
-  if(modField && !modField.value) modField.value = currentUser.modName;
-  globalData.operator = currentUser.modName;
+  if(modField && currentUser.modName) modField.value = currentUser.modName;
+  globalData.operator = currentUser.modName || '';
   saveProgress();
   // Update logout label
   document.getElementById('hd-logout-label').textContent = 'Sign out (' + currentUser.firstName + ')';
@@ -9311,7 +9311,9 @@ function showCheckoutThankYou(){
 
 function autoLogoutAfterCheckout(){
   sessionStorage.removeItem('centific_session_prereq_done');
-  // Keep inv decision/set — same moderator, same set still valid within 24h
+  // Clear inventory state — next login (this moderator or another) will re-prompt for set selection
+  sessionStorage.removeItem('centific_inv_decision_made');
+  sessionStorage.removeItem('centific_inv_set');
   sessionStorage.removeItem('centific_ir_shown');
   sessionStorage.removeItem('centific_highres_shown');
   if(typeof clearIRReminderFlags === 'function') clearIRReminderFlags();
@@ -9321,8 +9323,14 @@ function autoLogoutAfterCheckout(){
     stepDone.forEach(a => a.fill(false));
     taskData.forEach(d => { d.lux=''; d.notes=''; d.status='Not Started'; d.completedAt=''; });
     taskSynced.fill(false);
+    // Reset globalData. Operator will be re-populated from currentUser.modName on next sign-in.
     globalData = {participant:'', participantName:'', operator:'', date:'', device:'Device A'};
     localStorage.removeItem(STORAGE_KEY);
+    // Reset visible form fields (so they show empty when moderator signs back in)
+    ['g-participant','g-participant-name','g-operator','g-date'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.value = '';
+    });
   } catch(e){ console.error('reset:', e); }
   currentUser = null;
   sessionStorage.removeItem('centific_user');
@@ -9487,19 +9495,24 @@ async function openInventoryCheck(){
       groupMap[key].items.push({ itemType, sn, location: loc });
     });
 
-    // Filter by location if user has one set — show sets matching their location first
+    // Filter sets by moderator's location — only show sets that match
     const userLoc = (currentUser && currentUser.location) ? currentUser.location.toLowerCase().trim() : '';
     let groups = Object.values(groupMap);
+    console.log('[Inventory] Moderator location:', userLoc || '(none)');
+    console.log('[Inventory] Found set locations:', [...new Set(groups.map(g => g.location))]);
+
     if(userLoc){
-      groups.sort((a,b) => {
-        const aMatch = a.location && a.location.toLowerCase().trim() === userLoc;
-        const bMatch = b.location && b.location.toLowerCase().trim() === userLoc;
-        if(aMatch === bMatch) return (a.setName||'').localeCompare(b.setName||'');
-        return aMatch ? -1 : 1;
-      });
-    } else {
-      groups.sort((a,b) => (a.setName||'').localeCompare(b.setName||''));
+      const matching = groups.filter(g => g.location && g.location.toLowerCase().trim() === userLoc);
+      if(matching.length > 0){
+        // Use only matching-location sets
+        groups = matching;
+        console.log('[Inventory] Filtered to', groups.length, 'sets for', userLoc);
+      } else {
+        // Fallback: if no sets match the moderator's location, show all sets so they can still select something
+        console.warn('[Inventory] No sets matched location "' + userLoc + '"; showing all sets as fallback');
+      }
     }
+    groups.sort((a,b) => (a.setName||'').localeCompare(b.setName||''));
 
     inventoryData = groups;
     renderInventoryTiles();
@@ -10150,6 +10163,26 @@ function clearIRReminderFlags(){
       <svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>
       Got it — High Resolution Enabled
     </button>
+  </div>
+</div>
+
+<!-- ── Inventory Set Confirmation Modal (Moderators only) ── -->
+<div class="inv-overlay hidden" id="inv-overlay">
+  <div class="inv-modal">
+    <div class="inv-header">
+      <div class="inv-title">Confirm Your Equipment Set</div>
+      <div class="inv-subtitle">Select the equipment set you are using for this session. Verify all items are present before confirming.</div>
+    </div>
+    <div class="inv-body" id="inv-body">
+      <div class="inv-loading"><div class="inv-spinner"></div><span>Loading equipment sets…</span></div>
+    </div>
+    <div class="inv-footer" id="inv-footer" style="display:none">
+      <div class="inv-error-msg" id="inv-error-msg"></div>
+      <button class="inv-confirm-btn" id="inv-confirm-btn" onclick="confirmInventorySet()" disabled>
+        <svg viewBox="0 0 16 16" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="2,8 6,12 14,4"/></svg>
+        <span id="inv-confirm-label">Select a set first</span>
+      </button>
+    </div>
   </div>
 </div>
 
