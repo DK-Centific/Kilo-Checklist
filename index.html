@@ -5400,6 +5400,93 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 }
 .reg-popup-confirm-btn:hover{background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.28)}
 .reg-popup-confirm-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Mod QA Check Link ── */
+.mod-qa-link{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 12px;margin:10px 0 0;
+  background:rgba(34,197,94,.08);
+  border:.5px solid rgba(34,197,94,.25);
+  border-radius:var(--r);
+  text-decoration:none;color:var(--text);
+  font-family:var(--font);font-size:12px;font-weight:500;letter-spacing:-0.01em;
+  transition:all .2s;
+  cursor:pointer;
+}
+.mod-qa-link:hover{
+  background:rgba(34,197,94,.14);
+  border-color:rgba(34,197,94,.4);
+  transform:translateY(-1px);
+}
+.mod-qa-link.na{
+  background:rgba(115,115,115,.08);
+  border-color:rgba(115,115,115,.25);
+  color:var(--text3);
+  cursor:default;
+}
+.mod-qa-link.na:hover{
+  transform:none;background:rgba(115,115,115,.08);
+}
+.mod-qa-icon{
+  width:14px;height:14px;stroke:var(--green);fill:none;
+  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;
+}
+.mod-qa-link.na .mod-qa-icon{stroke:var(--text3)}
+.mod-qa-link span{flex:1}
+.mod-qa-ext{
+  width:11px;height:11px;stroke:currentColor;fill:none;
+  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.55;
+}
+
+/* ── Update Available Toast (version-poll notification) ── */
+.update-toast{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);
+  background:linear-gradient(135deg, var(--pink), #d637a3);
+  color:#fff;padding:14px 20px;
+  border-radius:14px;
+  box-shadow:0 12px 32px rgba(239,67,179,.35), 0 4px 12px rgba(0,0,0,.12);
+  display:flex;align-items:center;gap:12px;
+  font-size:14px;font-weight:500;letter-spacing:-0.01em;
+  z-index:9999;
+  transition:transform .4s cubic-bezier(.34,1.2,.64,1), opacity .25s;
+  opacity:0;pointer-events:none;
+  max-width:calc(100vw - 40px);
+}
+.update-toast.visible{
+  transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto;
+}
+.update-toast-icon{
+  width:34px;height:34px;border-radius:50%;
+  background:rgba(255,255,255,.18);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.update-toast-icon svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.update-toast-content{flex:1;min-width:0}
+.update-toast-title{font-weight:600;font-size:13px;letter-spacing:-0.01em}
+.update-toast-sub{font-size:11px;opacity:.85;margin-top:2px}
+.update-toast-actions{display:flex;gap:6px;flex-shrink:0}
+.update-toast-btn{
+  padding:7px 14px;border-radius:999px;
+  background:#fff;color:var(--pink);border:none;cursor:pointer;
+  font-family:var(--font);font-size:12px;font-weight:600;letter-spacing:-0.01em;
+  transition:transform .15s;
+}
+.update-toast-btn:hover{transform:scale(1.04)}
+.update-toast-btn.secondary{
+  background:rgba(255,255,255,.18);color:#fff;
+}
+
+/* ── Field validation error state ── */
+.field-error{
+  border-color:var(--red) !important;
+  box-shadow:0 0 0 3px rgba(239,68,68,.15) !important;
+  animation:shake .35s;
+}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%,60%{transform:translateX(-4px)}
+  40%,80%{transform:translateX(4px)}
+}
 </style>
 </head>
 <body>
@@ -5432,9 +5519,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   <div class="nav-right">
     <div class="nav-prog-wrap">
       <div class="nav-prog-bar"><div class="nav-prog-fill" id="nav-fill" style="width:0%"></div></div>
-      <span style="font-size:11px;color:var(--text3)" id="nav-label">0/12</span>
+      <span style="font-size:11px;color:var(--text3)" id="nav-label">0/14</span>
     </div>
-    <span class="nav-count" id="nav-badge">0 / 12</span>
+    <span class="nav-count" id="nav-badge">0 / 14</span>
     <div class="nav-user-chip" id="nav-user-chip" style="display:none">
       <div class="nav-user-avatar" id="nav-user-avatar">?</div>
       <span class="nav-user-name" id="nav-user-name"></span>
@@ -5533,7 +5620,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       </div>
     </div>
     <div class="sidebar-list" id="sidebar-list"></div>
-    <div class="sidebar-version">v 1.2 (051126)</div>
+    <div class="sidebar-version">v 1.2 (052126)</div>
   </div>
 
   <!-- Main -->
@@ -5554,7 +5641,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       </div>
       <div class="entry-field">
         <div class="entry-label">Participant Name <span style="color:var(--red)">*</span></div>
-        <input type="text" id="g-participant-name" class="entry-input" placeholder="Full name" oninput="syncGlobal();this.style.borderColor=''"/>
+        <input type="text" id="g-participant-name" class="entry-input" placeholder="First Last — e.g. David Kang" oninput="syncGlobal();this.style.borderColor=''"/>
       </div>
       <div class="entry-field">
         <div class="entry-label">Moderator <span style="color:var(--red)">*</span></div>
@@ -5803,6 +5890,9 @@ const TASK_VIDEOS = [
   // Task 14: Kilo Task 12.mp4 (per spec — same as Task 12)
   "https://digitaltechedge.sharepoint.com/:v:/r/sites/ProjectKiloModerators/Shared%20Documents/Learning%20Material/Moderators%20Training%20and%20Resources/Kilo%2012%20Tasks/Kilo%20Task%2012.mp4?csf=1&web=1&e=npBX1t"
 ];
+
+// ── APP VERSION (searchable constant for version-poll notification) ──
+const APP_VERSION = "1.2.052126";
 
 const TASKS=[
   {id:0,title:"Registration",cat:"Registration",distance:"",lux:"",duration:"",warn:"",note:"",isRegistration:true,steps:[]},
@@ -6141,10 +6231,12 @@ async function postToPA(idx){
 // ── Progress ──────────────────────────────────────────
 function completedCount(){ return taskDone.slice(1).filter(Boolean).length; } // exclude reg task
 function updateProgress(){
-  const c=completedCount(),pct=Math.round(c/12*100);
+  // Total = number of real tasks (TASKS[0] is Registration so subtract 1)
+  const total = (typeof TASKS !== 'undefined' && TASKS.length > 1) ? (TASKS.length - 1) : 14;
+  const c=completedCount(),pct=total > 0 ? Math.round(c/total*100) : 0;
   document.getElementById('nav-fill').style.width=pct+'%';
-  document.getElementById('nav-label').textContent=c+'/12';
-  document.getElementById('nav-badge').textContent=c+' / 12';
+  document.getElementById('nav-label').textContent=c+'/'+total;
+  document.getElementById('nav-badge').textContent=c+' / '+total;
 }
 function syncGlobal(){
   globalData.participant=document.getElementById('g-participant').value;
@@ -6444,6 +6536,19 @@ function validateRequired(){
     if(bar) bar.scrollIntoView({behavior:'smooth', block:'nearest'});
     return false;
   }
+
+  // Format check — participant name must be full name (First + Last), no _vid suffix
+  if(typeof isValidParticipantName === 'function' && !isValidParticipantName(globalData.participantName)){
+    showToast('⚠ Please enter the full name (First and Last) — e.g. "David Kang". "_vid" is not allowed.');
+    if(pnField){
+      pnField.style.borderColor = 'var(--red)';
+      pnField.classList.add('field-error');
+      pnField.focus();
+      setTimeout(() => pnField.classList.remove('field-error'), 2000);
+    }
+    return false;
+  }
+
   return true;
 }
 
@@ -6589,7 +6694,7 @@ function exportToExcel(){
   const rows=[['CENTIFIC DATA COLLECTION — SESSION EXPORT'],[],
     ['Participant ID',globalData.participant,'Operator',globalData.operator],
     ['Session Date',globalData.date,'Device ID',globalData.device],
-    ['Export Time',new Date().toLocaleString(),'Tasks Complete',completedCount()+' / 12'],[],
+    ['Export Time',new Date().toLocaleString(),'Tasks Complete',completedCount()+' / '+((typeof TASKS !== 'undefined' && TASKS.length > 1) ? (TASKS.length - 1) : 14)],[],
     ['Task ID','Title','Category','Distance','Duration','Lux Reading','Status','Steps Done','Steps Total','Synced','Completed At','Notes']
   ];
   TASKS.forEach((t,i)=>{const d=taskData[i];rows.push([`TASK ${String(t.id).padStart(2,'0')}`,t.title,t.cat,t.distance,t.duration,d.lux||'',d.status,stepDone[i].filter(Boolean).length,t.steps.length,taskSynced[i]?'Yes':'No',d.completedAt||'',d.notes||'']);});
@@ -7745,6 +7850,11 @@ async function dashSync(){
       showToast('Sync succeeded but table appears empty');
     }
 
+    // Warn if response is exactly 256 rows — PA "List rows" default limit
+    if(dashData.length === 256){
+      console.warn('[Dashboard] Exactly 256 rows returned — likely hitting PA pagination limit. Enable pagination on the PA flow and set Top Count to 5000+.');
+      showToast('⚠ Only 256 rows returned. Enable PA pagination — see console.');
+    }
     localStorage.setItem('centific_dash_data', JSON.stringify(dashData));
     const now = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
     localStorage.setItem('centific_dash_last_sync', now);
@@ -7902,17 +8012,28 @@ function renderDashboard(){
     return;
   }
   const completedRows=data.filter(r=>r.status==='Complete');
-  const uniqueParts=new Set(data.map(r=>r.participantId).filter(Boolean));
+  // Total Participants = unique participantIds who have a Task 14 row (any status).
+  // The app only writes Task 14 to Excel after the moderator marks it complete and
+  // proceeds through the session-complete flow, so any Task 14 row = participant done.
+  const uniqueParts=new Set(
+    data
+      .filter(r => r.participantId && String(r.taskId).trim() === '14')
+      .map(r => r.participantId)
+  );
+  // Total unique participants who have started any task (regardless of completion)
+  const uniquePartsAll=new Set(data.map(r=>r.participantId).filter(Boolean));
   const uniqueMods=new Set(data.map(r=>r.moderator).filter(Boolean));
   const uniqueDates=new Set(data.map(r=>r.sessionDate).filter(Boolean));
-  // Participant-based completion: how many participants finished all 12 tasks
+  // Participant-based completion: how many participants finished all 14 tasks
   const partTaskCount = {};
   completedRows.forEach(r=>{
     if(!r.participantId) return;
     partTaskCount[r.participantId] = (partTaskCount[r.participantId]||0) + 1;
   });
-  const fullyCompleteParticipants = Object.values(partTaskCount).filter(n=>n>=12).length;
-  const rate = uniqueParts.size > 0 ? Math.round(fullyCompleteParticipants / uniqueParts.size * 100) : 0;
+  // Threshold matches total task count (TASKS[0] is Registration, so real tasks count = TASKS.length - 1)
+  const taskCount = (typeof TASKS !== "undefined" && TASKS.length > 1) ? (TASKS.length - 1) : 14;
+  const fullyCompleteParticipants = uniqueParts.size; // alias — same value, used by older code
+  const rate = uniquePartsAll.size > 0 ? Math.round(uniqueParts.size / uniquePartsAll.size * 100) : 0;
   const modParts={};
   data.forEach(r=>{ if(!r.moderator||!r.participantId) return; if(!modParts[r.moderator]) modParts[r.moderator]=new Set(); modParts[r.moderator].add(r.participantId); });
   const modNames=Object.keys(modParts).sort();
@@ -7925,25 +8046,34 @@ function renderDashboard(){
     dailyC[dateKey]=(dailyC[dateKey]||0)+1;
   });
   const sortedDates=Object.keys(dailyC).sort();
-  const taskC={};
-  completedRows.forEach(r=>{ const k=r.taskTitle||('Task '+r.taskId); taskC[k]=(taskC[k]||0)+1; });
-  const tLabels=Object.keys(taskC).sort((a,b)=>taskC[b]-taskC[a]).slice(0,12);
-  const tVals=tLabels.map(k=>taskC[k]);
+  // Build Task Completion Breakdown — show ALL tasks (1-14) sorted ascending by task number
+  // Map: taskId → { title, count }
+  const taskBreakdown = {};
+  // Seed all 14 tasks so each appears even if 0 completions
+  for(let tid = 1; tid <= 14; tid++){
+    const taskDef = (typeof TASKS !== 'undefined') ? TASKS.find(t => t.id === tid) : null;
+    const title = taskDef ? `Task ${String(tid).padStart(2,'0')} — ${taskDef.title}` : `Task ${String(tid).padStart(2,'0')}`;
+    taskBreakdown[tid] = { title, count: 0 };
+  }
+  completedRows.forEach(r => {
+    const tid = parseInt(String(r.taskId).trim(), 10);
+    if(!isNaN(tid) && taskBreakdown[tid]) taskBreakdown[tid].count++;
+  });
+  // Sort by task ID ascending
+  const sortedTaskIds = Object.keys(taskBreakdown).map(Number).sort((a,b) => a - b);
+  const tLabels = sortedTaskIds.map(tid => taskBreakdown[tid].title);
+  const tVals = sortedTaskIds.map(tid => taskBreakdown[tid].count);
   const modRows=modNames.map(m=>{
     const mR  = data.filter(r=>r.moderator===m);
     const mP  = modParts[m].size; // unique participants
     const mL  = mR[0]?.location||'—';
     const mD  = mR.filter(r=>r.status==='Complete').length; // completed task rows
 
-    // A participant is "fully complete" when all 12 tasks are done
-    // Count participants who have exactly 12 Complete rows
-    const partTaskMap = {};
-    mR.forEach(r=>{
-      if(!r.participantId) return;
-      if(!partTaskMap[r.participantId]) partTaskMap[r.participantId] = 0;
-      if(r.status === 'Complete') partTaskMap[r.participantId]++;
-    });
-    const fullyComplete = Object.values(partTaskMap).filter(n => n >= 12).length;
+    // A participant is "fully complete" when a Task 14 row exists for them
+    const fullyComplete = new Set(
+      mR.filter(r => r.participantId && String(r.taskId).trim() === '14')
+        .map(r => r.participantId)
+    ).size;
     const mRt = mP > 0 ? Math.round(fullyComplete / mP * 100) : 0;
 
     return {name:m, participants:mP, completed:mD, fullyComplete, total:mR.length, rate:mRt, location:mL};
@@ -7973,7 +8103,7 @@ function renderDashboard(){
       <div class="kpi-card accent">
         <div class="kpi-top-row"><div class="kpi-label">Total Participants</div></div>
         <div class="kpi-bottom-row">
-          <div class="kpi-sub">${uniqueDates.size} session day${uniqueDates.size!==1?'s':''}</div>
+          <div class="kpi-sub">reached Task 14</div>
           <div class="kpi-value kpi-value-xl ">${uniqueParts.size}</div>
         </div>
       </div>
@@ -7994,7 +8124,7 @@ function renderDashboard(){
       <div class="kpi-card amber">
         <div class="kpi-top-row"><div class="kpi-label">Completion Rate</div></div>
         <div class="kpi-bottom-row">
-          <div class="kpi-sub">${fullyCompleteParticipants} of ${uniqueParts.size} done</div>
+          <div class="kpi-sub">${uniqueParts.size} of ${uniquePartsAll.size} participants done</div>
           <div class="kpi-value kpi-value-xl ">${rate}<span style="font-size:0.45em;font-weight:500;opacity:.7">%</span></div>
         </div>
       </div>
@@ -8024,7 +8154,7 @@ function renderDashboard(){
       <table class="detail-table">
         <thead><tr>
           <th>Moderator</th><th>Location</th>
-          <th>Participants</th><th>Fully Complete (12/12)</th>
+          <th>Participants</th><th>Fully Reached Task 14</th>
           <th>Tasks Completed</th><th>Completion Rate</th>
         </tr></thead>
         <tbody>${modRows.map(r=>`<tr>
@@ -8168,6 +8298,11 @@ function renderModeratorsPage(){
   if(!dashData || !dashData.length) return;
   const container = document.getElementById('mods-grid-container');
   if(!container) return;
+  // Kick off QA link loading (idempotent — runs once per page-view, re-renders when done)
+  if(typeof loadModQaLinks === 'function' && !window.modQaLinks_loading){
+    window.modQaLinks_loading = true;
+    loadModQaLinks().finally(() => { window.modQaLinks_loading = false; });
+  }
 
   const now = new Date();
   const thirtyMinsAgo = new Date(now - 30*60*1000);
@@ -8216,12 +8351,11 @@ function renderModeratorsPage(){
     // Stats
     const uniqueParts = new Set(rows.map(r=>r.participantId).filter(Boolean));
     const completedTasks = rows.filter(r=>r.status==='Complete').length;
-    // Participant completion rate
-    const partTaskCount = {};
-    rows.filter(r=>r.status==='Complete').forEach(r=>{
-      if(r.participantId) partTaskCount[r.participantId] = (partTaskCount[r.participantId]||0)+1;
-    });
-    const fullyDone = Object.values(partTaskCount).filter(n=>n>=12).length;
+    // A participant is fully done when a Task 14 row exists for them
+    const fullyDone = new Set(
+      rows.filter(r => r.participantId && String(r.taskId).trim() === '14')
+        .map(r => r.participantId)
+    ).size;
 
     // Is online? Last activity within 5 hours
     let isOnline = false;
@@ -8256,7 +8390,7 @@ function renderModeratorsPage(){
     const taskStatus = {};
     sessionRows.forEach(r=>{
       const id = parseInt(r.taskId)||0;
-      if(id>=1&&id<=12) taskStatus[id] = r.status;
+      if(id>=1&&id<=14) taskStatus[id] = r.status;
     });
 
     // Avatar initial
@@ -8287,10 +8421,25 @@ function renderModeratorsPage(){
           ${isOnline?'Active':'Inactive'}
         </div>
       </div>
+      ${(function(){
+        const qa = typeof getModQaLink === 'function' ? getModQaLink(mod.name) : null;
+        if(qa && qa.link){
+          return `<a href="${qa.link}" target="_blank" rel="noopener noreferrer" class="mod-qa-link" title="Open QA Check for set ${qa.setId}">
+            <svg viewBox="0 0 16 16" class="mod-qa-icon"><polyline points="2,8 6,12 14,4"/></svg>
+            <span>QA Check</span>
+            <svg viewBox="0 0 16 16" class="mod-qa-ext"><path d="M6 3h7v7"/><line x1="13" y1="3" x2="7" y2="9"/></svg>
+          </a>`;
+        } else {
+          return `<span class="mod-qa-link na" title="No QA link configured for this moderator's current set">
+            <svg viewBox="0 0 16 16" class="mod-qa-icon"><circle cx="8" cy="8" r="6"/><line x1="5" y1="8" x2="11" y2="8"/></svg>
+            <span>QA Check: n/a</span>
+          </span>`;
+        }
+      })()}
       <div class="mod-stats">
         <div class="mod-stat"><div class="mod-stat-val pink">${uniqueParts.size}</div><div class="mod-stat-lbl">Participants</div></div>
         <div class="mod-stat"><div class="mod-stat-val green">${completedTasks}</div><div class="mod-stat-lbl">Tasks Done</div></div>
-        <div class="mod-stat"><div class="mod-stat-val blue">${fullyDone}</div><div class="mod-stat-lbl">Complete (12/12)</div></div>
+        <div class="mod-stat"><div class="mod-stat-val blue">${fullyDone}</div><div class="mod-stat-lbl">Reached Task 14</div></div>
       </div>
       <div class="mod-last-active">Last active: ${lastActiveStr}</div>
       <div class="mod-live">
@@ -9606,14 +9755,17 @@ async function openInventoryCheck(){
       const itemType = String(getField(row, ['Item Type', 'ItemType', 'itemType']) || '').trim();
       const sn       = String(getField(row, ['SerialNumber', 'Serial Number', 'serialNumber']) || '').trim();
       const loc      = String(getField(row, ['Location', 'location']) || '').trim();
+      const link     = String(getField(row, ['Link', 'link', 'URL', 'url', 'QA Link', 'QALink']) || '').trim();
       if(!setId && !setName) return;
       const key = setId || setName;
       if(!groupMap[key]){
-        groupMap[key] = { setId: setId, setName: setName || setId, location: loc, items: [] };
+        groupMap[key] = { setId: setId, setName: setName || setId, location: loc, items: [], qaLink: '' };
       }
       // Track most common location for the group
       if(loc && !groupMap[key].location) groupMap[key].location = loc;
-      groupMap[key].items.push({ itemType, sn, location: loc });
+      // Capture the first non-empty Link encountered for this set (set-level QA check URL)
+      if(link && !groupMap[key].qaLink) groupMap[key].qaLink = link;
+      groupMap[key].items.push({ itemType, sn, location: loc, link });
     });
 
     // Filter sets by moderator's location — only show sets that match
@@ -9636,6 +9788,9 @@ async function openInventoryCheck(){
     groups.sort((a,b) => (a.setName||'').localeCompare(b.setName||''));
 
     inventoryData = groups;
+    window.inventoryDataCache = groups;        // <-- accessible from Mods page
+    // Also save raw mod→link map for fast lookup
+    if(typeof window.inventoryRawRows !== 'undefined' || true) window.inventoryRawRows = rows;
     renderInventoryTiles();
   } catch(err){
     console.error('[Inventory] Error:', err);
@@ -9887,6 +10042,249 @@ function maybeShowRegPopup(){
   if(sessionStorage.getItem('centific_reg_popup_shown')) return;
   sessionStorage.setItem('centific_reg_popup_shown', '1');
   setTimeout(showRegPopup, 300);
+}
+
+
+// ══════════════════════════════════════════════════════════
+// ── MODS PAGE: QA CHECK LINKS ─────────────────────────────
+// ══════════════════════════════════════════════════════════
+// Lookup table: mod name (lowercase) → QA link
+window.modQaLinks = window.modQaLinks || {};
+
+// Fetch latest InventoryLog entries + Inventory data and build mod→link map
+async function loadModQaLinks(){
+  console.log('[Mods QA] Loading inventory + log data for QA link mapping...');
+  try {
+    // Fetch both endpoints in parallel
+    const [invRes, logRes] = await Promise.all([
+      fetch(INVENTORY_READ_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}),
+      fetch(INVENTORY_LOG_READ_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({loginId:''})})
+    ]);
+    if(!invRes.ok || !logRes.ok){
+      console.warn('[Mods QA] HTTP error', invRes.status, logRes.status);
+      return;
+    }
+    const invText = await invRes.text();
+    const logText = await logRes.text();
+    let invData, logData;
+    try { invData = JSON.parse(invText); } catch(e){ console.warn('[Mods QA] inv parse fail'); return; }
+    try { logData = JSON.parse(logText); } catch(e){ console.warn('[Mods QA] log parse fail'); return; }
+
+    // Extract arrays
+    function extractRows(data){
+      let rows = [];
+      if(Array.isArray(data)) rows = data;
+      else if(Array.isArray(data.rows)) rows = data.rows;
+      else if(Array.isArray(data.value)) rows = data.value;
+      else if(Array.isArray(data.logs)) rows = data.logs;
+      else if(typeof data.logs === 'string'){ try{ rows = JSON.parse(data.logs); }catch(e){} }
+      else if(typeof data.rows === 'string'){ try{ rows = JSON.parse(data.rows); }catch(e){} }
+      return rows.map(r => {
+        const c = {};
+        Object.keys(r).forEach(k => { if(!k.startsWith('@odata') && k !== 'ItemInternalId') c[k] = r[k]; });
+        return c;
+      });
+    }
+    const invRows = extractRows(invData);
+    const logRows = extractRows(logData);
+
+    function getField(obj, names){
+      for(const n of names){
+        for(const k of Object.keys(obj)){
+          if(k.toLowerCase().replace(/\s+/g,'') === n.toLowerCase().replace(/\s+/g,'')){
+            return obj[k];
+          }
+        }
+      }
+      return '';
+    }
+
+    // Build setId → link map from Inventory rows (first non-empty Link per set)
+    const setIdToLink = {};
+    invRows.forEach(r => {
+      const setId = String(getField(r, ['SetId','setId']) || '').trim();
+      const link  = String(getField(r, ['Link','link','URL','url','QA Link','QALink']) || '').trim();
+      if(!setId || !link) return;
+      if(!setIdToLink[setId]) setIdToLink[setId] = link;
+    });
+
+    // From InventoryLog, find each moderator's most recent CONFIRMED (set check-in) entry
+    // Status starts with "Confirmed" (not "Checkout") because we want the active set
+    const modLatestSetId = {};
+    const modLatestTimestamp = {};
+    logRows.forEach(r => {
+      const modName = String(getField(r, ['modName','ModName','moderator']) || '').trim();
+      const status  = String(getField(r, ['status','Status']) || '').trim().toLowerCase();
+      const setId   = String(getField(r, ['setId','SetId']) || '').trim();
+      const ts      = new Date(getField(r, ['confirmedAt','ConfirmedAt']) || 0).getTime();
+      if(!modName || !setId) return;
+      if(!status.startsWith('confirmed')) return;     // only initial set check-ins
+      if(!modLatestTimestamp[modName] || ts > modLatestTimestamp[modName]){
+        modLatestTimestamp[modName] = ts;
+        modLatestSetId[modName] = setId;
+      }
+    });
+
+    // Also: if a moderator's most recent log entry is a CHECKOUT (Done for the day), they're not active.
+    // We exclude them by checking that they don't have a more recent Checkout than Confirm.
+    const modLatestCheckoutTs = {};
+    logRows.forEach(r => {
+      const modName = String(getField(r, ['modName','ModName','moderator']) || '').trim();
+      const status  = String(getField(r, ['status','Status']) || '').trim().toLowerCase();
+      const ts      = new Date(getField(r, ['confirmedAt','ConfirmedAt']) || 0).getTime();
+      if(!modName) return;
+      if(!status.startsWith('checkout')) return;
+      if(!modLatestCheckoutTs[modName] || ts > modLatestCheckoutTs[modName]){
+        modLatestCheckoutTs[modName] = ts;
+      }
+    });
+
+    // Build final map: only active sessions (confirm AFTER any checkout)
+    const map = {};
+    Object.keys(modLatestSetId).forEach(modName => {
+      const confirmTs = modLatestTimestamp[modName];
+      const checkoutTs = modLatestCheckoutTs[modName] || 0;
+      if(confirmTs > checkoutTs){
+        const setId = modLatestSetId[modName];
+        const link = setIdToLink[setId];
+        if(link){
+          map[modName.toLowerCase()] = { link, setId };
+        }
+      }
+    });
+
+    window.modQaLinks = map;
+    console.log('[Mods QA] Built map for', Object.keys(map).length, 'moderators:', map);
+    // Re-render the Mods page if it's visible so links appear
+    if(typeof renderModeratorsPage === 'function'){
+      const container = document.getElementById('mods-grid-container');
+      if(container && container.innerHTML) renderModeratorsPage();
+    }
+  } catch(err){
+    console.error('[Mods QA] Failed to load:', err);
+  }
+}
+
+// Get the QA link for a given moderator name (case-insensitive)
+function getModQaLink(modName){
+  if(!window.modQaLinks) return null;
+  const key = String(modName||'').toLowerCase().trim();
+  return window.modQaLinks[key] || null;
+}
+
+
+// ══════════════════════════════════════════════════════════
+// ── VERSION-POLL NOTIFICATION SYSTEM ─────────────────────
+// ══════════════════════════════════════════════════════════
+// Periodically fetches the deployed index.html and compares the
+// embedded APP_VERSION against the one running in memory. If a
+// newer version is detected, shows a non-intrusive refresh prompt.
+
+const VERSION_CHECK_INTERVAL_MS = 5 * 60 * 1000; // every 5 min
+let _updateAvailable = false;
+let _dismissedUntilNextCheck = false;
+
+async function checkForAppUpdate(){
+  try {
+    // Cache-bust by appending a timestamp; force no-cache header
+    const url = window.location.pathname + '?v=' + Date.now();
+    const res = await fetch(url, {
+      cache: 'no-store',
+      headers: {'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache'}
+    });
+    if(!res.ok) return;
+    // Read only first 60KB — version constant is near the top of the JS
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let text = '';
+    let bytesRead = 0;
+    while(bytesRead < 60000){
+      const { done, value } = await reader.read();
+      if(done) break;
+      bytesRead += value.length;
+      text += decoder.decode(value, {stream: true});
+      if(text.includes('APP_VERSION =')) break; // found it, stop reading
+    }
+    try { reader.cancel(); } catch(e){}
+    const match = text.match(/APP_VERSION\s*=\s*"([^"]+)"/);
+    if(!match) return;
+    const remoteVersion = match[1];
+    if(remoteVersion !== APP_VERSION && !_updateAvailable){
+      console.log('[Update] New version detected:', remoteVersion, '(running:', APP_VERSION + ')');
+      _updateAvailable = true;
+      showUpdateToast(remoteVersion);
+    }
+  } catch(err){
+    // Network failure is fine — try again at next interval
+    console.log('[Update] Check failed (will retry):', err.message);
+  }
+}
+
+function showUpdateToast(remoteVersion){
+  if(_dismissedUntilNextCheck) return;
+  const toast = document.getElementById('update-toast');
+  const sub = document.getElementById('update-toast-sub');
+  if(!toast) return;
+  if(sub) sub.textContent = `${APP_VERSION} → ${remoteVersion}. Refresh to apply.`;
+  toast.classList.add('visible');
+}
+
+function dismissUpdateToast(){
+  const toast = document.getElementById('update-toast');
+  if(toast) toast.classList.remove('visible');
+  _dismissedUntilNextCheck = true;
+  // Reset so we re-prompt at next poll interval if still pending
+  setTimeout(() => { _dismissedUntilNextCheck = false; }, VERSION_CHECK_INTERVAL_MS);
+}
+
+function reloadForUpdate(){
+  // Hard reload — bypass cache
+  window.location.reload(true);
+}
+
+// Kick off version polling once the app is loaded
+window.addEventListener('load', () => {
+  // First check after 30 seconds (don't spam at startup)
+  setTimeout(checkForAppUpdate, 30 * 1000);
+  // Then every 5 minutes
+  setInterval(checkForAppUpdate, VERSION_CHECK_INTERVAL_MS);
+});
+
+
+// ══════════════════════════════════════════════════════════
+// ── PARTICIPANT NAME VALIDATION ───────────────────────────
+// ══════════════════════════════════════════════════════════
+// Require first AND last name (two words minimum) — block submissions
+// like "David", "David_vid", "Joe Smith Jr." is allowed (3+ words OK).
+function isValidParticipantName(name){
+  if(!name) return false;
+  const trimmed = String(name).trim();
+  if(!trimmed) return false;
+  // Reject if it contains _vid suffix (or similar metadata suffix)
+  if(/_vid\b/i.test(trimmed)) return false;
+  // Reject if it ends with _anything (likely a registration tag)
+  if(/_[a-z0-9]+$/i.test(trimmed)) return false;
+  // Require at least two words separated by whitespace (first + last name)
+  const words = trimmed.split(/\s+/).filter(w => w.length > 0);
+  if(words.length < 2) return false;
+  // Each word must be at least 1 character of letters
+  if(!words.every(w => /^[\p{L}.\-']+$/u.test(w))) return false;
+  return true;
+}
+
+function showNameValidationError(){
+  if(typeof showToast === 'function'){
+    showToast('Please enter the participant\'s full name (First and Last). Do not include "_vid".');
+  } else {
+    alert('Please enter the participant\'s full name (First and Last). Do not include "_vid".');
+  }
+  // Briefly highlight the field
+  const el = document.getElementById('g-participant-name');
+  if(el){
+    el.classList.add('field-error');
+    el.focus();
+    setTimeout(() => el.classList.remove('field-error'), 2000);
+  }
 }
 </script>
 
@@ -10364,6 +10762,21 @@ function maybeShowRegPopup(){
       <svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>
       Got It — Begin Registration
     </button>
+  </div>
+</div>
+
+<!-- ── Update Available Toast ── -->
+<div class="update-toast" id="update-toast">
+  <div class="update-toast-icon">
+    <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+  </div>
+  <div class="update-toast-content">
+    <div class="update-toast-title">New version available</div>
+    <div class="update-toast-sub" id="update-toast-sub">A newer version of Kilo is ready</div>
+  </div>
+  <div class="update-toast-actions">
+    <button class="update-toast-btn secondary" onclick="dismissUpdateToast()">Later</button>
+    <button class="update-toast-btn" onclick="reloadForUpdate()">Refresh</button>
   </div>
 </div>
 
