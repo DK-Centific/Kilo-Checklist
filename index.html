@@ -4105,6 +4105,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .dash-back-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .dash-toolbar-title{font-size:15px;font-weight:600;letter-spacing:-0.02em;color:var(--text);flex:1}
 .dash-select{font-family:var(--font);font-size:12px;color:var(--text);background:var(--input-bg);border:.5px solid var(--border-strong);border-radius:8px;padding:6px 10px;outline:none;cursor:pointer;transition:border-color .15s;appearance:none;-webkit-appearance:none}
+.dash-date-input{cursor:text;min-width:120px}
+.dash-date-input:focus{border-color:var(--pink)}
+.dash-date-input::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.6}
+.dash-date-input::-webkit-calendar-picker-indicator:hover{opacity:1}
 .dash-select:focus{border-color:var(--pink)}
 .dash-btn{display:flex;align-items:center;gap:6px;font-family:var(--font);font-size:12px;font-weight:500;color:var(--text2);background:var(--bg2);border:.5px solid var(--border-strong);border-radius:8px;padding:7px 13px;cursor:pointer;transition:all .18s;white-space:nowrap}
 .dash-btn:hover{border-color:var(--pink);color:var(--pink)}
@@ -5487,6 +5491,255 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   20%,60%{transform:translateX(-4px)}
   40%,80%{transform:translateX(4px)}
 }
+
+/* ── Moderators page view-mode toggle ── */
+.mods-view-toolbar{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  margin-bottom:16px;flex-wrap:wrap;
+}
+.mods-view-toggle{
+  display:flex;align-items:center;gap:0;
+  background:var(--bg2);border:.5px solid var(--border);
+  border-radius:99px;padding:3px;
+}
+.mods-view-btn{
+  font-family:var(--font);font-size:12px;font-weight:500;letter-spacing:-0.01em;
+  background:transparent;color:var(--text2);
+  border:none;border-radius:99px;
+  padding:6px 14px;cursor:pointer;
+  transition:all .2s;
+  display:flex;align-items:center;gap:5px;
+}
+.mods-view-btn:hover:not(.active){color:var(--text);background:var(--bg3)}
+.mods-view-btn.active{background:var(--pink);color:#fff;box-shadow:0 2px 8px rgba(239,67,179,.25)}
+.mods-view-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Team view extras (time stats) ── */
+.mod-time-stats{
+  display:flex;align-items:center;gap:10px;
+  margin-top:10px;padding:9px 12px;
+  background:rgba(245,158,11,.08);border:.5px solid rgba(245,158,11,.2);
+  border-radius:var(--r);
+  font-size:11px;color:var(--text);font-weight:500;letter-spacing:-0.01em;
+}
+.mod-time-stats svg{width:13px;height:13px;stroke:var(--amber);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.mod-time-stats strong{color:var(--amber);font-weight:700;letter-spacing:0}
+.mod-time-stats .sep{color:var(--text3);margin:0 3px}
+
+/* ── List view (compact table) ── */
+.mods-list-table{
+  width:100%;border-collapse:collapse;
+  background:var(--card-bg);border:.5px solid var(--border);border-radius:var(--rl);
+  overflow:hidden;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+.mods-list-table thead{
+  background:var(--bg2);
+}
+.mods-list-table th{
+  font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--text3);text-align:left;padding:11px 14px;
+  border-bottom:.5px solid var(--border);
+  white-space:nowrap;
+}
+.mods-list-table td{
+  font-size:13px;color:var(--text);padding:12px 14px;
+  border-bottom:.5px solid var(--border);
+  letter-spacing:-0.01em;
+  vertical-align:middle;
+}
+.mods-list-table tbody tr:last-child td{border-bottom:none}
+.mods-list-table tbody tr:hover{background:var(--bg2)}
+.mods-list-table .ml-name{font-weight:600;color:var(--text)}
+.mods-list-table .ml-loc{color:var(--text2)}
+.mods-list-table .ml-num{font-weight:600;color:var(--pink);font-variant-numeric:tabular-nums}
+.mods-list-table .ml-time{color:var(--amber);font-weight:600;font-variant-numeric:tabular-nums}
+.mods-list-table .ml-rating-val{color:var(--amber);font-weight:700;font-variant-numeric:tabular-nums}
+.mods-list-table .ml-rating-none{color:var(--text3);font-size:11px;font-style:italic}
+.mods-list-table .ml-status{font-size:11px}
+.mods-list-table .ml-status .dot{
+  display:inline-block;width:7px;height:7px;border-radius:50%;
+  margin-right:5px;vertical-align:middle;
+}
+.mods-list-table .ml-status.online .dot{background:var(--green);box-shadow:0 0 0 2px rgba(34,197,94,.18)}
+.mods-list-table .ml-status.offline .dot{background:var(--text3)}
+.mods-list-table .ml-status.online{color:var(--green);font-weight:600}
+.mods-list-table .ml-status.offline{color:var(--text3)}
+
+@media(max-width:700px){
+  .mods-list-table th, .mods-list-table td{padding:9px 8px;font-size:11px}
+  .mods-list-table th{font-size:9px}
+}
+
+/* ── Feedback & Rating: shared overlay base ── */
+.fb-send-overlay,.rt-overlay,.inbox-popup-overlay,.inbox-list-overlay{
+  position:fixed;inset:0;z-index:600;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.fb-send-overlay.hidden,.rt-overlay.hidden,.inbox-popup-overlay.hidden,.inbox-list-overlay.hidden{display:none!important}
+
+/* ── Send Feedback Modal ── */
+.fb-send-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:440px;padding:30px 28px 26px;
+  box-shadow:var(--shadow-lg);position:relative;
+  animation:fadeUp .35s cubic-bezier(.34,1.2,.64,1);
+}
+.fb-send-close,.rt-close{
+  position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;
+  border:.5px solid var(--border-strong);background:var(--bg3);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  color:var(--text3);font-size:16px;transition:all .15s;
+}
+.fb-send-close:hover,.rt-close:hover{background:var(--bg4);color:var(--text)}
+.fb-send-icon,.rt-icon{
+  width:56px;height:56px;border-radius:50%;
+  background:rgba(239,67,179,.12);border:.5px solid rgba(239,67,179,.3);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 14px;
+}
+.fb-send-icon svg,.rt-icon svg{width:26px;height:26px;stroke:var(--pink);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.rt-icon{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.3)}
+.rt-icon svg{stroke:var(--amber);fill:rgba(245,158,11,.15)}
+.fb-send-title,.rt-title{font-size:19px;font-weight:600;letter-spacing:-0.03em;color:var(--text);text-align:center;margin-bottom:4px}
+.fb-send-sub,.rt-sub{font-size:13px;color:var(--text2);text-align:center;margin-bottom:18px;letter-spacing:-0.01em}
+.fb-send-sub strong,.rt-sub strong{color:var(--text);font-weight:600}
+.fb-send-text,.rt-notes{
+  width:100%;font-family:var(--font);font-size:14px;color:var(--text);
+  background:var(--input-bg);border:.5px solid var(--border-strong);border-radius:var(--r);
+  padding:11px 13px;outline:none;resize:vertical;line-height:1.5;letter-spacing:-0.01em;
+}
+.fb-send-text:focus,.rt-notes:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(239,67,179,.12)}
+.fb-send-error,.rt-error{font-size:12px;color:var(--red);text-align:center;min-height:14px;margin:8px 0;font-weight:500}
+.fb-send-btn,.rt-submit-btn{
+  width:100%;padding:14px;border-radius:var(--r);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;
+}
+.fb-send-btn:hover:not(:disabled),.rt-submit-btn:hover:not(:disabled){background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.28)}
+.fb-send-btn:disabled,.rt-submit-btn:disabled{opacity:.6;cursor:not-allowed}
+
+/* ── Rating scale ── */
+.rt-scale{display:flex;gap:5px;justify-content:center;margin-bottom:10px;flex-wrap:wrap}
+.rt-num{
+  width:34px;height:38px;border-radius:9px;
+  border:.5px solid var(--border-strong);background:var(--bg2);
+  font-family:var(--font);font-size:14px;font-weight:600;color:var(--text2);
+  cursor:pointer;transition:all .12s;
+}
+.rt-num:hover,.rt-num.hover{background:rgba(245,158,11,.15);border-color:var(--amber);color:var(--amber);transform:translateY(-2px)}
+.rt-num.active{background:var(--amber);border-color:var(--amber);color:#fff}
+.rt-selected-label{text-align:center;font-size:13px;font-weight:600;color:var(--amber);margin-bottom:14px;letter-spacing:-0.01em}
+
+/* ── Mod card: feedback/rating buttons ── */
+.mod-action-row{display:flex;gap:6px;margin:10px 0 0}
+.mod-action-btn{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:5px;
+  padding:6px 8px;border-radius:8px;
+  font-family:var(--font);font-size:11px;font-weight:600;letter-spacing:-0.01em;
+  border:.5px solid;cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.mod-action-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.mod-action-btn.feedback{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.3);color:var(--blue,#3b82f6)}
+.mod-action-btn.feedback:hover{background:rgba(59,130,246,.16);transform:translateY(-1px)}
+.mod-action-btn.rating{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.3);color:var(--amber)}
+.mod-action-btn.rating:hover{background:rgba(245,158,11,.16);transform:translateY(-1px)}
+
+/* ── Rating display (Team/List views) ── */
+.mod-rating-display{
+  display:flex;align-items:center;gap:6px;margin-top:10px;padding:9px 12px;
+  background:rgba(245,158,11,.08);border:.5px solid rgba(245,158,11,.2);border-radius:var(--r);
+  font-size:11px;color:var(--text);font-weight:500;letter-spacing:-0.01em;
+}
+.mod-rating-display svg{width:13px;height:13px;stroke:var(--amber);fill:rgba(245,158,11,.2);stroke-width:1.5;flex-shrink:0}
+.mod-rating-display strong{color:var(--amber);font-weight:700}
+.mod-rating-display.none-yet{background:rgba(115,115,115,.08);border-color:rgba(115,115,115,.2);color:var(--text3)}
+.mod-rating-display.none-yet svg{stroke:var(--text3);fill:none}
+
+/* ── Moderator feedback popup ── */
+.inbox-popup-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:420px;padding:32px 28px 26px;text-align:center;
+  box-shadow:var(--shadow-lg);animation:fadeUp .4s cubic-bezier(.34,1.2,.64,1);
+}
+.inbox-popup-icon{
+  width:64px;height:64px;border-radius:50%;
+  background:rgba(239,67,179,.12);border:.5px solid rgba(239,67,179,.3);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
+}
+.inbox-popup-icon svg{width:30px;height:30px;stroke:var(--pink);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.inbox-popup-title{font-size:21px;font-weight:600;letter-spacing:-0.03em;color:var(--text);margin-bottom:8px}
+.inbox-popup-sub{font-size:14px;color:var(--text2);line-height:1.5;margin-bottom:22px}
+.inbox-popup-sub strong{color:var(--pink);font-weight:700}
+.inbox-popup-btn{
+  width:100%;padding:14px;border-radius:var(--r);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.inbox-popup-btn:hover{background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.28)}
+.inbox-popup-msg-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;text-align:left}
+.inbox-popup-from-avatar{
+  width:42px;height:42px;border-radius:50%;background:var(--pink);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:600;font-size:17px;flex-shrink:0;
+}
+.inbox-popup-from-label{font-size:14px;color:var(--text);letter-spacing:-0.01em}
+.inbox-popup-from-label strong{font-weight:600}
+.inbox-popup-date{font-size:12px;color:var(--text3);margin-top:2px}
+.inbox-popup-message{
+  background:var(--bg2);border:.5px solid var(--border);border-radius:var(--rl);
+  padding:16px;font-size:14px;color:var(--text);line-height:1.6;text-align:left;
+  margin-bottom:20px;letter-spacing:-0.01em;white-space:pre-wrap;max-height:240px;overflow-y:auto;
+}
+
+/* ── Inbox list ── */
+.inbox-list-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:480px;max-height:80vh;
+  box-shadow:var(--shadow-lg);display:flex;flex-direction:column;overflow:hidden;
+  animation:fadeUp .35s cubic-bezier(.34,1.1,.64,1);
+}
+.inbox-list-header{
+  padding:20px 24px 16px;border-bottom:.5px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.inbox-list-title{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:600;letter-spacing:-0.03em;color:var(--text)}
+.inbox-list-close{
+  width:30px;height:30px;border-radius:50%;border:.5px solid var(--border-strong);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text3);font-size:16px;transition:all .15s;
+}
+.inbox-list-close:hover{background:var(--bg4);color:var(--text)}
+.inbox-list-body{overflow-y:auto;padding:8px}
+.inbox-item{
+  display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:var(--rl);
+  cursor:pointer;transition:background .15s;
+}
+.inbox-item:hover{background:var(--bg2)}
+.inbox-item.unread{background:rgba(239,67,179,.05)}
+.inbox-item-icon{position:relative;width:36px;height:36px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.inbox-item-icon svg{width:16px;height:16px;stroke:var(--text2);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.inbox-unread-dot{position:absolute;top:-2px;right:-2px;width:10px;height:10px;border-radius:50%;background:var(--pink);border:2px solid var(--card-bg)}
+.inbox-item-content{flex:1;min-width:0}
+.inbox-item-from{font-size:13px;font-weight:600;color:var(--text);letter-spacing:-0.01em}
+.inbox-item.unread .inbox-item-from{color:var(--pink)}
+.inbox-item-preview{font-size:12px;color:var(--text3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:-0.01em}
+.inbox-item-date{font-size:11px;color:var(--text3);flex-shrink:0;white-space:nowrap}
+.inbox-empty{text-align:center;padding:40px 20px;color:var(--text3)}
+.inbox-empty svg{width:40px;height:40px;stroke:var(--text3);fill:none;stroke-width:1.4;margin-bottom:12px}
+.inbox-empty p{font-size:13px}
+
+/* ── Inbox menu item badge ── */
+#inbox-menu-badge{
+  display:none;align-items:center;justify-content:center;
+  min-width:18px;height:18px;padding:0 5px;margin-left:auto;
+  background:var(--pink);color:#fff;border-radius:99px;
+  font-size:11px;font-weight:700;
+}
 </style>
 </head>
 <body>
@@ -5565,6 +5818,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
           <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor" stroke="none"/></svg>
           <span>Troubleshooting</span>
         </div>
+        <div class="hd-item" id="hd-inbox" onclick="openInbox();closeHamburger()" style="display:none">
+          <svg viewBox="0 0 16 16"><path d="M2 4h12v8H2z" fill="none"/><polyline points="2,5 8,9 14,5"/></svg>
+          <span>Inbox</span>
+          <span id="inbox-menu-badge">0</span>
+        </div>
         <div class="hd-item" id="hd-settings" onclick="openPanelFromMenu('settings')">
           <svg viewBox="0 0 16 16" width="16" height="16" style="flex-shrink:0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.8"/><path d="M8 1.5V3M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1.05 1.05M11.55 11.55l1.05 1.05M12.6 3.4l-1.05 1.05M4.45 11.55l-1.05 1.05"/></svg>
           <span>Settings</span>
@@ -5620,7 +5878,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       </div>
     </div>
     <div class="sidebar-list" id="sidebar-list"></div>
-    <div class="sidebar-version">v 1.2 (052126)</div>
+    <div class="sidebar-version">v 1.2 (060226)</div>
   </div>
 
   <!-- Main -->
@@ -5892,7 +6150,7 @@ const TASK_VIDEOS = [
 ];
 
 // ── APP VERSION (searchable constant for version-poll notification) ──
-const APP_VERSION = "1.2.052126";
+const APP_VERSION = "1.2.060226";
 
 const TASKS=[
   {id:0,title:"Registration",cat:"Registration",distance:"",lux:"",duration:"",warn:"",note:"",isRegistration:true,steps:[]},
@@ -6972,6 +7230,15 @@ function _onLoginSuccessInner(){
     if(typeof checkInventoryEligibility === 'function'){
       setTimeout(() => checkInventoryEligibility(), 800);
     }
+    // Show the Inbox menu item for moderators and fetch their feedback
+    const inboxItem = document.getElementById('hd-inbox');
+    if(inboxItem) inboxItem.style.display = 'flex';
+    if(typeof loadMyFeedback === 'function'){
+      // Slight delay so login UI settles before any popup appears
+      setTimeout(() => loadMyFeedback(true), 1200);
+      // Live polling: check for new feedback every 60 seconds while in session
+      startFeedbackPolling();
+    }
   }
   // Background-fetch troubleshooting so notifications can appear silently
   setTimeout(() => {
@@ -7011,6 +7278,13 @@ function doLogout(){
   if(switchSep) switchSep.style.display = 'none';
   const trackerLog = document.getElementById('hd-tracker-log');
   if(trackerLog) trackerLog.style.display = 'none';
+  // Hide and clear inbox
+  const inboxItem = document.getElementById('hd-inbox');
+  if(inboxItem) inboxItem.style.display = 'none';
+  window.modInbox = [];
+  if(typeof updateInboxBadge === 'function') updateInboxBadge();
+  if(typeof stopFeedbackPolling === 'function') stopFeedbackPolling();
+  if(typeof _seenFeedbackIds !== 'undefined') _seenFeedbackIds = new Set();
   sessionStorage.removeItem('centific_admin_view');
   // Clear inventory state — next login will re-prompt
   sessionStorage.removeItem('centific_inv_decision_made');
@@ -7836,7 +8110,8 @@ async function dashSync(){
         moderator:     clean.moderator     || clean.Moderator     || '',
         sessionDate:   (function(v){ if(!v) return ''; var s=String(v).trim(); if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0,10); var d=new Date(s); return isNaN(d)?s:(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')); })(clean.sessionDate||clean.SessionDate||''),
         deviceId:      clean.deviceId      || clean.DeviceId      || '',
-        completedAt:   (clean.completedAt||clean.CompletedAt||'').toString().split(',')[0].trim(),
+        completedAt:   (clean.completedAt||clean.CompletedAt||'').toString().trim(),
+        completedAtDate: (clean.completedAt||clean.CompletedAt||'').toString().split(',')[0].trim(),
         notes:         clean.notes         || clean.Notes         || '',
         submittedAt:   clean.submittedAt   || clean.SubmittedAt   || '',
         location:      clean.location      || clean.Location      || '',
@@ -7981,21 +8256,68 @@ function getFilteredData(){
   const location = document.getElementById('dash-location').value;
   const selMods  = getSelectedMods();
   const now = new Date();
-  const y=now.getFullYear(), mo=String(now.getMonth()+1).padStart(2,'0'), d=String(now.getDate()).padStart(2,'0');
-  const todayStr = `${y}-${mo}-${d}`;
-  const weekAgo  = new Date(now - 7*24*60*60*1000);
-  const wyStr    = weekAgo.getFullYear()+'-'+String(weekAgo.getMonth()+1).padStart(2,'0')+'-'+String(weekAgo.getDate()).padStart(2,'0');
+  const fmt = (dt) => dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+  const todayStr = fmt(now);
+
+  // Calendar-week boundaries (Sunday-start weeks)
+  const dow = now.getDay(); // 0 = Sunday
+  const thisWeekStart = new Date(now); thisWeekStart.setDate(now.getDate() - dow); thisWeekStart.setHours(0,0,0,0);
+  const thisWeekStartStr = fmt(thisWeekStart);
+  const lastWeekStart = new Date(thisWeekStart); lastWeekStart.setDate(thisWeekStart.getDate() - 7);
+  const lastWeekStartStr = fmt(lastWeekStart);
+  const lastWeekEnd = new Date(thisWeekStart); lastWeekEnd.setDate(thisWeekStart.getDate() - 1);
+  const lastWeekEndStr = fmt(lastWeekEnd);
+
+  // Custom range values (may be empty)
+  const customFrom = (document.getElementById('dash-custom-from')?.value || '').trim();
+  const customTo   = (document.getElementById('dash-custom-to')?.value || '').trim();
 
   return dashData.filter(r=>{
-    // Use completedAt for date filtering — parse mm/dd/yyyy from "5/5/2026, 7:05 PM" format
-    const rDateRaw = r.completedAt || r.submittedAt || r.sessionDate || '';
+    // Use completedAtDate (date-only) for date filtering
+    const rDateRaw = r.completedAtDate || r.completedAt || r.submittedAt || r.sessionDate || '';
     const rDate = toISODate(rDateRaw.split(',')[0].trim());
     const rLoc  = (r.location || '').trim().toLowerCase();
-    if(period==='today' && rDate !== todayStr) return false;
-    if(period==='week'  && rDate < wyStr) return false;
+
+    if(period==='today'    && rDate !== todayStr) return false;
+    if(period==='week'     && rDate < thisWeekStartStr) return false;
+    if(period==='lastweek' && (rDate < lastWeekStartStr || rDate > lastWeekEndStr)) return false;
+    if(period==='custom'){
+      if(customFrom && rDate < customFrom) return false;
+      if(customTo   && rDate > customTo) return false;
+    }
     if(location!=='all' && rLoc !== location.trim().toLowerCase()) return false;
     if(selMods.length && !selMods.includes(r.moderator)) return false;
     return true;
+  });
+}
+
+// Toggle the custom date inputs when Period changes, then re-render
+function onPeriodChanged(){
+  onPeriodVisibilityOnly();
+  const period = document.getElementById('dash-period').value;
+  if(period === 'custom'){
+    // Default the custom range to the last 7 days if empty, so there's an immediate result
+    const fromEl = document.getElementById('dash-custom-from');
+    const toEl   = document.getElementById('dash-custom-to');
+    if(fromEl && !fromEl.value){
+      const now = new Date();
+      const weekAgo = new Date(now - 6*24*60*60*1000);
+      const fmt = (dt) => dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+      fromEl.value = fmt(weekAgo);
+      if(toEl && !toEl.value) toEl.value = fmt(now);
+    }
+  }
+  onTrackerFiltersChanged();
+}
+
+// Show/hide custom date inputs based on the current Period value (no re-render)
+function onPeriodVisibilityOnly(){
+  const periodEl = document.getElementById('dash-period');
+  if(!periodEl) return;
+  const isCustom = periodEl.value === 'custom';
+  ['dash-custom-label','dash-custom-from','dash-custom-to-label','dash-custom-to'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = isCustom ? '' : 'none';
   });
 }
 
@@ -8108,10 +8430,18 @@ function renderDashboard(){
         </div>
       </div>
       <div class="kpi-card green">
-        <div class="kpi-top-row"><div class="kpi-label">Tasks Completed</div></div>
+        <div class="kpi-top-row"><div class="kpi-label">Avg Time / Task</div></div>
         <div class="kpi-bottom-row">
-          <div class="kpi-sub">of ${data.length} synced rows</div>
-          <div class="kpi-value kpi-value-xl ">${completedRows.length}</div>
+          <div class="kpi-sub">${completedRows.length} tasks completed</div>
+          <div class="kpi-value kpi-value-xl">${(function(){
+            const avgMs = (typeof computeAvgTaskCompletionTime === 'function') ? computeAvgTaskCompletionTime(data) : 0;
+            if(avgMs <= 0) return '—';
+            const mins = Math.round(avgMs / 60000);
+            if(mins < 1) return '<1<span style="font-size:0.32em;font-weight:500;opacity:.7"> min</span>';
+            if(mins < 60) return mins + '<span style="font-size:0.32em;font-weight:500;opacity:.7"> min</span>';
+            const h = Math.floor(mins/60), m = mins%60;
+            return h + '<span style="font-size:0.32em;font-weight:500;opacity:.7">h </span>' + m + '<span style="font-size:0.32em;font-weight:500;opacity:.7">m</span>';
+          })()}</div>
         </div>
       </div>
       <div class="kpi-card blue">
@@ -8282,9 +8612,19 @@ function switchTrackerPage(page){
   if(dashBody) dashBody.style.display = isDash ? '' : 'none';
   if(modsBody) modsBody.style.display = isDash ? 'none' : '';
 
-  // Show/hide dashboard-specific filters
-  const filterEls = document.querySelectorAll('#dash-period, #dash-location, .mod-dropdown-wrap, #dash-period ~ .dash-filter-label');
-  filterEls.forEach(el=>el.style.display = isDash ? '' : 'none');
+  // Filters (Period, Location, Moderators) now apply to BOTH pages — keep them visible.
+  // Explicitly list the always-on filter elements (avoid sibling selectors that would
+  // wrongly reveal the custom-range date inputs).
+  ['dash-period','dash-location','mod-dropdown-wrap'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = '';
+  });
+  document.querySelectorAll('.dash-toolbar > .dash-filter-label').forEach(el => {
+    // Show standard labels, but leave the custom From/To labels controlled by period state
+    if(el.id !== 'dash-custom-label' && el.id !== 'dash-custom-to-label') el.style.display = '';
+  });
+  // Re-apply custom-range visibility based on current period selection
+  if(typeof onPeriodVisibilityOnly === 'function') onPeriodVisibilityOnly();
 
   if(!isDash && dashData) renderModeratorsPage();
   if(isDash && dashData){
@@ -8293,6 +8633,120 @@ function switchTrackerPage(page){
   }
   sessionStorage.setItem('centific_tracker_page', page);
 }
+
+
+
+// ── Moderators page: view-mode state ──────────────────────
+let modsViewMode = 'live'; // 'live' | 'team' | 'list'
+
+function setModsViewMode(mode){
+  modsViewMode = mode;
+  // Update toggle button active state
+  document.querySelectorAll('.mods-view-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === mode);
+  });
+  renderModeratorsPage();
+}
+
+// Parse a timestamp like "5/5/2026, 7:05 PM" or ISO "2026-05-05T19:05:00" → ms since epoch
+function parseTs(str){
+  if(!str) return 0;
+  // Try ISO first
+  const iso = new Date(str);
+  if(!isNaN(iso)) return iso.getTime();
+  // Try mm/dd/yyyy, h:mm AM/PM
+  try {
+    const d = new Date(str);
+    if(!isNaN(d)) return d.getTime();
+  } catch(e){}
+  return 0;
+}
+
+// Format duration in ms → "Xh Ym" or "Y min"
+function fmtDuration(ms){
+  if(!ms || ms < 0) return '—';
+  const mins = Math.round(ms / 60000);
+  if(mins < 1) return '<1 min';
+  if(mins < 60) return mins + ' min';
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return `${h}h ${m}m`;
+}
+
+// Format duration → "X min/task"
+function fmtPerTask(ms){
+  if(!ms || ms < 0) return '—';
+  const mins = Math.round(ms / 60000);
+  if(mins < 1) return '<1 min';
+  return mins + ' min';
+}
+
+// Compute time stats for a moderator's rows
+// Returns: { avgPerTask, totalTime, sessionCount }
+function computeModTimeStats(rows){
+  // Group rows by participantId — each participant = one session
+  const sessions = {};
+  rows.forEach(r => {
+    if(!r.participantId) return;
+    if(!sessions[r.participantId]) sessions[r.participantId] = [];
+    sessions[r.participantId].push(r);
+  });
+
+  let totalSessionTime = 0;
+  let totalCompletedTasks = 0;
+  let validSessions = 0;
+
+  Object.values(sessions).forEach(sessionRows => {
+    // For each session: find earliest and latest completedAt
+    const completedRows = sessionRows.filter(r => r.completedAt && r.status === 'Complete');
+    if(completedRows.length < 1) return;
+    const timestamps = completedRows.map(r => parseTs(r.completedAt)).filter(t => t > 0);
+    if(timestamps.length < 1) return;
+    const minTs = Math.min(...timestamps);
+    const maxTs = Math.max(...timestamps);
+    const sessionDuration = maxTs - minTs;
+    // Only count sessions with at least 2 completed tasks
+    if(completedRows.length < 2 || sessionDuration <= 0){
+      // Skip — can't compute duration with 1 row
+      return;
+    }
+    totalSessionTime += sessionDuration;
+    totalCompletedTasks += completedRows.length;
+    validSessions++;
+  });
+
+  // Avg per task: total time / total completed tasks (excluding Registration which is index 0)
+  const avgPerTask = totalCompletedTasks > 0 ? Math.round(totalSessionTime / totalCompletedTasks) : 0;
+  return { avgPerTask, totalTime: totalSessionTime, sessionCount: validSessions };
+}
+
+// Compute global avg time per task across filtered data — used in Dashboard KPI
+function computeAvgTaskCompletionTime(data){
+  // Group by participantId
+  const sessions = {};
+  data.forEach(r => {
+    if(!r.participantId) return;
+    if(!sessions[r.participantId]) sessions[r.participantId] = [];
+    sessions[r.participantId].push(r);
+  });
+
+  let totalTime = 0;
+  let totalTasks = 0;
+
+  Object.values(sessions).forEach(rows => {
+    const completed = rows.filter(r => r.completedAt && r.status === 'Complete');
+    if(completed.length < 2) return;
+    const ts = completed.map(r => parseTs(r.completedAt)).filter(t => t > 0);
+    if(ts.length < 2) return;
+    const span = Math.max(...ts) - Math.min(...ts);
+    if(span <= 0) return;
+    totalTime += span;
+    totalTasks += completed.length;
+  });
+
+  return totalTasks > 0 ? Math.round(totalTime / totalTasks) : 0;
+}
+
 
 function renderModeratorsPage(){
   if(!dashData || !dashData.length) return;
@@ -8303,30 +8757,123 @@ function renderModeratorsPage(){
     window.modQaLinks_loading = true;
     loadModQaLinks().finally(() => { window.modQaLinks_loading = false; });
   }
+  // Kick off ratings loading
+  if(typeof loadModRatings === 'function' && !window.modRatings_loading){
+    window.modRatings_loading = true;
+    loadModRatings().finally(() => { window.modRatings_loading = false; });
+  }
 
   const now = new Date();
   const thirtyMinsAgo = new Date(now - 30*60*1000);
+  const twoHoursAgo = new Date(now - 2*60*60*1000);
 
-  // Group data by moderator
+  // Apply the same filters as the Dashboard (date period, location, moderator selection)
+  const data = (typeof getFilteredData === 'function') ? getFilteredData() : dashData;
+
+  // Group filtered data by moderator
   const modMap = {};
-  dashData.forEach(r=>{
+  data.forEach(r=>{
     if(!r.moderator) return;
     if(!modMap[r.moderator]) modMap[r.moderator] = {
       name: r.moderator, location: r.location||'—',
-      rows: [], lastActiveRaw: ''
+      rows: [], lastActiveRaw: '', modId: r.modId || ''
     };
+    if(r.modId && !modMap[r.moderator].modId) modMap[r.moderator].modId = r.modId;
     modMap[r.moderator].rows.push(r);
-    // Track most recent activity
     const ts = r.submittedAt || r.completedAt || '';
     if(ts && ts > modMap[r.moderator].lastActiveRaw) modMap[r.moderator].lastActiveRaw = ts;
   });
 
-  const mods = Object.values(modMap).sort((a,b)=>a.name.localeCompare(b.name));
+  let mods = Object.values(modMap).sort((a,b)=>a.name.localeCompare(b.name));
+
+  // Live view default: only show moderators active within the past 2 hours
+  if(modsViewMode === 'live'){
+    mods = mods.filter(m => {
+      if(!m.lastActiveRaw) return false;
+      const d = new Date(m.lastActiveRaw);
+      return !isNaN(d) && d > twoHoursAgo;
+    });
+  }
+
   if(!mods.length){
-    container.innerHTML='<div class="mods-empty"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><p>No moderator data found.</p></div>';
+    const emptyMsg = modsViewMode === 'live'
+      ? 'No moderators have been active in the past 2 hours.'
+      : 'No moderator data matches the current filters.';
+    container.innerHTML = renderViewToolbar() + '<div class="mods-empty"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><p>' + emptyMsg + '</p></div>';
     return;
   }
 
+  // Render based on view mode
+  if(modsViewMode === 'list'){
+    container.innerHTML = renderViewToolbar() + renderModsListView(mods, now, thirtyMinsAgo);
+  } else {
+    // 'live' or 'team' both use card grid
+    container.innerHTML = renderViewToolbar() + renderModsCardView(mods, now, thirtyMinsAgo, modsViewMode === 'team');
+  }
+}
+
+function renderViewToolbar(){
+  return `<div class="mods-view-toolbar">
+    <div class="mods-view-toggle">
+      <button class="mods-view-btn ${modsViewMode==='live'?'active':''}" data-mode="live" onclick="setModsViewMode('live')">
+        <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="3"/><circle cx="8" cy="8" r="6"/></svg>
+        Live
+      </button>
+      <button class="mods-view-btn ${modsViewMode==='team'?'active':''}" data-mode="team" onclick="setModsViewMode('team')">
+        <svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2"/><circle cx="11" cy="6" r="2"/><path d="M3 14c0-2 1.5-3.5 3-3.5s3 1.5 3 3.5M8 14c0-2 1.5-3.5 3-3.5s3 1.5 3 3.5"/></svg>
+        Team
+      </button>
+      <button class="mods-view-btn ${modsViewMode==='list'?'active':''}" data-mode="list" onclick="setModsViewMode('list')">
+        <svg viewBox="0 0 16 16"><line x1="2" y1="4" x2="14" y2="4"/><line x1="2" y1="8" x2="14" y2="8"/><line x1="2" y1="12" x2="14" y2="12"/></svg>
+        List
+      </button>
+    </div>
+  </div>`;
+}
+
+function renderModsListView(mods, now, thirtyMinsAgo){
+  const rows = mods.map(mod => {
+    const r = mod.rows;
+    const unique = new Set(r.map(x=>x.participantId).filter(Boolean)).size;
+    const reached14 = new Set(r.filter(x => x.participantId && String(x.taskId).trim() === '14').map(x=>x.participantId)).size;
+    const stats = computeModTimeStats(r);
+    // Active status
+    let isOnline = false;
+    if(mod.lastActiveRaw){
+      const d = new Date(mod.lastActiveRaw);
+      isOnline = !isNaN(d) && d > thirtyMinsAgo;
+    }
+    return `<tr>
+      <td class="ml-name">${mod.name}</td>
+      <td class="ml-loc">${mod.location}</td>
+      <td class="ml-num">${reached14}</td>
+      <td class="ml-num">${unique}</td>
+      <td class="ml-time">${stats.avgPerTask ? fmtPerTask(stats.avgPerTask) : '—'}</td>
+      <td class="ml-time">${stats.totalTime ? fmtDuration(stats.totalTime) : '—'}</td>
+      <td class="ml-rating">${(function(){
+        const rt = (typeof getModRating === 'function') ? getModRating(mod.name, mod.modId) : null;
+        if(rt && rt.count > 0) return `<span class="ml-rating-val">${rt.avg} / 10</span>`;
+        return `<span class="ml-rating-none">Need to evaluate</span>`;
+      })()}</td>
+      <td class="ml-status ${isOnline?'online':'offline'}"><span class="dot"></span>${isOnline?'Active':'Inactive'}</td>
+    </tr>`;
+  }).join('');
+  return `<table class="mods-list-table">
+    <thead><tr>
+      <th>Name</th>
+      <th>Location</th>
+      <th>Reached Task 14</th>
+      <th>Participants</th>
+      <th>Avg Time / Task</th>
+      <th>Total Time</th>
+      <th>Rating</th>
+      <th>Status</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function renderModsCardView(mods, now, thirtyMinsAgo, showTeamStats){
   // Group by location
   const locationGroups = {};
   mods.forEach(mod=>{
@@ -8338,33 +8885,30 @@ function renderModeratorsPage(){
   const sortedLocations = Object.keys(locationGroups).sort((a, b) => {
     const ai = LOCATION_ORDER.indexOf(a);
     const bi = LOCATION_ORDER.indexOf(b);
-    if(ai === -1 && bi === -1) return a.localeCompare(b); // unknown locations alphabetically at end
+    if(ai === -1 && bi === -1) return a.localeCompare(b);
     if(ai === -1) return 1;
     if(bi === -1) return -1;
     return ai - bi;
   });
 
-  const TASK_LABELS = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+  const TASK_LABELS = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12','T13','T14'];
 
   const cards = mods.map(mod=>{
     const rows = mod.rows;
-    // Stats
     const uniqueParts = new Set(rows.map(r=>r.participantId).filter(Boolean));
     const completedTasks = rows.filter(r=>r.status==='Complete').length;
-    // A participant is fully done when a Task 14 row exists for them
     const fullyDone = new Set(
       rows.filter(r => r.participantId && String(r.taskId).trim() === '14')
         .map(r => r.participantId)
     ).size;
 
-    // Is online? Last activity within 5 hours
     let isOnline = false;
     let lastActiveStr = 'No activity';
     if(mod.lastActiveRaw){
       const lastDate = new Date(mod.lastActiveRaw);
       if(!isNaN(lastDate)){
         isOnline = lastDate > thirtyMinsAgo;
-        const diff = Math.round((now - lastDate)/60000); // minutes ago
+        const diff = Math.round((now - lastDate)/60000);
         if(diff < 1)       lastActiveStr = 'Just now';
         else if(diff < 30) lastActiveStr = diff + 'm ago';
         else if(diff < 60) lastActiveStr = diff + 'm ago';
@@ -8373,8 +8917,6 @@ function renderModeratorsPage(){
       }
     }
 
-    // Latest session: get most recent participantId's task statuses
-    // Find the participant with the most recent submittedAt
     const partLatest = {};
     rows.forEach(r=>{
       if(!r.participantId) return;
@@ -8386,18 +8928,15 @@ function renderModeratorsPage(){
     const sortedParts = Object.values(partLatest).sort((a,b)=>b.ts.localeCompare(a.ts));
     const latestPid = sortedParts[0]?.pid || null;
     const sessionRows = latestPid ? rows.filter(r=>r.participantId===latestPid) : [];
-    // Build task status map for latest session
     const taskStatus = {};
     sessionRows.forEach(r=>{
       const id = parseInt(r.taskId)||0;
       if(id>=1&&id<=14) taskStatus[id] = r.status;
     });
 
-    // Avatar initial
     const initials = mod.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
     const sessionLabel = latestPid ? `Latest session: Participant ${latestPid}` : 'No session data';
 
-    // Task pips
     const pips = TASK_LABELS.map((_,i)=>{
       const id = i+1;
       const st = taskStatus[id] || 'notstarted';
@@ -8405,6 +8944,66 @@ function renderModeratorsPage(){
       const icon = st==='Complete'?'✓':st==='In Progress'?'…':String(id);
       return `<div class="mod-task-pip ${cls}" title="Task ${id}: ${st}">${icon}</div>`;
     }).join('');
+
+    // Team view: compute time stats
+    let timeStatsHtml = '';
+    if(showTeamStats){
+      const stats = computeModTimeStats(rows);
+      if(stats.avgPerTask > 0 || stats.totalTime > 0){
+        timeStatsHtml = `<div class="mod-time-stats">
+          <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><polyline points="8,5 8,8 10,10"/></svg>
+          <span>Average time spent: <strong>${fmtPerTask(stats.avgPerTask)}</strong> per task</span>
+          <span class="sep">·</span>
+          <span>Total: <strong>${fmtDuration(stats.totalTime)}</strong></span>
+        </div>`;
+      } else {
+        timeStatsHtml = `<div class="mod-time-stats" style="opacity:.6">
+          <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><polyline points="8,5 8,8 10,10"/></svg>
+          <span>Not enough data to compute session time</span>
+        </div>`;
+      }
+    }
+
+    // Feedback + Rating action buttons (replaces QA Check)
+    const safeName = mod.name.replace(/'/g, "\\'");
+    const loginIdAttr = (mod.modId || '').replace(/'/g, "\\'");
+    const actionButtons = `<div class="mod-action-row">
+      <button class="mod-action-btn feedback" onclick="openFeedbackModal('${safeName}','${loginIdAttr}')">
+        <svg viewBox="0 0 16 16"><path d="M14 8a5 5 0 0 1-5 5 5 5 0 0 1-2.3-.5L2 13l1-3.5A5 5 0 0 1 9 3a5 5 0 0 1 5 5z"/></svg>
+        Feedback
+      </button>
+      <button class="mod-action-btn rating" onclick="openRatingModal('${safeName}','${loginIdAttr}')">
+        <svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg>
+        Rating
+      </button>
+    </div>`;
+
+    // Rating display (Team/List views show average)
+    let ratingHtml = '';
+    if(showTeamStats){
+      const rt = (typeof getModRating === 'function') ? getModRating(mod.name, mod.modId) : null;
+      if(rt && rt.count > 0){
+        ratingHtml = `<div class="mod-rating-display">
+          <svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg>
+          <span>Average rating: <strong>${rt.avg} / 10</strong> (${rt.count} rating${rt.count!==1?'s':''})</span>
+        </div>`;
+      } else {
+        ratingHtml = `<div class="mod-rating-display none-yet">
+          <svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg>
+          <span>Need to evaluate</span>
+        </div>`;
+      }
+    }
+
+    // Session status section — only shown in Live view (not Team)
+    const sessionStatusHtml = showTeamStats ? '' : `<div class="mod-live">
+        <div class="mod-live-title">
+          ${isOnline?'<span class="live-dot"></span>':''}
+          ${isOnline?'Active Session (last 30 min)':'Latest Session Status'}
+        </div>
+        <div class="mod-tasks-grid">${pips}</div>
+        <div class="mod-session-info">${sessionLabel}</div>
+      </div>`;
 
     return {name: mod.name, card: `<div class="mod-card">
       <div class="mod-card-header">
@@ -8421,40 +9020,20 @@ function renderModeratorsPage(){
           ${isOnline?'Active':'Inactive'}
         </div>
       </div>
-      ${(function(){
-        const qa = typeof getModQaLink === 'function' ? getModQaLink(mod.name) : null;
-        if(qa && qa.link){
-          return `<a href="${qa.link}" target="_blank" rel="noopener noreferrer" class="mod-qa-link" title="Open QA Check for set ${qa.setId}">
-            <svg viewBox="0 0 16 16" class="mod-qa-icon"><polyline points="2,8 6,12 14,4"/></svg>
-            <span>QA Check</span>
-            <svg viewBox="0 0 16 16" class="mod-qa-ext"><path d="M6 3h7v7"/><line x1="13" y1="3" x2="7" y2="9"/></svg>
-          </a>`;
-        } else {
-          return `<span class="mod-qa-link na" title="No QA link configured for this moderator's current set">
-            <svg viewBox="0 0 16 16" class="mod-qa-icon"><circle cx="8" cy="8" r="6"/><line x1="5" y1="8" x2="11" y2="8"/></svg>
-            <span>QA Check: n/a</span>
-          </span>`;
-        }
-      })()}
-      <div class="mod-stats">
+      ${actionButtons}
+      <div class="mod-stats-row">
         <div class="mod-stat"><div class="mod-stat-val pink">${uniqueParts.size}</div><div class="mod-stat-lbl">Participants</div></div>
         <div class="mod-stat"><div class="mod-stat-val green">${completedTasks}</div><div class="mod-stat-lbl">Tasks Done</div></div>
         <div class="mod-stat"><div class="mod-stat-val blue">${fullyDone}</div><div class="mod-stat-lbl">Reached Task 14</div></div>
       </div>
+      ${timeStatsHtml}
+      ${ratingHtml}
       <div class="mod-last-active">Last active: ${lastActiveStr}</div>
-      <div class="mod-live">
-        <div class="mod-live-title">
-          ${isOnline?'<span class="live-dot"></span>':''}
-          ${isOnline?'Active Session (last 30 min)':'Latest Session Status'}
-        </div>
-        <div class="mod-tasks-grid">${pips}</div>
-        <div class="mod-session-info">${sessionLabel}</div>
-      </div>
+      ${sessionStatusHtml}
     </div>`};
   });
 
-  // Build grouped HTML by location
-  const groupedHTML = sortedLocations.map(loc => {
+  return sortedLocations.map(loc => {
     const locMods = locationGroups[loc];
     const locCards = locMods.map(mod => {
       const found = cards.find(c => c.name === mod.name);
@@ -8474,8 +9053,6 @@ function renderModeratorsPage(){
       <div class="mods-grid">${locCards}</div>
     </div>`;
   }).join('');
-
-  container.innerHTML = groupedHTML;
 }
 
 
@@ -9663,6 +10240,11 @@ function closeIRDisableReminder(){
 const INVENTORY_READ_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b2275fce01e94b80a78a6623662d34e5/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=MZjqr1o8iq1fi_dP6wtxX0pYsvrxBhGIIUJw0pXQFVs';
 const INVENTORY_LOG_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/83e85c70c0cc4107ad21eb73f8ae41aa/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=BwlH-IKrjb60SuWlLpojbfTqOFRYXLvVhlZTlAKYNO0';
 const INVENTORY_LOG_READ_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/62ba86206f294bce899bd40ca39c581a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=P95-oqEHzBY6UuwYmUGXt9hdAIAULv9cxLkY8uaMOcI';
+const FEEDBACK_WRITE_URL  = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/c5f8a4c58c4747098c361857c11a5b07/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=H_JNgru4f2eGsbkkAEcq4c1NC5Bfs65j2WQ8ex_Letw';
+const FEEDBACK_READ_URL   = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/fa16aa62a6084b0ca279fa349170834e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=KtFZJQOooZGd5u6-ewXFZove9z7EmbOyGwFG6J6FneY';
+const FEEDBACK_UPDATE_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/cd961fa3f50e4529a78decc6df429a51/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=BMlN7iLiE2AKvpd3r-OTtelKomcVjC6pOjP-fCN8Pc8';
+const RATING_WRITE_URL    = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/cb666ab6112d4dc99491bfd00d685768/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=hsKEu9DcPuIAG9K7BpFgDMAUiaROZuzXQPRJTE2z0wQ';
+const RATING_READ_URL     = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/92714fef20a74751ab6373f92bf6ce6c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=BRXbjyP883x4NajZRqFwH1NO-l_u3Uzeu7-e1ZBQMuk';
 
 let inventoryData = null;     // groups: [{setId, setName, location, items:[...]}]
 let inventorySelected = null; // currently selected set object
@@ -10286,6 +10868,491 @@ function showNameValidationError(){
     setTimeout(() => el.classList.remove('field-error'), 2000);
   }
 }
+
+
+// Dispatch filter changes to whichever Tracker page is currently visible
+function onTrackerFiltersChanged(){
+  const page = sessionStorage.getItem('centific_tracker_page') || 'dashboard';
+  if(page === 'moderators'){
+    renderModeratorsPage();
+  } else {
+    renderDashboard();
+  }
+}
+
+
+
+// ══════════════════════════════════════════════════════════
+// ── FEEDBACK & RATINGS SYSTEM ─────────────────────────────
+// ══════════════════════════════════════════════════════════
+
+// ----- Helpers to extract rows from PA responses -----
+function _frExtractRows(data, keys){
+  let rows = [];
+  if(Array.isArray(data)) rows = data;
+  else {
+    for(const k of keys){
+      if(Array.isArray(data[k])){ rows = data[k]; break; }
+      if(typeof data[k] === 'string'){ try{ const p = JSON.parse(data[k]); if(Array.isArray(p)){ rows = p; break; } }catch(e){} }
+    }
+    if(!rows.length && Array.isArray(data.value)) rows = data.value;
+  }
+  return rows.map(r => {
+    const c = {};
+    Object.keys(r).forEach(k => { if(!k.startsWith('@odata') && k !== 'ItemInternalId') c[k] = r[k]; });
+    return c;
+  });
+}
+function _frField(obj, names){
+  for(const n of names){
+    for(const k of Object.keys(obj)){
+      if(k.toLowerCase().replace(/\s+/g,'') === n.toLowerCase().replace(/\s+/g,'')) return obj[k];
+    }
+  }
+  return '';
+}
+
+// ══════════════════════════════════════════════════════════
+// ── ADMIN: SEND FEEDBACK ──────────────────────────────────
+// ══════════════════════════════════════════════════════════
+let _fbTargetMod = null; // {loginId, name}
+
+function openFeedbackModal(modName, modLoginId){
+  _fbTargetMod = { name: modName, loginId: modLoginId || '' };
+  const ov = document.getElementById('fb-send-overlay');
+  if(!ov) return;
+  document.getElementById('fb-send-target').textContent = modName;
+  document.getElementById('fb-send-text').value = '';
+  document.getElementById('fb-send-error').textContent = '';
+  const btn = document.getElementById('fb-send-btn');
+  if(btn){ btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 16 16" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><line x1="2" y1="8" x2="14" y2="8"/><polyline points="9,3 14,8 9,13"/></svg> Send Feedback'; }
+  ov.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => { const t = document.getElementById('fb-send-text'); if(t) t.focus(); }, 100);
+}
+function closeFeedbackModal(){
+  const ov = document.getElementById('fb-send-overlay');
+  if(ov) ov.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+async function submitFeedback(){
+  const text = (document.getElementById('fb-send-text').value || '').trim();
+  const errEl = document.getElementById('fb-send-error');
+  if(!text){ if(errEl) errEl.textContent = 'Please enter a message.'; return; }
+  if(!_fbTargetMod){ if(errEl) errEl.textContent = 'No recipient selected.'; return; }
+  const btn = document.getElementById('fb-send-btn');
+  if(btn){ btn.disabled = true; btn.innerHTML = '<div style="width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;animation:spin .7s linear infinite"></div> Sending…'; }
+
+  // Resolve recipient loginId. The reliable convention is "Firstname-Kilo".
+  // We derive from the moderator's display name rather than the TaskData modId
+  // column (which is often empty or a numeric id that won't match the login).
+  let loginId = '';
+  if(_fbTargetMod.name){
+    const first = _fbTargetMod.name.split(/\s+/)[0];
+    loginId = first + '-Kilo';
+  }
+  // If an explicit loginId was passed AND it looks like a login (contains "-"), prefer it
+  if(_fbTargetMod.loginId && /-/.test(_fbTargetMod.loginId)){
+    loginId = _fbTargetMod.loginId;
+  }
+
+  const payload = {
+    feedbackId: 'FB-' + Date.now(),
+    modLoginId: loginId,
+    modName: _fbTargetMod.name,
+    adminName: (currentUser && currentUser.modName) || 'Admin',
+    message: text,
+    sentAt: new Date().toISOString(),
+    status: 'unread'
+  };
+  console.log('[Feedback] Sending:', payload);
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 15000);
+    const res = await fetch(FEEDBACK_WRITE_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload), signal:ctrl.signal });
+    clearTimeout(timer);
+    if(!res.ok && res.status !== 200 && res.status !== 202) throw new Error('HTTP ' + res.status);
+    console.log('[Feedback] Sent OK');
+    closeFeedbackModal();
+    if(typeof showToast === 'function') showToast('Feedback sent to ' + _fbTargetMod.name + ' ✓');
+  } catch(err){
+    console.error('[Feedback] Send error:', err);
+    if(errEl) errEl.textContent = 'Failed to send: ' + (err.message || 'try again');
+    if(btn){ btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 16 16" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><line x1="2" y1="8" x2="14" y2="8"/><polyline points="9,3 14,8 9,13"/></svg> Send Feedback'; }
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// ── ADMIN: RATE MODERATOR ─────────────────────────────────
+// ══════════════════════════════════════════════════════════
+let _rtTargetMod = null;
+
+function openRatingModal(modName, modLoginId){
+  _rtTargetMod = { name: modName, loginId: modLoginId || '' };
+  const ov = document.getElementById('rt-overlay');
+  if(!ov) return;
+  document.getElementById('rt-target').textContent = modName;
+  document.getElementById('rt-error').textContent = '';
+  _rtSelected = 0;
+  renderRatingScale();
+  ov.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+function closeRatingModal(){
+  const ov = document.getElementById('rt-overlay');
+  if(ov) ov.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+let _rtSelected = 0;
+function renderRatingScale(){
+  const wrap = document.getElementById('rt-scale');
+  if(!wrap) return;
+  let h = '';
+  for(let i = 1; i <= 10; i++){
+    h += `<button class="rt-num${i <= _rtSelected ? ' active' : ''}" onmouseover="hoverRating(${i})" onmouseout="hoverRating(0)" onclick="selectRating(${i})">${i}</button>`;
+  }
+  wrap.innerHTML = h;
+  const lbl = document.getElementById('rt-selected-label');
+  if(lbl) lbl.textContent = _rtSelected > 0 ? (_rtSelected + ' / 10') : 'Select a score';
+}
+function hoverRating(n){
+  const btns = document.querySelectorAll('#rt-scale .rt-num');
+  btns.forEach((b, idx) => {
+    const val = idx + 1;
+    b.classList.toggle('hover', n > 0 && val <= n);
+  });
+}
+function selectRating(n){
+  _rtSelected = n;
+  renderRatingScale();
+}
+async function submitRating(){
+  const errEl = document.getElementById('rt-error');
+  if(!_rtSelected || _rtSelected < 1){ if(errEl) errEl.textContent = 'Please select a score 1-10.'; return; }
+  if(!_rtTargetMod){ if(errEl) errEl.textContent = 'No moderator selected.'; return; }
+  const notes = (document.getElementById('rt-notes').value || '').trim();
+  const btn = document.getElementById('rt-submit-btn');
+  if(btn){ btn.disabled = true; btn.innerHTML = '<div style="width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;animation:spin .7s linear infinite"></div> Submitting…'; }
+
+  let loginId = _rtTargetMod.loginId;
+  if(!loginId && _rtTargetMod.name){
+    loginId = _rtTargetMod.name.split(/\s+/)[0] + '-Kilo';
+  }
+  const payload = {
+    ratingId: 'RT-' + Date.now(),
+    modLoginId: loginId,
+    modName: _rtTargetMod.name,
+    adminName: (currentUser && currentUser.modName) || 'Admin',
+    rating: _rtSelected,
+    ratedAt: new Date().toISOString(),
+    notes: notes
+  };
+  console.log('[Rating] Submitting:', payload);
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 15000);
+    const res = await fetch(RATING_WRITE_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload), signal:ctrl.signal });
+    clearTimeout(timer);
+    if(!res.ok && res.status !== 200 && res.status !== 202) throw new Error('HTTP ' + res.status);
+    console.log('[Rating] Submitted OK');
+    // Optimistic cache update
+    if(!window.modRatings) window.modRatings = {};
+    const key = (loginId || _rtTargetMod.name).toLowerCase();
+    if(!window.modRatings[key]) window.modRatings[key] = [];
+    window.modRatings[key].push(_rtSelected);
+    closeRatingModal();
+    if(typeof showToast === 'function') showToast('Rated ' + _rtTargetMod.name + ': ' + _rtSelected + '/10 ✓');
+    if(typeof renderModeratorsPage === 'function') renderModeratorsPage();
+  } catch(err){
+    console.error('[Rating] Submit error:', err);
+    if(errEl) errEl.textContent = 'Failed: ' + (err.message || 'try again');
+    if(btn){ btn.disabled = false; btn.innerHTML = 'Submit Rating'; }
+  }
+}
+
+// ----- Load all ratings (admin side) → build avg map keyed by loginId AND name -----
+window.modRatings = window.modRatings || {};
+async function loadModRatings(){
+  try {
+    const res = await fetch(RATING_READ_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' });
+    if(!res.ok) return;
+    const text = await res.text();
+    let data; try { data = JSON.parse(text); } catch(e){ return; }
+    const rows = _frExtractRows(data, ['ratings','rows','value']);
+    const map = {};
+    rows.forEach(r => {
+      const loginId = String(_frField(r, ['modLoginId','ModLoginId']) || '').toLowerCase().trim();
+      const name    = String(_frField(r, ['modName','ModName']) || '').toLowerCase().trim();
+      const rating  = parseInt(_frField(r, ['rating','Rating']), 10);
+      if(isNaN(rating)) return;
+      // Key by both loginId and name so lookup works either way
+      [loginId, name].forEach(key => {
+        if(!key) return;
+        if(!map[key]) map[key] = [];
+        map[key].push(rating);
+      });
+    });
+    window.modRatings = map;
+    console.log('[Rating] Loaded ratings for', Object.keys(map).length, 'keys');
+    if(typeof renderModeratorsPage === 'function'){
+      const c = document.getElementById('mods-grid-container');
+      if(c && c.innerHTML) renderModeratorsPage();
+    }
+  } catch(err){ console.error('[Rating] Load error:', err); }
+}
+
+// Get avg rating for a mod (by name or loginId) → {avg, count} or null
+function getModRating(modName, modLoginId){
+  if(!window.modRatings) return null;
+  const keys = [];
+  if(modLoginId) keys.push(String(modLoginId).toLowerCase().trim());
+  if(modName) keys.push(String(modName).toLowerCase().trim());
+  for(const k of keys){
+    if(window.modRatings[k] && window.modRatings[k].length){
+      const arr = window.modRatings[k];
+      const avg = arr.reduce((a,b)=>a+b,0) / arr.length;
+      return { avg: Math.round(avg*10)/10, count: arr.length };
+    }
+  }
+  return null;
+}
+
+
+// ══════════════════════════════════════════════════════════
+// ── MODERATOR: FEEDBACK INBOX ─────────────────────────────
+// ══════════════════════════════════════════════════════════
+window.modInbox = [];          // all feedback rows for this mod
+let _inboxUnreadQueue = [];     // unread messages to show as popups
+
+async function loadMyFeedback(showPopup){
+  if(!currentUser || !currentUser.loginId){ console.warn('[Inbox] No currentUser.loginId — skipping'); return; }
+  if(currentUser.isAdmin && currentUser.loginId === ADMIN_LOGIN_ID) return;
+
+  // Build the set of identifiers this user could be addressed by
+  const myLoginId = String(currentUser.loginId || '').toLowerCase().trim();
+  const myName    = String(currentUser.modName || '').toLowerCase().trim();
+  const myFirst   = myName.split(/\s+/)[0] || '';
+  const myDerivedLogin = myFirst ? (myFirst + '-kilo') : '';
+  const myIds = [myLoginId, myName, myDerivedLogin].filter(Boolean);
+  console.log('[Inbox] Loading feedback for identifiers:', myIds);
+
+  try {
+    const res = await fetch(FEEDBACK_READ_URL, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ modLoginId: currentUser.loginId })
+    });
+    if(!res.ok){ console.warn('[Inbox] HTTP', res.status); return; }
+    const text = await res.text();
+    console.log('[Inbox] Raw response (first 400):', text.substring(0, 400));
+    let data; try { data = JSON.parse(text); } catch(e){ console.warn('[Inbox] JSON parse failed'); return; }
+    let rows = _frExtractRows(data, ['feedback','rows','value']);
+    console.log('[Inbox] Extracted', rows.length, 'raw rows');
+
+    // Normalize ALL rows first
+    let inbox = rows.map(r => ({
+      feedbackId: String(_frField(r, ['feedbackId','FeedbackId']) || ''),
+      modLoginId: String(_frField(r, ['modLoginId','ModLoginId']) || '').toLowerCase().trim(),
+      modName:    String(_frField(r, ['modName','ModName']) || '').toLowerCase().trim(),
+      adminName:  String(_frField(r, ['adminName','AdminName']) || 'Admin'),
+      message:    String(_frField(r, ['message','Message']) || ''),
+      sentAt:     String(_frField(r, ['sentAt','SentAt']) || ''),
+      status:     String(_frField(r, ['status','Status']) || 'unread').toLowerCase()
+    })).filter(f => f.feedbackId && f.message);
+
+    // Client-side tolerant match: keep rows addressed to ANY of my identifiers.
+    // (Guards against the server-side filter returning everything OR mismatching.)
+    const matched = inbox.filter(f => myIds.includes(f.modLoginId) || myIds.includes(f.modName));
+    // If the server already filtered correctly we may get exactly my rows; if it returned
+    // all rows, the client filter narrows it. If client filter finds nothing but server
+    // returned a small set, trust the server set (handles odd login conventions).
+    if(matched.length > 0){
+      inbox = matched;
+    } else if(inbox.length > 0 && rows.length <= 50){
+      console.log('[Inbox] No identifier match; trusting server-filtered set of', inbox.length);
+      // keep inbox as-is (server already filtered by modLoginId)
+    } else {
+      inbox = matched; // empty
+    }
+
+    // Sort newest first
+    inbox.sort((a,b) => (b.sentAt||'').localeCompare(a.sentAt||''));
+    window.modInbox = inbox;
+    console.log('[Inbox] Final inbox:', inbox.length, 'messages', inbox);
+    updateInboxBadge();
+
+    if(showPopup){
+      const unread = inbox.filter(f => f.status !== 'acknowledged');
+      if(unread.length){
+        _inboxUnreadQueue = unread.slice();
+        showNextUnreadPopup();
+      }
+    }
+  } catch(err){ console.error('[Inbox] Load error:', err); }
+}
+
+function showNextUnreadPopup(){
+  if(!_inboxUnreadQueue.length) return;
+  const fb = _inboxUnreadQueue[0];
+  const ov = document.getElementById('inbox-popup-overlay');
+  if(!ov) return;
+  // Stage 1: "You have a message"
+  document.getElementById('inbox-popup-stage1').style.display = 'block';
+  document.getElementById('inbox-popup-stage2').style.display = 'none';
+  document.getElementById('inbox-popup-count').textContent = _inboxUnreadQueue.length;
+  ov.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+// ── Live feedback polling (while moderator is in session) ──
+let _feedbackPollTimer = null;
+let _seenFeedbackIds = new Set();
+
+function startFeedbackPolling(){
+  stopFeedbackPolling();
+  // Seed seen-set with whatever is already loaded so we only popup genuinely new ones
+  (window.modInbox || []).forEach(f => _seenFeedbackIds.add(f.feedbackId));
+  _feedbackPollTimer = setInterval(() => {
+    if(!currentUser || currentUser.isAdmin) { stopFeedbackPolling(); return; }
+    pollForNewFeedback();
+  }, 60 * 1000); // every 60 seconds
+  console.log('[Inbox] Live polling started (60s interval)');
+}
+function stopFeedbackPolling(){
+  if(_feedbackPollTimer){ clearInterval(_feedbackPollTimer); _feedbackPollTimer = null; }
+}
+
+async function pollForNewFeedback(){
+  if(!currentUser || !currentUser.loginId) return;
+  // Remember current ids before reload
+  const before = new Set((window.modInbox||[]).map(f => f.feedbackId));
+  await loadMyFeedback(false); // refresh window.modInbox without auto-popup
+  // Find genuinely new, unacknowledged messages
+  const fresh = (window.modInbox||[]).filter(f =>
+    f.status !== 'acknowledged' && !before.has(f.feedbackId) && !_seenFeedbackIds.has(f.feedbackId)
+  );
+  if(fresh.length){
+    console.log('[Inbox] Live: ' + fresh.length + ' new message(s) arrived');
+    fresh.forEach(f => _seenFeedbackIds.add(f.feedbackId));
+    // Only stack the popup if one isn't already open
+    const ov = document.getElementById('inbox-popup-overlay');
+    if(ov && ov.classList.contains('hidden')){
+      _inboxUnreadQueue = fresh.slice();
+      showNextUnreadPopup();
+    }
+    // Subtle toast as well
+    if(typeof showToast === 'function') showToast('📬 New message from your admin');
+  }
+}
+function inboxPopupRead(){
+  const fb = _inboxUnreadQueue[0];
+  if(!fb) return;
+  document.getElementById('inbox-popup-stage1').style.display = 'none';
+  document.getElementById('inbox-popup-stage2').style.display = 'block';
+  document.getElementById('inbox-popup-from').textContent = fb.adminName || 'Admin';
+  document.getElementById('inbox-popup-date').textContent = fmtInboxDate(fb.sentAt);
+  document.getElementById('inbox-popup-message').textContent = fb.message;
+  // Mark as read (not acknowledged yet)
+  if(fb.status === 'unread') updateFeedbackStatus(fb.feedbackId, 'read');
+}
+async function inboxPopupAcknowledge(){
+  const fb = _inboxUnreadQueue.shift();
+  if(fb){
+    await updateFeedbackStatus(fb.feedbackId, 'acknowledged');
+    // Update local copy
+    const item = window.modInbox.find(m => m.feedbackId === fb.feedbackId);
+    if(item) item.status = 'acknowledged';
+  }
+  updateInboxBadge();
+  // Show next or close
+  if(_inboxUnreadQueue.length){
+    showNextUnreadPopup();
+  } else {
+    const ov = document.getElementById('inbox-popup-overlay');
+    if(ov) ov.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+}
+async function updateFeedbackStatus(feedbackId, status){
+  try {
+    await fetch(FEEDBACK_UPDATE_URL, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ feedbackId, status, acknowledgedAt: status === 'acknowledged' ? new Date().toISOString() : '' })
+    });
+    console.log('[Inbox] Marked', feedbackId, 'as', status);
+  } catch(err){ console.error('[Inbox] Update error:', err); }
+}
+
+function fmtInboxDate(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  if(isNaN(d)) return iso;
+  return d.toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' });
+}
+
+function updateInboxBadge(){
+  const badge = document.getElementById('inbox-menu-badge');
+  if(!badge) return;
+  const unack = (window.modInbox||[]).filter(f => f.status !== 'acknowledged').length;
+  if(unack > 0){
+    badge.textContent = unack;
+    badge.style.display = 'inline-flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// ----- Inbox list view (opened from menu) -----
+function openInbox(){
+  const ov = document.getElementById('inbox-list-overlay');
+  if(!ov) return;
+  renderInboxList();
+  ov.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  // Close the side menu if open
+  const menu = document.getElementById('side-menu');
+  if(menu) menu.classList.remove('open');
+}
+function closeInbox(){
+  const ov = document.getElementById('inbox-list-overlay');
+  if(ov) ov.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+function renderInboxList(){
+  const body = document.getElementById('inbox-list-body');
+  if(!body) return;
+  const inbox = window.modInbox || [];
+  if(!inbox.length){
+    body.innerHTML = '<div class="inbox-empty"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z" fill="none"/><polyline points="4,7 12,13 20,7"/></svg><p>No messages yet.</p></div>';
+    return;
+  }
+  body.innerHTML = inbox.map((f, i) => `
+    <div class="inbox-item${f.status!=='acknowledged'?' unread':''}" onclick="openInboxMessage(${i})">
+      <div class="inbox-item-icon">${f.status!=='acknowledged'?'<span class="inbox-unread-dot"></span>':''}
+        <svg viewBox="0 0 16 16"><path d="M2 4h12v8H2z" fill="none"/><polyline points="2,5 8,9 14,5"/></svg>
+      </div>
+      <div class="inbox-item-content">
+        <div class="inbox-item-from">${f.adminName||'Admin'}</div>
+        <div class="inbox-item-preview">${f.message.length>60?f.message.substring(0,60)+'…':f.message}</div>
+      </div>
+      <div class="inbox-item-date">${fmtInboxDate(f.sentAt)}</div>
+    </div>`).join('');
+}
+function openInboxMessage(idx){
+  const fb = (window.modInbox||[])[idx];
+  if(!fb) return;
+  document.getElementById('inbox-popup-stage1').style.display = 'none';
+  document.getElementById('inbox-popup-stage2').style.display = 'block';
+  document.getElementById('inbox-popup-from').textContent = fb.adminName || 'Admin';
+  document.getElementById('inbox-popup-date').textContent = fmtInboxDate(fb.sentAt);
+  document.getElementById('inbox-popup-message').textContent = fb.message;
+  // For re-reading from inbox, the acknowledge button just closes (already acknowledged)
+  _inboxUnreadQueue = fb.status !== 'acknowledged' ? [fb] : [];
+  const ov = document.getElementById('inbox-popup-overlay');
+  if(ov) ov.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  const ackBtn = document.getElementById('inbox-ack-btn');
+  if(ackBtn) ackBtn.textContent = fb.status !== 'acknowledged' ? 'Acknowledge' : 'Close';
+}
 </script>
 
 <!-- ── Admin Landing ── -->
@@ -10326,14 +11393,21 @@ function showNameValidationError(){
     </div>
 
     <span class="dash-filter-label">Period</span>
-    <select class="dash-select" id="dash-period" onchange="renderDashboard()">
+    <select class="dash-select" id="dash-period" onchange="onPeriodChanged()">
+      <option value="overall" selected>Overall</option>
       <option value="today">Today</option>
       <option value="week">This Week</option>
-      <option value="overall" selected>Overall</option>
+      <option value="lastweek">Last Week</option>
+      <option value="custom">Custom Range…</option>
     </select>
 
+    <span class="dash-filter-label" id="dash-custom-label" style="display:none">From</span>
+    <input type="date" class="dash-select dash-date-input" id="dash-custom-from" style="display:none" onchange="onTrackerFiltersChanged()"/>
+    <span class="dash-filter-label" id="dash-custom-to-label" style="display:none">To</span>
+    <input type="date" class="dash-select dash-date-input" id="dash-custom-to" style="display:none" onchange="onTrackerFiltersChanged()"/>
+
     <span class="dash-filter-label">Location</span>
-    <select class="dash-select" id="dash-location" onchange="populateModFilter();renderDashboard()">
+    <select class="dash-select" id="dash-location" onchange="populateModFilter();onTrackerFiltersChanged()">
       <option value="all">All Locations</option>
       <option value="Redmond">Redmond</option>
       <option value="Las Vegas">Las Vegas</option>
@@ -10777,6 +11851,86 @@ function showNameValidationError(){
   <div class="update-toast-actions">
     <button class="update-toast-btn secondary" onclick="dismissUpdateToast()">Later</button>
     <button class="update-toast-btn" onclick="reloadForUpdate()">Refresh</button>
+  </div>
+</div>
+
+<!-- ── Admin: Send Feedback Modal ── -->
+<div class="fb-send-overlay hidden" id="fb-send-overlay" onclick="if(event.target===this)closeFeedbackModal()">
+  <div class="fb-send-modal">
+    <div class="fb-send-close" onclick="closeFeedbackModal()">✕</div>
+    <div class="fb-send-icon">
+      <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+    </div>
+    <div class="fb-send-title">Send Feedback</div>
+    <div class="fb-send-sub">To <strong id="fb-send-target">Moderator</strong></div>
+    <textarea class="fb-send-text" id="fb-send-text" placeholder="Write your feedback message…" rows="4"></textarea>
+    <div class="fb-send-error" id="fb-send-error"></div>
+    <button class="fb-send-btn" id="fb-send-btn" onclick="submitFeedback()">
+      <svg viewBox="0 0 16 16" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><line x1="2" y1="8" x2="14" y2="8"/><polyline points="9,3 14,8 9,13"/></svg>
+      Send Feedback
+    </button>
+  </div>
+</div>
+
+<!-- ── Admin: Rate Moderator Modal ── -->
+<div class="rt-overlay hidden" id="rt-overlay" onclick="if(event.target===this)closeRatingModal()">
+  <div class="rt-modal">
+    <div class="rt-close" onclick="closeRatingModal()">✕</div>
+    <div class="rt-icon">
+      <svg viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9"/></svg>
+    </div>
+    <div class="rt-title">Rate Performance</div>
+    <div class="rt-sub">Rating <strong id="rt-target">Moderator</strong> — 10 is best</div>
+    <div class="rt-scale" id="rt-scale"></div>
+    <div class="rt-selected-label" id="rt-selected-label">Select a score</div>
+    <textarea class="rt-notes" id="rt-notes" placeholder="Optional notes…" rows="2"></textarea>
+    <div class="rt-error" id="rt-error"></div>
+    <button class="rt-submit-btn" id="rt-submit-btn" onclick="submitRating()">Submit Rating</button>
+  </div>
+</div>
+
+<!-- ── Moderator: Feedback Popup (message reader) ── -->
+<div class="inbox-popup-overlay hidden" id="inbox-popup-overlay">
+  <div class="inbox-popup-modal">
+    <div id="inbox-popup-stage1">
+      <div class="inbox-popup-icon">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z" fill="none"/><polyline points="4,7 12,13 20,7"/></svg>
+      </div>
+      <div class="inbox-popup-title">You have a message</div>
+      <div class="inbox-popup-sub">You have <strong id="inbox-popup-count">1</strong> message from your admin.</div>
+      <button class="inbox-popup-btn" onclick="inboxPopupRead()">
+        <svg viewBox="0 0 16 16" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M2 4h12v8H2z" fill="none"/><polyline points="2,5 8,9 14,5"/></svg>
+        Read Message
+      </button>
+    </div>
+    <div id="inbox-popup-stage2" style="display:none">
+      <div class="inbox-popup-msg-header">
+        <div class="inbox-popup-from-avatar">A</div>
+        <div>
+          <div class="inbox-popup-from-label">From <strong id="inbox-popup-from">Admin</strong></div>
+          <div class="inbox-popup-date" id="inbox-popup-date"></div>
+        </div>
+      </div>
+      <div class="inbox-popup-message" id="inbox-popup-message"></div>
+      <button class="inbox-popup-btn" id="inbox-ack-btn" onclick="inboxPopupAcknowledge()">
+        <svg viewBox="0 0 16 16" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="2,8 6,12 14,4"/></svg>
+        Acknowledge
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Moderator: Inbox List ── -->
+<div class="inbox-list-overlay hidden" id="inbox-list-overlay" onclick="if(event.target===this)closeInbox()">
+  <div class="inbox-list-modal">
+    <div class="inbox-list-header">
+      <div class="inbox-list-title">
+        <svg viewBox="0 0 16 16" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round"><path d="M2 4h12v8H2z" fill="none"/><polyline points="2,5 8,9 14,5"/></svg>
+        Inbox
+      </div>
+      <div class="inbox-list-close" onclick="closeInbox()">✕</div>
+    </div>
+    <div class="inbox-list-body" id="inbox-list-body"></div>
   </div>
 </div>
 
