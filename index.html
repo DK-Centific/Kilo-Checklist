@@ -7401,10 +7401,12 @@ function _onLoginSuccessInner(){
     const inboxItem = document.getElementById('hd-inbox');
     if(inboxItem) inboxItem.style.display = 'flex';
     if(typeof loadMyFeedback === 'function'){
-      // Slight delay so login UI settles before any popup appears
-      setTimeout(() => loadMyFeedback(true), 1200);
-      // Live polling: check for new feedback every 60 seconds while in session
-      startFeedbackPolling();
+      // Initial load shows a popup for any messages waiting at login
+      setTimeout(() => {
+        loadMyFeedback(true);
+        // Start live polling AFTER the first load so the seen-set is seeded correctly
+        startFeedbackPolling();
+      }, 1200);
     }
   }
   // Background-fetch troubleshooting so notifications can appear silently
@@ -11543,8 +11545,8 @@ function startFeedbackPolling(){
   _feedbackPollTimer = setInterval(() => {
     if(!currentUser || currentUser.isAdmin) { stopFeedbackPolling(); return; }
     pollForNewFeedback();
-  }, 60 * 1000); // every 60 seconds
-  console.log('[Inbox] Live polling started (60s interval)');
+  }, 10 * 1000); // every 10 seconds — near-instant delivery
+  console.log('[Inbox] Live polling started (10s interval)');
 }
 function stopFeedbackPolling(){
   if(_feedbackPollTimer){ clearInterval(_feedbackPollTimer); _feedbackPollTimer = null; }
