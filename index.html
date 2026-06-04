@@ -199,6 +199,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .entry-field{display:flex;flex-direction:column;gap:5px;min-width:110px;flex:1}
 .entry-label{display:block;font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);white-space:nowrap}
 .entry-input{font-family:var(--font);font-size:14px;color:var(--text);background:var(--input-bg);border:.5px solid var(--border-strong);border-radius:var(--r);padding:7px 10px;outline:none;transition:all .2s ease;width:100%;letter-spacing:-0.01em}
+.entry-input-locked{background:var(--bg3);color:var(--text2);cursor:not-allowed;border-style:dashed;opacity:.92}
+.entry-input-locked:focus{border-color:var(--border-strong);box-shadow:none}
 .entry-input::placeholder{color:var(--text3)}
 .entry-input:focus{border-color:var(--pink);background:var(--bg2);box-shadow:0 0 0 4px rgba(239,67,179,.10)}
 .content{flex:1;overflow-y:auto;padding:28px 32px}
@@ -6035,8 +6037,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <input type="text" id="g-participant-name" class="entry-input" placeholder="First Last — e.g. David Kang" oninput="syncGlobal();this.style.borderColor=''"/>
       </div>
       <div class="entry-field">
-        <div class="entry-label">Moderator <span style="color:var(--red)">*</span></div>
-        <input type="text" id="g-operator" class="entry-input" placeholder="Your name" oninput="syncGlobal();this.style.borderColor=''"/>
+        <div class="entry-label">Moderator <span style="color:var(--red)">*</span> <span style="color:var(--text3);font-weight:400;font-size:10px;letter-spacing:0">(from your login — locked)</span></div>
+        <input type="text" id="g-operator" class="entry-input entry-input-locked" placeholder="Your name" readonly tabindex="-1" aria-readonly="true" title="Set automatically from your login and cannot be changed"/>
       </div>
       <div class="entry-field">
         <div class="entry-label">Session Date</div>
@@ -9455,6 +9457,11 @@ function resetOCR(){
   if(cropSec){ cropSec.style.display = 'none'; cropSec.classList.add('hidden'); }
   if(pickBtn) pickBtn.style.display = 'flex';
   if(tip) tip.style.display = 'block';
+  // Clear the detected name field
+  const nameInput = document.getElementById('ocr-name-input');
+  if(nameInput){ nameInput.value = ''; nameInput.classList.remove('valid'); }
+  const nameValidity = document.getElementById('ocr-name-validity');
+  if(nameValidity) nameValidity.textContent = '';
 }
 
 // Resize image to max 1500px wide, return as base64 (without data:image/... prefix)
@@ -9642,6 +9649,123 @@ function showOCRResult(detectedText){
   }
   // Run validity check on whatever's in the input
   onOCREditInput();
+  // Attempt to detect a participant name from the same OCR text
+  populateOCRName(detectedText);
+}
+
+// ── Extract a likely participant name from the OCR text ──
+// Names are alphabetic word-pairs that are NOT the UUID, not pure hex/numbers,
+// and not common label words (e.g. "Participant", "ID", "Name").
+function extractNameFromOCR(detectedText){
+  if(!detectedText) return '';
+  // Normalize whitespace across the whole blob (the message may wrap across lines)
+  const flat = String(detectedText).replace(/\s+/g, ' ').trim();
+
+  // ── Primary: known Registration format ──
+  //   "Participant <firstname_vid> <lastname> assigned PID: <uuid>"
+  // Capture everything between "Participant" and "assigned" (case-insensitive).
+  let nameStr = '';
+  const m = flat.match(/participant\s+(.+?)\s+assigned\b/i);
+  if(m){
+    nameStr = m[1];
+  } else {
+    // Fallback: take text before "assigned PID" / "assigned" / "PID"
+    const m2 = flat.match(/^(.*?)\s+assigned\b/i) || flat.match(/^(.*?)\s+PID\b/i);
+    if(m2) nameStr = m2[1].replace(/^participant\s+/i, '');
+  }
+
+  if(nameStr){
+    // 1) Strip a "_vid" / "_xxx" suffix attached to a token: "david_vid" → "david"
+    // 2) Drop a STANDALONE "vid" token (low-quality OCR reads "david_vid" as "david vid")
+    //    — also catches "_vid" if the underscore survived as its own token.
+    let words = nameStr.split(/\s+/)
+      .map(w => w.replace(/_vid\b/i, '').replace(/_[a-z0-9]+$/i, ''))
+      .map(w => w.replace(/^_+|_+$/g, '')) // strip stray underscores
+      .filter(Boolean)
+      // remove any token that is just "vid" (or "_vid") on its own
+      .filter(w => !/^_?vid$/i.test(w))
+      // keep only name-like tokens (letters, accents, hyphen, apostrophe)
+      .filter(w => /^[\p{L}][\p{L}.'\-]*$/u.test(w));
+    // Respect names with 2, 3, or 4 parts — do not truncate. Cap at 5 as a safety bound.
+    if(words.length > 5) words = words.slice(0, 5);
+    if(words.length >= 2){
+      return words.map(titleCaseWord).join(' ');
+    }
+    if(words.length === 1){
+      // Only one usable word — still return it (moderator can complete the last name)
+      return titleCaseWord(words[0]);
+    }
+  }
+
+  // ── Generic fallback (older logic) for non-standard photos ──
+  const LABELS = /^(participant|name|id|uuid|vid|first|last|full|subject|session|date|dob|age|gender|sex|email|phone|device|moderator|operator|registration|assigned|pid|click|ok|begin|recording|successful)$/i;
+  const lines = String(detectedText).split(/\r?\n/);
+  const candidates = [];
+  for(let raw of lines){
+    let line = raw.trim();
+    if(!line) continue;
+    line = line.replace(/^\s*(participant\s*name|full\s*name|name)\s*[:\-–]\s*/i, '');
+    if(/[0-9a-f]{8}-[0-9a-f]{4}/i.test(line)) continue;
+    if(/[0-9a-f]{16,}/i.test(line.replace(/\s/g,''))) continue;
+    const words = line.split(/\s+/)
+      .map(w => w.replace(/_vid\b/i, '').replace(/_[a-z0-9]+$/i, ''))
+      .map(w => w.replace(/^_+|_+$/g, ''))
+      .filter(w => {
+        const clean = w.replace(/[.'\-]/g,'');
+        if(!clean) return false;
+        if(LABELS.test(clean)) return false;   // also drops standalone "vid"
+        return /^[\p{L}][\p{L}.'\-]*$/u.test(w) && clean.length >= 2;
+      });
+    // Allow names with 2–5 parts (don't truncate legitimate multi-part names)
+    if(words.length >= 2 && words.length <= 5) candidates.push(words.join(' '));
+  }
+  if(!candidates.length) return '';
+  candidates.sort((a,b) => {
+    const score = s => s.split(/\s+/).filter(w => /^[A-Z\p{Lu}]/u.test(w)).length;
+    return score(b) - score(a);
+  });
+  return candidates[0].split(/\s+/).map(titleCaseWord).join(' ');
+}
+
+// Title-case a single word, preserving hyphen/apostrophe segments (e.g. "anne-marie" → "Anne-Marie")
+function titleCaseWord(w){
+  return w.replace(/[\p{L}]+/gu, seg => seg.charAt(0).toUpperCase() + seg.slice(1).toLowerCase());
+}
+
+function populateOCRName(detectedText){
+  const nameInput = document.getElementById('ocr-name-input');
+  const nameHint  = document.getElementById('ocr-name-hint');
+  if(!nameInput) return;
+  const detected = extractNameFromOCR(detectedText);
+  if(detected){
+    nameInput.value = detected;
+    if(nameHint){ nameHint.style.display = 'block'; nameHint.textContent = 'Detected from the photo — verify spelling'; }
+    console.log('[OCR] Name detected:', detected);
+  } else {
+    nameInput.value = '';
+    if(nameHint){ nameHint.style.display = 'block'; nameHint.textContent = 'No name detected — enter it manually if needed'; }
+  }
+  onOCRNameInput();
+}
+
+function onOCRNameInput(){
+  const input = document.getElementById('ocr-name-input');
+  const validity = document.getElementById('ocr-name-validity');
+  if(!input || !validity) return;
+  const v = input.value.trim();
+  if(!v){ validity.textContent = ''; input.classList.remove('valid'); return; }
+  // Use the same full-name rule as the main form, if available
+  const ok = (typeof isValidParticipantName === 'function') ? isValidParticipantName(v)
+            : (v.split(/\s+/).filter(Boolean).length >= 2);
+  if(ok){
+    input.classList.add('valid');
+    validity.textContent = '✓ Looks like a full name';
+    validity.style.color = 'var(--green)';
+  } else {
+    input.classList.remove('valid');
+    validity.textContent = 'Enter first and last name (no "_vid")';
+    validity.style.color = 'var(--text3)';
+  }
 }
 
 function showOCRError(msg){
@@ -9684,8 +9808,23 @@ function useOCRResult(){
         try { syncGlobal(); } catch(e){ console.error('[OCR] syncGlobal error:', e); }
       }
     }
+    // Auto-populate Participant Name if one was detected/entered
+    const nameInput = document.getElementById('ocr-name-input');
+    const nameVal = nameInput ? nameInput.value.trim() : '';
+    let nameMsg = '';
+    if(nameVal){
+      const nameField = document.getElementById('g-participant-name');
+      if(nameField){
+        nameField.value = nameVal;
+        nameField.style.borderColor = '';
+        if(typeof syncGlobal === 'function'){
+          try { syncGlobal(); } catch(e){}
+        }
+        nameMsg = ' & name';
+      }
+    }
     closeOCR();
-    if(typeof showToast === 'function') showToast('Participant ID set ✓');
+    if(typeof showToast === 'function') showToast('Participant ID' + nameMsg + ' set ✓');
   } catch(err){
     console.error('[OCR] useOCRResult error:', err);
     alert('Error confirming ID: ' + (err.message || err));
@@ -11926,6 +12065,12 @@ function openCollReminderForCurrent(){
           <input type="text" id="ocr-result-input" class="ocr-result-input" placeholder="Enter or paste Participant ID" oninput="onOCREditInput()" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"/>
           <div class="ocr-result-raw" id="ocr-result-raw" style="display:none"></div>
           <div class="ocr-validity" id="ocr-validity"></div>
+        </div>
+        <div id="ocr-name-result" class="ocr-result" style="margin-top:12px">
+          <div class="ocr-result-label" id="ocr-name-label">Participant Name</div>
+          <div class="ocr-result-hint" id="ocr-name-hint" style="display:none">Detected from the photo — edit if needed</div>
+          <input type="text" id="ocr-name-input" class="ocr-result-input" placeholder="First Last — e.g. David Kang" oninput="onOCRNameInput()" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false"/>
+          <div class="ocr-validity" id="ocr-name-validity"></div>
         </div>
       </div>
 
