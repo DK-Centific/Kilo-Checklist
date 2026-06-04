@@ -6332,8 +6332,6 @@ function resetProgress(){
 const DEFAULT_LOGIN_PA_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/47e3b8b0644d431993240102d3144729/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=RJZTVliJceBcr00uadxq9nDqWwkJmBWx0fuVpp3hsWo';
 let loginPaUrl = localStorage.getItem('centific_login_pa_url') || DEFAULT_LOGIN_PA_URL;
 
-const ADMIN_LOGIN_ID = 'Admin-Kilo';
-
 const DEFAULT_DASH_PA_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/1c8b2684a1ce41da9428dcce00d5bc0f/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=wSXohgb_YJMm5AbdlTr0HbP4WIpc0rske7OcudoMyzs';
 let dashPaUrl  = localStorage.getItem('centific_dash_pa_url') || DEFAULT_DASH_PA_URL;
 let dashData   = null;
@@ -7135,17 +7133,6 @@ async function doLogin(){
   btn.disabled = true;
   btn.innerHTML = '<div class="login-spinner"></div><span>Signing in…</span>';
   errEl.textContent = '';
-
-  // ── Admin bypass — case-insensitive match ──
-  if(loginId.toLowerCase() === ADMIN_LOGIN_ID.toLowerCase()){
-    currentUser = {
-      modId:'ADMIN', modName:'Admin', firstName:'Admin',
-      location:'', email:'', phone:'', loginId:ADMIN_LOGIN_ID, isAdmin:true
-    };
-    sessionStorage.setItem('centific_user', JSON.stringify(currentUser));
-    onLoginSuccess();
-    return;
-  }
 
   if(!loginPaUrl){
     resetBtn();
@@ -10327,8 +10314,6 @@ let inventorySelected = null; // currently selected set object
 
 function shouldShowInventoryCheck(){
   if(!currentUser) return false;
-  // Hardcoded Admin-Kilo bypass — never show (it's the emergency admin, not a real moderator)
-  if(currentUser.loginId === ADMIN_LOGIN_ID) return false;
   // For admins from PA login: only show when they're in the checklist view, not on the admin landing
   if(currentUser.isAdmin){
     const view = sessionStorage.getItem('centific_admin_view');
@@ -10615,8 +10600,6 @@ function getActiveSetInfo(){
 function renderActiveSetIndicator(){
   // Show for any logged-in user who has confirmed a set
   if(!currentUser) return '';
-  // Hardcoded Admin-Kilo never sees this (no set picker shown to them)
-  if(currentUser.loginId === ADMIN_LOGIN_ID) return '';
   const set = getActiveSetInfo();
   if(!set || !set.setName) return '';
   const safeName = String(set.setName).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
@@ -11202,7 +11185,6 @@ let _inboxUnreadQueue = [];     // unread messages to show as popups
 
 async function loadMyFeedback(showPopup){
   if(!currentUser || !currentUser.loginId){ console.warn('[Inbox] No currentUser.loginId — skipping'); return; }
-  if(currentUser.isAdmin && currentUser.loginId === ADMIN_LOGIN_ID) return;
 
   // Build the set of identifiers this user could be addressed by
   const myLoginId = String(currentUser.loginId || '').toLowerCase().trim();
