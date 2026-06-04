@@ -5788,6 +5788,91 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   display:flex;align-items:center;justify-content:center;gap:8px;
 }
 .clearpart-btn:hover{background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.28)}
+
+/* ── Collection Reminder modal ── */
+.collrem-overlay{
+  position:fixed;inset:0;z-index:615;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.collrem-overlay.hidden{display:none!important}
+.collrem-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:460px;padding:28px 26px 24px;
+  box-shadow:var(--shadow-lg);position:relative;
+  animation:fadeUp .35s cubic-bezier(.34,1.2,.64,1);
+  max-height:90vh;overflow-y:auto;
+}
+.collrem-close{
+  position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;
+  border:.5px solid var(--border-strong);background:var(--bg3);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  color:var(--text3);font-size:16px;transition:all .15s;
+}
+.collrem-close:hover{background:var(--bg4);color:var(--text)}
+.collrem-icon{
+  width:54px;height:54px;border-radius:50%;
+  background:rgba(59,130,246,.12);border:.5px solid rgba(59,130,246,.3);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 14px;
+}
+.collrem-icon svg{width:26px;height:26px;stroke:var(--blue,#3b82f6);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.collrem-title{font-size:19px;font-weight:600;letter-spacing:-0.03em;color:var(--text);text-align:center;margin-bottom:4px}
+.collrem-sub{font-size:12px;color:var(--text3);text-align:center;margin-bottom:18px;letter-spacing:.02em;text-transform:uppercase;font-weight:600}
+.collrem-section-label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blue,#3b82f6);margin:0 0 8px}
+.collrem-section-label.task{color:var(--pink)}
+.collrem-list{
+  background:var(--bg2);border:.5px solid var(--border);border-radius:var(--rl);
+  padding:14px 16px;margin-bottom:16px;
+}
+.collrem-list.task-list{background:rgba(239,67,179,.06);border-color:rgba(239,67,179,.22)}
+.collrem-item{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text);line-height:1.5;margin-bottom:10px;letter-spacing:-0.01em}
+.collrem-item:last-child{margin-bottom:0}
+.collrem-item-dot{width:6px;height:6px;border-radius:50%;background:var(--blue,#3b82f6);flex-shrink:0;margin-top:6px}
+.collrem-list.task-list .collrem-item-dot{background:var(--pink)}
+.collrem-item strong{font-weight:600}
+.collrem-btn{
+  width:100%;padding:14px;border-radius:var(--r);
+  font-family:var(--font);font-size:15px;font-weight:500;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.collrem-btn:hover{background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.28)}
+
+/* ── Floating help button (bottom-right, pulsing) ── */
+.collrem-fab{
+  position:fixed;bottom:22px;right:22px;z-index:540;
+  width:52px;height:52px;border-radius:50%;
+  background:var(--blue,#3b82f6);color:#fff;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 20px rgba(59,130,246,.4);
+  transition:transform .2s;
+}
+.collrem-fab:hover{transform:scale(1.08)}
+.collrem-fab svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.collrem-fab.hidden{display:none!important}
+/* Dim pulsing ring for attention */
+.collrem-fab::before{
+  content:'';position:absolute;inset:-6px;border-radius:50%;
+  border:2px solid var(--blue,#3b82f6);opacity:.5;
+  animation:collremPulse 2s ease-out infinite;
+}
+@keyframes collremPulse{
+  0%{transform:scale(1);opacity:.5}
+  70%{transform:scale(1.4);opacity:0}
+  100%{transform:scale(1.4);opacity:0}
+}
+.collrem-fab-tooltip{
+  position:absolute;right:60px;top:50%;transform:translateY(-50%);
+  background:var(--text);color:var(--bg);font-size:12px;font-weight:600;
+  padding:6px 11px;border-radius:8px;white-space:nowrap;
+  opacity:0;pointer-events:none;transition:opacity .2s;letter-spacing:-0.01em;
+}
+.collrem-fab:hover .collrem-fab-tooltip{opacity:1}
+@media(max-width:700px){
+  .collrem-fab{bottom:16px;right:16px;width:48px;height:48px}
+}
 </style>
 </head>
 <body>
@@ -5926,7 +6011,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       </div>
     </div>
     <div class="sidebar-list" id="sidebar-list"></div>
-    <div class="sidebar-version">v 1.2 (060326)</div>
+    <div class="sidebar-version">v 1.2 (060426)</div>
   </div>
 
   <!-- Main -->
@@ -6198,7 +6283,7 @@ const TASK_VIDEOS = [
 ];
 
 // ── APP VERSION (searchable constant for version-poll notification) ──
-const APP_VERSION = "1.2.060326";
+const APP_VERSION = "1.2.060426";
 
 const TASKS=[
   {id:0,title:"Registration",cat:"Registration",distance:"",lux:"",duration:"",warn:"",note:"",isRegistration:true,steps:[]},
@@ -6676,6 +6761,14 @@ function openTask(i){
     // Delay slightly longer than IR popup so they don't overlap if both fire
     setTimeout(showHighResReminder, 1500);
   }
+  // Collection reminders (general + task-specific). Task 5 has its own; Tasks 8–11 share one shown at Task 8.
+  if(i === 5){
+    maybeShowCollReminder(5, 'centific_collrem_task5_shown');
+  } else if(i === 8){
+    maybeShowCollReminder(8, 'centific_collrem_task8_shown');
+  }
+  // Show/position the floating help button for the current task
+  if(typeof updateCollReminderFab === 'function') updateCollReminderFab(i);
   activeTask=i;
   activePanel=null;
   PANEL_IDS.forEach(p=>{
@@ -7174,10 +7267,37 @@ async function doLogin(){
     try { data = JSON.parse(text); }
     catch(e){ throw new Error('Invalid JSON: ' + text.substring(0,100)); }
 
-    if(!data || !data.found){
+    console.log('[Login] Parsed response:', data);
+
+    // ── STRICT VALIDATION ──────────────────────────────────────
+    // The flow must explicitly confirm the login exists. We require BOTH:
+    //   1. data.found === true (boolean or string "true")
+    //   2. The response carries real moderator data (a non-empty modName or modId)
+    //      that actually belongs to the requested loginId.
+    // This prevents a misconfigured flow that returns found:true (or the first
+    // row) for any input from granting access.
+    const foundFlag = data && (data.found === true || String(data.found).toLowerCase() === 'true');
+    const hasModData = data && (
+      (data.modName && String(data.modName).trim() !== '') ||
+      (data.modId && String(data.modId).trim() !== '')
+    );
+
+    // Verify the returned record matches the requested login (guards against the
+    // flow ignoring the filter and returning some other/first row).
+    const returnedLogin = String(data.loginId || data.LoginId || '').toLowerCase().trim();
+    const requestedLogin = loginId.toLowerCase().trim();
+    // If the flow echoes a loginId, it MUST match what we asked for.
+    const loginMatches = !returnedLogin || returnedLogin === requestedLogin;
+
+    if(!foundFlag || !hasModData || !loginMatches){
       resetBtn();
       document.getElementById('login-id-input').classList.add('error');
       errEl.textContent = 'Login ID not recognised. Please check and try again.';
+      console.warn('[Login] REJECTED — found:', data && data.found,
+                   '| hasModData:', hasModData,
+                   '| returnedLogin:', returnedLogin || '(none echoed)',
+                   '| requestedLogin:', requestedLogin,
+                   '| loginMatches:', loginMatches);
       return;
     }
 
@@ -7304,6 +7424,7 @@ function doLogout(){
   if(!confirm('Sign out of the app?')) return;
   currentUser = null;
   sessionStorage.removeItem('centific_user');
+  if(typeof hideCollReminderFab === 'function') hideCollReminderFab();
   // Hide nav chip
   document.getElementById('nav-user-chip').style.display = 'none';
   document.getElementById('hd-logout-label').textContent = 'Sign out';
@@ -7854,6 +7975,11 @@ function selectRegSubTask(type){
     regStepsDone[type] = new Array(steps.length).fill(false);
   }
   renderRegistration();
+  // General collection reminder — shown once when Device A registration is opened
+  if(type === 'device'){
+    if(typeof maybeShowCollReminder === 'function') maybeShowCollReminder(null, 'centific_collrem_general_shown');
+    if(typeof updateCollReminderFab === 'function') updateCollReminderFab(null);
+  }
 }
 
 function toggleRegStep(j){
@@ -9225,6 +9351,9 @@ function _doStartNewSession(){
   // Keep inv decision/set — same moderator, same set still valid within 24h
   sessionStorage.removeItem('centific_ir_shown');
   sessionStorage.removeItem('centific_highres_shown');
+  sessionStorage.removeItem('centific_collrem_general_shown');
+  sessionStorage.removeItem('centific_collrem_task5_shown');
+  sessionStorage.removeItem('centific_collrem_task8_shown');
   if(typeof clearIRReminderFlags === 'function') clearIRReminderFlags();
   sessionStorage.removeItem('centific_ir_disable_shown');
   const keepOperator = globalData.operator || '';
@@ -10191,6 +10320,9 @@ function autoLogoutAfterCheckout(){
   sessionStorage.removeItem('centific_reg_popup_shown');
   sessionStorage.removeItem('centific_ir_shown');
   sessionStorage.removeItem('centific_highres_shown');
+  sessionStorage.removeItem('centific_collrem_general_shown');
+  sessionStorage.removeItem('centific_collrem_task5_shown');
+  sessionStorage.removeItem('centific_collrem_task8_shown');
   sessionStorage.removeItem('centific_ir_disable_shown');
   sessionStorage.removeItem('centific_admin_view');
   if(typeof clearIRReminderFlags === 'function') clearIRReminderFlags();
@@ -11411,6 +11543,90 @@ function openInboxMessage(idx){
   const ackBtn = document.getElementById('inbox-ack-btn');
   if(ackBtn) ackBtn.textContent = fb.status !== 'acknowledged' ? 'Acknowledge' : 'Close';
 }
+
+
+// ══════════════════════════════════════════════════════════
+// ── COLLECTION REMINDERS (general + task-specific) ────────
+// ══════════════════════════════════════════════════════════
+// Task-specific reminder content keyed by the task index it applies to.
+const TASK_SPECIFIC_REMINDERS = {
+  5: {
+    label: 'Task 05 — Unengaged',
+    items: [
+      'Ensure the participant is <strong>NOT looking at the camera</strong> during the action.'
+    ]
+  },
+  // Tasks 8–11 share the same appearance-change reminder; shown once at Task 8.
+  8: {
+    label: 'Tasks 08–11 — Appearance Changes',
+    items: [
+      'In the <strong>"Front"</strong> action, ensure the participant is facing the camera for at least <strong>1 second</strong> before the next action.',
+      '<strong>Reach hands out</strong> and <strong>open mouth</strong> as directed during the routine.'
+    ]
+  }
+};
+
+// Which task index's reminder is currently relevant (drives the FAB re-open)
+let _currentReminderTask = null;
+
+function buildTaskReminderHTML(taskIdx){
+  const r = TASK_SPECIFIC_REMINDERS[taskIdx];
+  if(!r) return null;
+  const items = r.items.map(t => `<div class="collrem-item"><span class="collrem-item-dot"></span><span>${t}</span></div>`).join('');
+  return { label: r.label, items };
+}
+
+// Show the reminder. If taskIdx has task-specific content, append it; otherwise general only.
+function showCollReminder(taskIdx){
+  const ov = document.getElementById('collrem-overlay');
+  if(!ov) return;
+  const taskSection = document.getElementById('collrem-task-section');
+  const built = (taskIdx != null) ? buildTaskReminderHTML(taskIdx) : null;
+  if(built){
+    document.getElementById('collrem-task-label').textContent = built.label;
+    document.getElementById('collrem-task-list').innerHTML = built.items;
+    taskSection.style.display = 'block';
+    document.getElementById('collrem-sub').textContent = built.label;
+  } else {
+    taskSection.style.display = 'none';
+    document.getElementById('collrem-sub').textContent = 'General Collection';
+  }
+  ov.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+function closeCollReminder(){
+  const ov = document.getElementById('collrem-overlay');
+  if(ov) ov.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+// Auto-show once per session, keyed so each trigger only fires a single time.
+function maybeShowCollReminder(taskIdx, onceKey){
+  if(sessionStorage.getItem(onceKey)) return;
+  sessionStorage.setItem(onceKey, '1');
+  setTimeout(() => showCollReminder(taskIdx), 400);
+}
+
+// FAB: show/hide + open the reminder relevant to the current task
+function updateCollReminderFab(taskIdx){
+  const fab = document.getElementById('collrem-fab');
+  if(!fab) return;
+  // Track which reminder the FAB should open. Tasks 8–11 all map to the Task-8 reminder.
+  let mapped = null;
+  if(taskIdx === 5) mapped = 5;
+  else if(taskIdx >= 8 && taskIdx <= 11) mapped = 8;
+  else mapped = null; // general-only for other tasks
+  _currentReminderTask = mapped;
+  // FAB visible whenever a task is open (it always at least shows general reminders)
+  fab.classList.remove('hidden');
+}
+function hideCollReminderFab(){
+  const fab = document.getElementById('collrem-fab');
+  if(fab) fab.classList.add('hidden');
+}
+function openCollReminderForCurrent(){
+  showCollReminder(_currentReminderTask);
+}
 </script>
 
 <!-- ── Admin Landing ── -->
@@ -11660,7 +11876,7 @@ function openInboxMessage(idx){
       <div class="review-reminder-title">Important note</div>
     </div>
     <div class="review-reminder-body">
-      Review the recorded video and ensure the steps are correctly followed before uploading it to the client server. Re-do as needed.
+      <strong>Review the recorded video</strong> and ensure the steps are correctly followed before uploading it to the client server. If the screen is <strong>blank</strong> or the recording <strong>frame is slow</strong>, <strong>re-do as needed</strong>.
     </div>
     <div class="review-reminder-actions">
       <button class="review-reminder-btn cancel" onclick="closeReviewReminderModal()">Cancel</button>
@@ -12013,6 +12229,41 @@ function openInboxMessage(idx){
     </button>
   </div>
 </div>
+
+<!-- ── Collection Reminder modal (general + task-specific) ── -->
+<div class="collrem-overlay hidden" id="collrem-overlay" onclick="if(event.target===this)closeCollReminder()">
+  <div class="collrem-modal">
+    <div class="collrem-close" onclick="closeCollReminder()">✕</div>
+    <div class="collrem-icon">
+      <svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+    </div>
+    <div class="collrem-title">Collection Reminders</div>
+    <div class="collrem-sub" id="collrem-sub">General Collection</div>
+
+    <div class="collrem-section-label">General Collection</div>
+    <div class="collrem-list">
+        <div class="collrem-item"><span class="collrem-item-dot"></span><span>Pace the participant's actions <strong>slowly enough</strong> for the video frame to capture the movement correctly.</span></div>
+        <div class="collrem-item"><span class="collrem-item-dot"></span><span>Give at least a <strong>5-second buffer</strong> after the recording is completed before stopping.</span></div>
+        <div class="collrem-item"><span class="collrem-item-dot"></span><span><strong>Resolution advice</strong> — select the value mentioned for the task (2104×1560 and 4280×3120).</span></div>
+    </div>
+
+    <div id="collrem-task-section" style="display:none">
+      <div class="collrem-section-label task" id="collrem-task-label">Task-Specific</div>
+      <div class="collrem-list task-list" id="collrem-task-list"></div>
+    </div>
+
+    <button class="collrem-btn" onclick="closeCollReminder()">
+      <svg viewBox="0 0 16 16" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><polyline points="2,8 6,12 14,4"/></svg>
+      Got It
+    </button>
+  </div>
+</div>
+
+<!-- ── Floating help button (re-opens reminders for current task) ── -->
+<button class="collrem-fab hidden" id="collrem-fab" onclick="openCollReminderForCurrent()" title="Collection reminders">
+  <span class="collrem-fab-tooltip">Collection reminders</span>
+  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.5 1.5c0 1.5-2 2-2 3.5"/><circle cx="12" cy="17" r=".6" fill="currentColor" stroke="none"/></svg>
+</button>
 
 </body>
 </html>
