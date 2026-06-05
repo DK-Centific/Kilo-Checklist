@@ -5558,6 +5558,43 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .mods-list-table .ml-time{color:var(--amber);font-weight:600;font-variant-numeric:tabular-nums}
 .mods-list-table .ml-rating-val{color:var(--amber);font-weight:700;font-variant-numeric:tabular-nums}
 .mods-list-table .ml-rating-none{color:var(--text3);font-size:11px;font-style:italic}
+
+/* ── Expandable list view (mlx) ── */
+.mlx-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.mlx-filter-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)}
+.mlx-toolbar-spacer{flex:1}
+.mlx-export-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 14px;border-radius:var(--r);
+  font-family:var(--font);font-size:12px;font-weight:600;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;border:none;cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.mlx-export-btn:hover{background:var(--pink-dim);transform:translateY(-1px);box-shadow:0 6px 18px rgba(239,67,179,.28)}
+.mlx-export-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.mlx-export-btn.filtered{background:var(--bg3);color:var(--text);border:.5px solid var(--border-strong)}
+.mlx-export-btn.filtered:hover{background:var(--bg4);box-shadow:none}
+.mlx-table .mlx-mod-row{cursor:pointer}
+.mlx-table .mlx-mod-row.open{background:var(--bg2)}
+.mlx-chev-cell{width:34px;text-align:center}
+.mlx-chev{display:inline-flex;align-items:center;justify-content:center;transition:transform .2s cubic-bezier(.4,0,.2,1);color:var(--text3)}
+.mlx-chev.open{transform:rotate(90deg);color:var(--pink)}
+.mlx-chev svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mlx-detail-row:hover{background:transparent!important}
+.mlx-detail-cell{padding:0!important;border-bottom:.5px solid var(--border)!important}
+.mlx-detail-wrap{padding:4px 14px 16px 44px;background:var(--bg2)}
+.mlx-sub-table{width:100%;border-collapse:collapse;background:var(--card-bg);border:.5px solid var(--border);border-radius:var(--r);overflow:hidden}
+.mlx-sub-table th{
+  font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);
+  text-align:left;padding:8px 12px;background:var(--bg3);border-bottom:.5px solid var(--border);white-space:nowrap;
+}
+.mlx-sub-table td{font-size:12px;color:var(--text);padding:9px 12px;border-bottom:.5px solid var(--border);letter-spacing:-0.01em}
+.mlx-sub-table tbody tr:last-child td{border-bottom:none}
+.mlx-sub-table .mlx-pid{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--text2)}
+.mlx-sub-table .mlx-tasks{font-weight:600;font-variant-numeric:tabular-nums}
+.mlx-badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:10.5px;font-weight:600;letter-spacing:-0.01em}
+.mlx-badge-done{background:rgba(34,170,90,.14);color:var(--green)}
+.mlx-badge-prog{background:rgba(245,158,11,.16);color:var(--amber)}
+.mlx-empty-sub{font-size:12px;color:var(--text3);padding:14px;text-align:center;font-style:italic}
 .mods-list-table .ml-status{font-size:11px}
 .mods-list-table .ml-status .dot{
   display:inline-block;width:7px;height:7px;border-radius:50%;
@@ -8282,6 +8319,7 @@ async function dashSync(){
         stepsDone:     clean.stepsDone     || clean.StepsDone     || 0,
         stepsTotal:    clean.stepsTotal    || clean.StepsTotal    || 0,
         participantId: clean.participantId || clean.ParticipantId || '',
+        participantName: clean.participantName || clean.ParticipantName || '',
         moderator:     clean.moderator     || clean.Moderator     || '',
         sessionDate:   (function(v){ if(!v) return ''; var s=String(v).trim(); if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0,10); var d=new Date(s); return isNaN(d)?s:(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')); })(clean.sessionDate||clean.SessionDate||''),
         deviceId:      clean.deviceId      || clean.DeviceId      || '',
@@ -9006,46 +9044,189 @@ function renderViewToolbar(){
   </div>`;
 }
 
+// Aggregate a moderator's rows into per-participant records.
+// Returns [{participantId, participantName, sessionDate, tasksDone, totalTasks, status}]
+function aggregateParticipants(rows){
+  const TOTAL = (typeof TASKS !== 'undefined' && TASKS.length > 1) ? (TASKS.length - 1) : 14;
+  const byPid = {};
+  rows.forEach(r => {
+    const pid = (r.participantId || '').trim();
+    if(!pid) return;
+    if(!byPid[pid]){
+      byPid[pid] = { participantId: pid, participantName: '', sessionDate: '', taskIds: new Set(), reached14: false, lastTs: '' };
+    }
+    const rec = byPid[pid];
+    if(r.participantName && !rec.participantName) rec.participantName = r.participantName;
+    if(r.sessionDate && !rec.sessionDate) rec.sessionDate = r.sessionDate;
+    const tid = String(r.taskId).trim();
+    if(tid && tid !== 'undefined' && tid !== '0') rec.taskIds.add(tid);
+    if(tid === '14') rec.reached14 = true;
+    const ts = r.submittedAt || r.completedAt || '';
+    if(ts && ts > rec.lastTs) rec.lastTs = ts;
+  });
+  return Object.values(byPid).map(rec => {
+    const tasksDone = rec.taskIds.size;
+    const status = rec.reached14 ? 'Completed' : 'In progress';
+    return {
+      participantId: rec.participantId,
+      participantName: rec.participantName || '—',
+      sessionDate: rec.sessionDate || '—',
+      tasksDone, totalTasks: TOTAL, status,
+      lastTs: rec.lastTs,
+    };
+  }).sort((a,b) => (b.lastTs||'').localeCompare(a.lastTs||''));
+}
+
+// Current status filter for the list view: 'all' | 'Completed' | 'In progress'
+let modsListStatusFilter = 'all';
+function setModsListStatusFilter(v){
+  modsListStatusFilter = v;
+  renderModeratorsPage();
+}
+function participantMatchesStatus(p){
+  if(modsListStatusFilter === 'all') return true;
+  return p.status === modsListStatusFilter;
+}
+
+// Track which moderator rows are expanded (persist across re-renders)
+window._expandedMods = window._expandedMods || {};
+function toggleModRow(key){
+  window._expandedMods[key] = !window._expandedMods[key];
+  const safe = key.replace(/[^a-z0-9]/gi,'_');
+  const detail = document.getElementById('mlx-detail-' + safe);
+  const chev = document.getElementById('mlx-chev-' + safe);
+  if(detail) detail.style.display = window._expandedMods[key] ? '' : 'none';
+  if(chev) chev.classList.toggle('open', window._expandedMods[key]);
+}
+
 function renderModsListView(mods, now, thirtyMinsAgo){
+  const filterBar = `<div class="mlx-toolbar">
+    <span class="mlx-filter-label">Participant status</span>
+    <select class="dash-select" id="mlx-status-filter" onchange="setModsListStatusFilter(this.value)">
+      <option value="all"${modsListStatusFilter==='all'?' selected':''}>All</option>
+      <option value="Completed"${modsListStatusFilter==='Completed'?' selected':''}>Completed</option>
+      <option value="In progress"${modsListStatusFilter==='In progress'?' selected':''}>In progress</option>
+    </select>
+    <div class="mlx-toolbar-spacer"></div>
+    <button class="mlx-export-btn" onclick="exportModListData(false)" title="Export every participant (ignores the status filter)">
+      <svg viewBox="0 0 16 16"><path d="M8 2v8M5 7l3 3 3-3M3 13h10"/></svg>
+      Export All
+    </button>
+    <button class="mlx-export-btn filtered" onclick="exportModListData(true)" title="Export only participants matching the current filters">
+      <svg viewBox="0 0 16 16"><path d="M2 3h12l-5 6v4l-2 1V9z"/></svg>
+      Export Filtered
+    </button>
+  </div>`;
+
   const rows = mods.map(mod => {
-    const r = mod.rows;
-    const unique = new Set(r.map(x=>x.participantId).filter(Boolean)).size;
-    const reached14 = new Set(r.filter(x => x.participantId && String(x.taskId).trim() === '14').map(x=>x.participantId)).size;
-    const stats = computeModTimeStats(r);
-    // Active status
+    const key = mod.name;
+    const safe = key.replace(/[^a-z0-9]/gi,'_');
+    const participants = aggregateParticipants(mod.rows);
+    const visible = participants.filter(participantMatchesStatus);
+    // If filtering and this mod has no matching participants, skip the row entirely
+    if(modsListStatusFilter !== 'all' && visible.length === 0) return '';
+
+    const unique = participants.length;
+    const reached14 = participants.filter(p => p.status === 'Completed').length;
     let isOnline = false;
     if(mod.lastActiveRaw){
       const d = new Date(mod.lastActiveRaw);
       isOnline = !isNaN(d) && d > thirtyMinsAgo;
     }
-    return `<tr>
-      <td class="ml-name">${mod.name}</td>
-      <td class="ml-loc">${mod.location}</td>
-      <td class="ml-num">${reached14}</td>
-      <td class="ml-num">${unique}</td>
-      <td class="ml-time">${stats.avgPerTask ? fmtPerTask(stats.avgPerTask) : '—'}</td>
-      <td class="ml-time">${stats.totalTime ? fmtDuration(stats.totalTime) : '—'}</td>
-      <td class="ml-rating">${(function(){
-        const rt = (typeof getModRating === 'function') ? getModRating(mod.name, mod.modId) : null;
-        if(rt && rt.count > 0) return `<span class="ml-rating-val">${rt.avg} / 10</span>`;
-        return `<span class="ml-rating-none">Need to evaluate</span>`;
-      })()}</td>
-      <td class="ml-status ${isOnline?'online':'offline'}"><span class="dot"></span>${isOnline?'Active':'Inactive'}</td>
+    const isOpen = !!window._expandedMods[key];
+
+    // Build the participant sub-table
+    const subRows = visible.map(p => {
+      const badgeClass = p.status === 'Completed' ? 'mlx-badge-done' : 'mlx-badge-prog';
+      return `<tr>
+        <td class="mlx-pid">${escapeHtml(p.participantId)}</td>
+        <td>${escapeHtml(p.participantName)}</td>
+        <td>${escapeHtml(p.sessionDate)}</td>
+        <td class="mlx-tasks">${p.tasksDone} / ${p.totalTasks}</td>
+        <td><span class="mlx-badge ${badgeClass}">${p.status}</span></td>
+      </tr>`;
+    }).join('');
+
+    const detailPanel = `<tr class="mlx-detail-row" id="mlx-detail-${safe}" style="display:${isOpen?'':'none'}">
+      <td colspan="6" class="mlx-detail-cell">
+        <div class="mlx-detail-wrap">
+          ${visible.length ? `<table class="mlx-sub-table">
+            <thead><tr><th>Participant ID</th><th>Name</th><th>Session Date</th><th>Tasks</th><th>Status</th></tr></thead>
+            <tbody>${subRows}</tbody>
+          </table>` : `<div class="mlx-empty-sub">No participants match the current filter.</div>`}
+        </div>
+      </td>
     </tr>`;
+
+    return `<tr class="mlx-mod-row${isOpen?' open':''}" onclick="toggleModRow('${key.replace(/'/g,"\\'")}')">
+        <td class="mlx-chev-cell"><span class="mlx-chev${isOpen?' open':''}" id="mlx-chev-${safe}"><svg viewBox="0 0 16 16"><polyline points="5,3 10,8 5,13"/></svg></span></td>
+        <td class="ml-name">${mod.name}</td>
+        <td class="ml-loc">${mod.location}</td>
+        <td class="ml-num">${unique}</td>
+        <td class="ml-num">${reached14}</td>
+        <td class="ml-status ${isOnline?'online':'offline'}"><span class="dot"></span>${isOnline?'Active':'Inactive'}</td>
+      </tr>${detailPanel}`;
   }).join('');
-  return `<table class="mods-list-table">
+
+  const tableBody = rows.trim() ? rows : `<tr><td colspan="6" class="mlx-empty-sub" style="padding:24px">No moderators match the current filter.</td></tr>`;
+
+  return filterBar + `<table class="mods-list-table mlx-table">
     <thead><tr>
+      <th style="width:34px"></th>
       <th>Name</th>
       <th>Location</th>
-      <th>Reached Task 14</th>
       <th>Participants</th>
-      <th>Avg Time / Task</th>
-      <th>Total Time</th>
-      <th>Rating</th>
+      <th>Completed</th>
       <th>Status</th>
     </tr></thead>
-    <tbody>${rows}</tbody>
+    <tbody>${tableBody}</tbody>
   </table>`;
+}
+
+// Export the per-participant data to Excel.
+// onlyFiltered=false → every participant across all moderators (ignores status filter,
+//   but still respects the page's Period/Location/Moderator filters via getFilteredData).
+// onlyFiltered=true  → respects the status filter too.
+function exportModListData(onlyFiltered){
+  if(typeof XLSX === 'undefined'){ showToast('Export library not loaded'); return; }
+  const data = (typeof getFilteredData === 'function') ? getFilteredData() : (dashData || []);
+  // Group by moderator
+  const modMap = {};
+  data.forEach(r => {
+    if(!r.moderator) return;
+    if(!modMap[r.moderator]) modMap[r.moderator] = { name: r.moderator, location: r.location || '—', rows: [] };
+    modMap[r.moderator].rows.push(r);
+  });
+  const mods = Object.values(modMap).sort((a,b) => a.name.localeCompare(b.name));
+
+  const header = ['Moderator','Location','Participant ID','Participant Name','Session Date','Tasks Done','Total Tasks','Status'];
+  const aoa = [header];
+  let count = 0;
+  mods.forEach(mod => {
+    const participants = aggregateParticipants(mod.rows);
+    participants.forEach(p => {
+      if(onlyFiltered && !participantMatchesStatus(p)) return;
+      aoa.push([mod.name, mod.location, p.participantId, p.participantName === '—' ? '' : p.participantName,
+                p.sessionDate === '—' ? '' : p.sessionDate, p.tasksDone, p.totalTasks, p.status]);
+      count++;
+    });
+  });
+
+  if(count === 0){ showToast('No data to export for the current filter'); return; }
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [{wch:18},{wch:14},{wch:24},{wch:20},{wch:14},{wch:11},{wch:11},{wch:14}];
+  // Freeze header row
+  ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+  XLSX.utils.book_append_sheet(wb, ws, 'Participants');
+
+  const tag = onlyFiltered ? 'Filtered' : 'All';
+  const statusTag = (onlyFiltered && modsListStatusFilter !== 'all') ? '_' + modsListStatusFilter.replace(/\s+/g,'') : '';
+  const dt = new Date();
+  const dstr = dt.getFullYear() + String(dt.getMonth()+1).padStart(2,'0') + String(dt.getDate()).padStart(2,'0');
+  XLSX.writeFile(wb, `Kilo_Participants_${tag}${statusTag}_${dstr}.xlsx`);
+  showToast(`Exported ${count} participant${count!==1?'s':''} (${tag.toLowerCase()})`);
 }
 
 function renderModsCardView(mods, now, thirtyMinsAgo, showTeamStats){
