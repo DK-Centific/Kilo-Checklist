@@ -6468,11 +6468,19 @@ try {
       dashData = parsed.map(r => ({
         ...r,
         sessionDate: (function(v){
-          if(!v) return '';
+          if(v===null||v===undefined||v==='') return '';
           const s = String(v).trim();
           if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0,10);
           const mdy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
           if(mdy) return `${mdy[3]}-${mdy[1].padStart(2,'0')}-${mdy[2].padStart(2,'0')}`;
+          // Excel serial date (days since 1899-12-30) — e.g. 46171 → 2026-05-29
+          if(/^\d{1,6}(\.\d+)?$/.test(s)){
+            const serial = parseFloat(s);
+            if(serial > 20000 && serial < 80000){
+              const ed = new Date(Date.UTC(1899,11,30) + Math.round(serial)*86400000);
+              if(!isNaN(ed)) return ed.getUTCFullYear()+'-'+String(ed.getUTCMonth()+1).padStart(2,'0')+'-'+String(ed.getUTCDate()).padStart(2,'0');
+            }
+          }
           const d = new Date(s);
           return isNaN(d) ? s : (d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'));
         })(r.sessionDate)
@@ -8321,7 +8329,7 @@ async function dashSync(){
         participantId: clean.participantId || clean.ParticipantId || '',
         participantName: clean.participantName || clean.ParticipantName || '',
         moderator:     clean.moderator     || clean.Moderator     || '',
-        sessionDate:   (function(v){ if(!v) return ''; var s=String(v).trim(); if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0,10); var d=new Date(s); return isNaN(d)?s:(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')); })(clean.sessionDate||clean.SessionDate||''),
+        sessionDate:   (function(v){ if(v===null||v===undefined||v==='') return ''; var s=String(v).trim(); if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0,10); if(/^\d{1,6}(\.\d+)?$/.test(s)){ var serial=parseFloat(s); if(serial>20000&&serial<80000){ var ed=new Date(Date.UTC(1899,11,30)+Math.round(serial)*86400000); if(!isNaN(ed)) return ed.getUTCFullYear()+'-'+String(ed.getUTCMonth()+1).padStart(2,'0')+'-'+String(ed.getUTCDate()).padStart(2,'0'); } } var d=new Date(s); return isNaN(d)?s:(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')); })(clean.sessionDate||clean.SessionDate||''),
         deviceId:      clean.deviceId      || clean.DeviceId      || '',
         completedAt:   (clean.completedAt||clean.CompletedAt||'').toString().trim(),
         completedAtDate: (clean.completedAt||clean.CompletedAt||'').toString().split(',')[0].trim(),
@@ -8547,16 +8555,22 @@ function renderDashboard(){
     return;
   }
   const completedRows=data.filter(r=>r.status==='Complete');
-  // Total Participants = unique participantIds who have a Task 14 row (any status).
+  // Total Participants = unique participant NAMES who have a Task 14 row (any status).
   // The app only writes Task 14 to Excel after the moderator marks it complete and
   // proceeds through the session-complete flow, so any Task 14 row = participant done.
+  // Records with no name are ignored (older data without a captured name).
+  const normName = (s) => String(s || '').trim().toLowerCase();
   const uniqueParts=new Set(
     data
-      .filter(r => r.participantId && String(r.taskId).trim() === '14')
-      .map(r => r.participantId)
+      .filter(r => r.participantName && normName(r.participantName) && String(r.taskId).trim() === '14')
+      .map(r => normName(r.participantName))
   );
-  // Total unique participants who have started any task (regardless of completion)
-  const uniquePartsAll=new Set(data.map(r=>r.participantId).filter(Boolean));
+  // Total unique participants (by name) who have any logged task — denominator for completion rate.
+  // Respects the current dashboard filters. Records with no name are ignored.
+  const uniquePartsAll=new Set(
+    data.filter(r => r.participantName && normName(r.participantName))
+        .map(r => normName(r.participantName))
+  );
   const uniqueMods=new Set(data.map(r=>r.moderator).filter(Boolean));
   const uniqueDates=new Set(data.map(r=>r.sessionDate).filter(Boolean));
   // Participant-based completion: how many participants finished all 14 tasks
