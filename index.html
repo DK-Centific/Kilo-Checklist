@@ -170,6 +170,22 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .s-check.checked svg{opacity:1}
 .s-info{flex:1;min-width:0}
 .s-num{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);margin-bottom:2px}
+.s-num-row{display:flex;align-items:center;gap:7px;margin-bottom:2px;flex-wrap:wrap}
+.s-num-row .s-num{margin-bottom:0}
+.s-cam-row{display:inline-flex;align-items:center;gap:4px}
+.s-cam-chip{display:inline-flex;align-items:center;gap:3px;border-radius:5px;padding:1px 4px;font-size:9px;font-weight:700;letter-spacing:.02em;line-height:1.4;border:.5px solid}
+.s-cam-chip svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.s-cam-chip.ir-on{color:var(--green);background:rgba(34,170,90,.12);border-color:rgba(34,170,90,.3)}
+.s-cam-chip.ir-off{color:var(--text3);background:rgba(120,120,128,.12);border-color:rgba(120,120,128,.3)}
+.s-cam-chip.hr-on{color:var(--blue,#3b82f6);background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.3)}
+/* Web: icon only, hide text label */
+.s-cam-label{display:none}
+/* Mobile: show full text label */
+@media(max-width:700px){
+  .s-cam-label{display:inline}
+  .s-cam-chip{padding:2px 7px;font-size:10px;gap:4px}
+  .s-cam-chip svg{width:12px;height:12px}
+}
 .s-item.active .s-num{color:var(--pink)}
 .s-title{font-size:13px;font-weight:500;letter-spacing:-0.01em;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .s-item.done .s-title{color:var(--text3);text-decoration:line-through}
@@ -6701,6 +6717,19 @@ function getTaskStatus(i){
   return 'notstarted';
 }
 
+// Derive IR + High-Resolution state for a task from its step text (single source of truth).
+// Returns {ir:'on'|'off'|null, highres:true|false|null}
+function getTaskCameraFlags(t){
+  if(!t || t.id === 0) return { ir:null, highres:null }; // registration handled separately
+  const stepsStr = JSON.stringify(t.steps || []);
+  let ir = null;
+  if(/IR LED MODE\s*→\s*select ON/i.test(stepsStr)) ir = 'on';
+  else if(/IR LED MODE\s*→\s*select OFF/i.test(stepsStr)) ir = 'off';
+  // High resolution = the dual-stream "2104x1560 and 4280x3120" is required
+  const highres = /2104x1560 and 4280x3120/i.test(stepsStr) ? true : false;
+  return { ir, highres };
+}
+
 function renderSidebar(){
   const el=document.getElementById('sidebar-list');
   el.innerHTML='';
@@ -6737,12 +6766,27 @@ function renderSidebar(){
       :'';
     const item=document.createElement('div');
     item.className='s-item'+(activeTask===i?' active':'')+(taskDone[i]?' done':'')+(taskSynced[i]?' synced':'')+(!sessionStarted?' locked':'');
+    // IR + High-Resolution indicator chips (small icons on web, full labels on mobile)
+    const flags = getTaskCameraFlags(t);
+    let camChips = '';
+    if(flags.ir === 'on'){
+      camChips += `<span class="s-cam-chip ir-on" title="IR Camera: ON"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.4 1.4M11.6 11.6L13 13M13 3l-1.4 1.4M4.4 11.6L3 13"/></svg><span class="s-cam-label">IR On</span></span>`;
+    } else if(flags.ir === 'off'){
+      camChips += `<span class="s-cam-chip ir-off" title="IR Camera: OFF"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="3"/><line x1="2" y1="14" x2="14" y2="2"/></svg><span class="s-cam-label">IR Off</span></span>`;
+    }
+    if(flags.highres === true){
+      camChips += `<span class="s-cam-chip hr-on" title="High Resolution: ON (2104×1560 + 4280×3120)"><svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 8h6M8 5v6"/></svg><span class="s-cam-label">Hi-Res</span></span>`;
+    }
+    const camRow = camChips ? `<div class="s-cam-row">${camChips}</div>` : '';
     item.innerHTML=`
       <div class="s-check${taskDone[i]?' checked':''}" onclick="quickCheck(event,${i})">
         <svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9.5 10.5,3"/></svg>
       </div>
       <div class="s-info">
-        <div class="s-num">${t.id===0 ? 'REGISTRATION' : 'TASK '+String(t.id).padStart(2,'0')}</div>
+        <div class="s-num-row">
+          <div class="s-num">${t.id===0 ? 'REGISTRATION' : 'TASK '+String(t.id).padStart(2,'0')}</div>
+          ${camRow}
+        </div>
         <div class="s-title">${t.title}</div>
         ${progressBar}
         <div class="s-status-row">
