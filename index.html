@@ -6066,7 +6066,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       </div>
     </div>
     <div class="sidebar-list" id="sidebar-list"></div>
-    <div class="sidebar-version">v 1.2 (060426)</div>
+    <div class="sidebar-version">v 1.2 (061526)</div>
   </div>
 
   <!-- Main -->
@@ -6338,7 +6338,7 @@ const TASK_VIDEOS = [
 ];
 
 // ── APP VERSION (searchable constant for version-poll notification) ──
-const APP_VERSION = "1.2.060426";
+const APP_VERSION = "1.2.061526";
 
 const TASKS=[
   {id:0,title:"Registration",cat:"Registration",distance:"",lux:"",duration:"",warn:"",note:"",isRegistration:true,steps:[]},
@@ -7486,17 +7486,16 @@ function _onLoginSuccessInner(){
     if(typeof checkInventoryEligibility === 'function'){
       setTimeout(() => checkInventoryEligibility(), 800);
     }
-    // Show the Inbox menu item for moderators and fetch their feedback
-    const inboxItem = document.getElementById('hd-inbox');
-    if(inboxItem) inboxItem.style.display = 'flex';
-    if(typeof loadMyFeedback === 'function'){
-      // Initial load shows a popup for any messages waiting at login
-      setTimeout(() => {
-        loadMyFeedback(true);
-        // Start live polling AFTER the first load so the seen-set is seeded correctly
-        startFeedbackPolling();
-      }, 1200);
-    }
+  }
+  // ── Feedback inbox runs for ALL roles (admins included) ──
+  // The recipient is matched by name/loginId, so anyone addressed gets the popup.
+  const inboxItemAll = document.getElementById('hd-inbox');
+  if(inboxItemAll) inboxItemAll.style.display = 'flex';
+  if(typeof loadMyFeedback === 'function'){
+    setTimeout(() => {
+      loadMyFeedback(true);
+      startFeedbackPolling();
+    }, 1200);
   }
   // Background-fetch troubleshooting so notifications can appear silently
   setTimeout(() => {
@@ -9606,7 +9605,13 @@ function _doStartNewSession(){
   localStorage.removeItem(STORAGE_KEY);
   taskDone.fill(false);
   stepDone.forEach(a => a.fill(false));
-  taskData.forEach(d => { d.lux=''; d.notes=''; d.status='Not Started'; d.completedAt=''; });
+  taskData.forEach(d => {
+    d.lux=''; d.notes=''; d.status='Not Started'; d.completedAt='';
+    // Reset registration sub-step checkboxes (phone + device) so the next
+    // participant starts with a clean registration checklist.
+    if(d.regPhoneSteps)  d.regPhoneSteps  = new Array(d.regPhoneSteps.length).fill(false);
+    if(d.regDeviceSteps) d.regDeviceSteps = new Array(d.regDeviceSteps.length).fill(false);
+  });
   taskSynced.fill(false);
 
   // Restore preserved fields — clear only Participant ID
@@ -11782,9 +11787,9 @@ function startFeedbackPolling(){
   // Seed seen-set with whatever is already loaded so we only popup genuinely new ones
   (window.modInbox || []).forEach(f => _seenFeedbackIds.add(f.feedbackId));
   _feedbackPollTimer = setInterval(() => {
-    if(!currentUser || currentUser.isAdmin) { stopFeedbackPolling(); return; }
+    if(!currentUser) { stopFeedbackPolling(); return; }
     pollForNewFeedback();
-  }, 10 * 1000); // every 10 seconds — near-instant delivery
+  }, 10 * 1000); // every 10 seconds — near-instant delivery (all roles)
   console.log('[Inbox] Live polling started (10s interval)');
 }
 function stopFeedbackPolling(){
@@ -11810,7 +11815,7 @@ async function pollForNewFeedback(){
       showNextUnreadPopup();
     }
     // Subtle toast as well
-    if(typeof showToast === 'function') showToast('📬 New message from your admin');
+    if(typeof showToast === 'function') showToast('📬 New message received');
   }
 }
 function inboxPopupRead(){
