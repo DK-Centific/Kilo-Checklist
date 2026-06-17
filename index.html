@@ -4142,6 +4142,26 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
 /* KPI row */
 .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;flex-shrink:0}
+/* ── Devices tab ── */
+.dev-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.dev-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.dev-search{min-width:180px;cursor:text}
+.dev-count{font-size:12px;color:var(--text3);font-weight:500;white-space:nowrap}
+.dev-table{width:100%;border-collapse:collapse;background:var(--card-bg);border:.5px solid var(--border);border-radius:var(--rl);overflow:hidden}
+.dev-table th.dev-th{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);text-align:left;padding:11px 14px;background:var(--bg3);border-bottom:.5px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap;transition:background .15s}
+.dev-table th.dev-th:hover{background:var(--bg4);color:var(--text)}
+.dev-table th.dev-th.sorted{color:var(--accent)}
+.dev-sort-arrow{font-size:9px}
+.dev-table td{font-size:13px;color:var(--text);padding:10px 14px;border-bottom:.5px solid var(--border);letter-spacing:-0.01em;vertical-align:top}
+.dev-table tbody tr:last-child td{border-bottom:none}
+.dev-table tbody tr:hover{background:var(--bg2)}
+.dev-sn{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--text2)}
+.dev-notes{color:var(--text2);max-width:320px}
+.dev-status{display:inline-block;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:600;letter-spacing:-0.01em}
+.dev-st-ok{background:rgba(34,197,94,.14);color:var(--green)}
+.dev-st-bad{background:rgba(239,68,68,.14);color:var(--red)}
+.dev-st-neutral{background:var(--bg4);color:var(--text3)}
+@media(max-width:760px){.dev-tiles{grid-template-columns:repeat(2,1fr)}.dev-notes{max-width:160px}}
 .kpi-card{
   background:var(--card-bg);border:.5px solid var(--border);border-radius:var(--rl);
   padding:20px 22px;box-shadow:var(--shadow-sm);transition:box-shadow .2s,transform .2s;
@@ -6066,7 +6086,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       </div>
     </div>
     <div class="sidebar-list" id="sidebar-list"></div>
-    <div class="sidebar-version">v 1.2 (061526)</div>
+    <div class="sidebar-version">v 1.2 (061626)</div>
   </div>
 
   <!-- Main -->
@@ -6338,7 +6358,7 @@ const TASK_VIDEOS = [
 ];
 
 // ── APP VERSION (searchable constant for version-poll notification) ──
-const APP_VERSION = "1.2.061526";
+const APP_VERSION = "1.2.061626";
 
 const TASKS=[
   {id:0,title:"Registration",cat:"Registration",distance:"",lux:"",duration:"",warn:"",note:"",isRegistration:true,steps:[]},
@@ -8401,6 +8421,7 @@ async function dashSync(){
     if(syncEl) syncEl.textContent = 'Synced at '+now;
     populateModFilter(); renderDashboard();
     if(currentTrackerPage === 'moderators') renderModeratorsPage();
+    if(currentTrackerPage === 'devices'){ window._devicesForceReload = true; loadDevices(); }
     showToast('Dashboard updated — '+dashData.length+' rows loaded');
   } catch(e){
     console.error('Dash sync error:', e);
@@ -8874,33 +8895,41 @@ function switchTrackerPage(page){
   currentTrackerPage = page;
   const dashBody  = document.getElementById('dash-body');
   const modsBody  = document.getElementById('mods-body');
+  const devBody   = document.getElementById('devices-body');
   const isDash    = page === 'dashboard';
+  const isMods    = page === 'moderators';
+  const isDev     = page === 'devices';
 
   document.getElementById('toggle-dashboard').classList.toggle('active', isDash);
-  document.getElementById('toggle-moderators').classList.toggle('active', !isDash);
+  document.getElementById('toggle-moderators').classList.toggle('active', isMods);
+  const devToggle = document.getElementById('toggle-devices');
+  if(devToggle) devToggle.classList.toggle('active', isDev);
 
   if(dashBody) dashBody.style.display = isDash ? '' : 'none';
-  if(modsBody) modsBody.style.display = isDash ? 'none' : '';
+  if(modsBody) modsBody.style.display = isMods ? '' : 'none';
+  if(devBody)  devBody.style.display  = isDev  ? '' : 'none';
 
-  // Filters (Period, Location, Moderators) now apply to BOTH pages — keep them visible.
-  // Explicitly list the always-on filter elements (avoid sibling selectors that would
-  // wrongly reveal the custom-range date inputs).
-  ['dash-period','dash-location','mod-dropdown-wrap'].forEach(id => {
+  // The Period / Location / Moderator filters apply to Dashboard + Moderators only.
+  // The Devices page has its OWN filters, so hide the shared ones while it's active.
+  const sharedFilterIds = ['dash-period','dash-location','mod-dropdown-wrap',
+                           'dash-custom-from','dash-custom-to'];
+  sharedFilterIds.forEach(id => {
     const el = document.getElementById(id);
-    if(el) el.style.display = '';
+    if(el) el.style.display = isDev ? 'none' : (id.startsWith('dash-custom') ? el.style.display : '');
   });
   document.querySelectorAll('.dash-toolbar > .dash-filter-label').forEach(el => {
-    // Show standard labels, but leave the custom From/To labels controlled by period state
-    if(el.id !== 'dash-custom-label' && el.id !== 'dash-custom-to-label') el.style.display = '';
+    if(isDev){ el.style.display = 'none'; }
+    else if(el.id !== 'dash-custom-label' && el.id !== 'dash-custom-to-label'){ el.style.display = ''; }
   });
-  // Re-apply custom-range visibility based on current period selection
-  if(typeof onPeriodVisibilityOnly === 'function') onPeriodVisibilityOnly();
 
-  if(!isDash && dashData) renderModeratorsPage();
+  if(!isDev && typeof onPeriodVisibilityOnly === 'function') onPeriodVisibilityOnly();
+
+  if(isMods && dashData) renderModeratorsPage();
   if(isDash && dashData){
     renderDashboard();
     setTimeout(()=>Object.values(dashCharts).forEach(c=>{try{c.resize();}catch(e){}}),100);
   }
+  if(isDev){ loadDevices(); }
   sessionStorage.setItem('centific_tracker_page', page);
 }
 
@@ -10817,6 +10846,185 @@ function closeIRDisableReminder(){
 // ── INVENTORY SET CONFIRMATION ────────────────────────────
 // ══════════════════════════════════════════════════════════
 
+/* ============================================================================
+   DEVICES TAB  —  reads the Inventory Excel table and shows tiles + sortable table
+   Columns referenced: Location, Type, Status, ClientS/N, Notes (+ SetId for set count)
+   ============================================================================ */
+const DEVICES_READ_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b2275fce01e94b80a78a6623662d34e5/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=MZjqr1o8iq1fi_dP6wtxX0pYsvrxBhGIIUJw0pXQFVs';
+
+let devicesRows = null;             // normalized rows
+let devicesSort = { col: 'location', dir: 'asc' };
+let devicesFilters = { location:'all', type:'all', status:'all', search:'' };
+
+function _devField(obj, names){
+  for(const n of names){
+    for(const k of Object.keys(obj)){
+      if(k.toLowerCase().replace(/[\s/_-]+/g,'') === n.toLowerCase().replace(/[\s/_-]+/g,'')) return obj[k];
+    }
+  }
+  return '';
+}
+
+async function loadDevices(){
+  const container = document.getElementById('devices-container');
+  if(!container) return;
+  // Use cache if present (Sync button refreshes via loadDevices(true))
+  if(devicesRows && !window._devicesForceReload){ renderDevices(); return; }
+  window._devicesForceReload = false;
+  container.innerHTML = '<div class="dash-empty"><div class="inv-spinner" style="margin:0 auto 14px"></div><p>Loading device inventory…</p></div>';
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    const res = await fetch(DEVICES_READ_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({}), signal:controller.signal });
+    clearTimeout(timer);
+    if(!res.ok && res.status !== 200 && res.status !== 202) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    let data; try { data = JSON.parse(text); } catch(e){ throw new Error('Invalid response format'); }
+    let rows = [];
+    if(Array.isArray(data)) rows = data;
+    else if(Array.isArray(data.rows)) rows = data.rows;
+    else if(Array.isArray(data.items)) rows = data.items;
+    else if(Array.isArray(data.value)) rows = data.value;
+    else if(typeof data.rows === 'string'){ try{ rows = JSON.parse(data.rows); }catch(e){} }
+    // Strip OData props
+    rows = rows.map(r => { const c={}; Object.keys(r).forEach(k=>{ if(!k.startsWith('@odata') && k!=='ItemInternalId') c[k]=r[k]; }); return c; });
+    if(rows.length === 256) console.warn('[Devices] Exactly 256 rows — PA pagination may be capped.');
+
+    devicesRows = rows.map(r => ({
+      location: String(_devField(r, ['Location']) || '').trim(),
+      type:     String(_devField(r, ['Type','Item Type','ItemType']) || '').trim(),
+      status:   String(_devField(r, ['Status']) || '').trim(),
+      clientSN: String(_devField(r, ['ClientS/N','ClientSN','Client S/N','ClientSerial','Client Serial']) || '').trim(),
+      notes:    String(_devField(r, ['Notes','Note']) || '').trim(),
+      setId:    String(_devField(r, ['SetId','Set Id','Set']) || '').trim(),
+    }));
+    console.log('[Devices] Loaded', devicesRows.length, 'rows');
+    renderDevices();
+  } catch(err){
+    console.error('[Devices] Error:', err);
+    container.innerHTML = '<div class="dash-empty"><p>Could not load device inventory: ' + (err.message||'Network error') + '</p></div>';
+  }
+}
+
+function getFilteredDevices(){
+  if(!devicesRows) return [];
+  const f = devicesFilters;
+  const q = f.search.toLowerCase().trim();
+  return devicesRows.filter(d => {
+    if(f.location !== 'all' && d.location !== f.location) return false;
+    if(f.type !== 'all' && d.type !== f.type) return false;
+    if(f.status !== 'all' && d.status !== f.status) return false;
+    if(q){
+      const hay = (d.location+' '+d.type+' '+d.status+' '+d.clientSN+' '+d.notes+' '+d.setId).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function setDeviceFilter(key, val){ devicesFilters[key] = val; renderDevices(); }
+function setDeviceSearch(val){ devicesFilters.search = val; renderDevicesTableOnly(); renderDeviceTiles(); }
+function setDeviceSort(col){
+  if(devicesSort.col === col){ devicesSort.dir = devicesSort.dir === 'asc' ? 'desc' : 'asc'; }
+  else { devicesSort.col = col; devicesSort.dir = 'asc'; }
+  renderDevicesTableOnly();
+}
+
+function renderDevices(){
+  const container = document.getElementById('devices-container');
+  if(!container) return;
+  if(!devicesRows || !devicesRows.length){
+    container.innerHTML = '<div class="dash-empty"><p>No device records found in the Inventory table.</p></div>';
+    return;
+  }
+  // Build filter dropdown options from data
+  const uniq = (key) => [...new Set(devicesRows.map(d => d[key]).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  const opts = (key, list) => ['<option value="all">All</option>'].concat(
+    list.map(v => `<option value="${escAttr(v)}"${devicesFilters[key]===v?' selected':''}>${escHtml(v)}</option>`)
+  ).join('');
+
+  container.innerHTML = `
+    <div class="dev-tiles" id="dev-tiles"></div>
+    <div class="dev-toolbar">
+      <span class="dash-filter-label">Search</span>
+      <input type="text" class="dash-select dev-search" id="dev-search" placeholder="Search devices…" value="${escAttr(devicesFilters.search)}" oninput="setDeviceSearch(this.value)"/>
+      <span class="dash-filter-label">Location</span>
+      <select class="dash-select" onchange="setDeviceFilter('location',this.value)">${opts('location',uniq('location'))}</select>
+      <span class="dash-filter-label">Type</span>
+      <select class="dash-select" onchange="setDeviceFilter('type',this.value)">${opts('type',uniq('type'))}</select>
+      <span class="dash-filter-label">Status</span>
+      <select class="dash-select" onchange="setDeviceFilter('status',this.value)">${opts('status',uniq('status'))}</select>
+      <div style="flex:1"></div>
+      <span class="dev-count" id="dev-count"></span>
+    </div>
+    <div id="dev-table-wrap"></div>`;
+  renderDeviceTiles();
+  renderDevicesTableOnly();
+}
+
+function renderDeviceTiles(){
+  const el = document.getElementById('dev-tiles');
+  if(!el) return;
+  const rows = getFilteredDevices();
+  const dcDevices = rows.filter(d => d.type.toLowerCase() === 'dc device').length;
+  const working   = rows.filter(d => d.status.toLowerCase() === 'working').length;
+  const laptops   = rows.filter(d => d.type.toLowerCase() === 'laptop').length;
+  const sets      = new Set(rows.map(d => d.setId).filter(Boolean)).size;
+  const tile = (label, val, accent) => `
+    <div class="kpi-card">
+      <div class="kpi-top-row"><div class="kpi-label">${label}</div></div>
+      <div class="kpi-bottom-row"><div class="kpi-value" style="${accent?('color:'+accent):''}">${val}</div></div>
+    </div>`;
+  el.innerHTML =
+    tile('DC Devices', dcDevices, 'var(--accent)') +
+    tile('Working Devices', working, 'var(--green)') +
+    tile('Laptops', laptops, 'var(--blue)') +
+    tile('Sets', sets, 'var(--amber)');
+}
+
+function renderDevicesTableOnly(){
+  const wrap = document.getElementById('dev-table-wrap');
+  if(!wrap) return;
+  let rows = getFilteredDevices();
+  // Sort
+  const { col, dir } = devicesSort;
+  rows = rows.slice().sort((a,b) => {
+    const av = String(a[col]||'').toLowerCase(), bv = String(b[col]||'').toLowerCase();
+    if(av < bv) return dir === 'asc' ? -1 : 1;
+    if(av > bv) return dir === 'asc' ? 1 : -1;
+    return 0;
+  });
+  const cnt = document.getElementById('dev-count');
+  if(cnt) cnt.textContent = rows.length + ' device' + (rows.length!==1?'s':'');
+
+  const cols = [
+    {key:'location', label:'Location'},
+    {key:'type',     label:'Type'},
+    {key:'status',   label:'Status'},
+    {key:'clientSN', label:'Client S/N'},
+    {key:'notes',    label:'Notes'},
+  ];
+  const arrow = (k) => devicesSort.col === k ? (devicesSort.dir === 'asc' ? ' ▲' : ' ▼') : '';
+  const head = cols.map(c => `<th onclick="setDeviceSort('${c.key}')" class="dev-th${devicesSort.col===c.key?' sorted':''}">${c.label}<span class="dev-sort-arrow">${arrow(c.key)}</span></th>`).join('');
+  const body = rows.length ? rows.map(d => {
+    const st = d.status.toLowerCase();
+    const stCls = st==='working' ? 'dev-st-ok' : (st==='damaged'||st==='not working' ? 'dev-st-bad' : 'dev-st-neutral');
+    return `<tr>
+      <td>${escHtml(d.location)||'—'}</td>
+      <td>${escHtml(d.type)||'—'}</td>
+      <td><span class="dev-status ${stCls}">${escHtml(d.status)||'—'}</span></td>
+      <td class="dev-sn">${escHtml(d.clientSN)||'—'}</td>
+      <td class="dev-notes">${escHtml(d.notes)||'—'}</td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text3)">No devices match the current filter.</td></tr>`;
+
+  wrap.innerHTML = `<table class="dev-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+}
+
+// Small escapers (escHtml may already exist elsewhere; these are scoped helpers)
+function escHtml(s){ return String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+function escAttr(s){ return escHtml(s).replace(/'/g,'&#39;'); }
+
 const INVENTORY_READ_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b2275fce01e94b80a78a6623662d34e5/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=MZjqr1o8iq1fi_dP6wtxX0pYsvrxBhGIIUJw0pXQFVs';
 const INVENTORY_LOG_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/83e85c70c0cc4107ad21eb73f8ae41aa/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=BwlH-IKrjb60SuWlLpojbfTqOFRYXLvVhlZTlAKYNO0';
 const INVENTORY_LOG_READ_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/62ba86206f294bce899bd40ca39c581a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=P95-oqEHzBY6UuwYmUGXt9hdAIAULv9cxLkY8uaMOcI';
@@ -12049,6 +12257,7 @@ function openCollReminderForCurrent(){
     <div class="page-toggle" id="tracker-toggle">
       <button class="page-toggle-btn active" id="toggle-dashboard" onclick="switchTrackerPage('dashboard')">Dashboard</button>
       <button class="page-toggle-btn" id="toggle-moderators" onclick="switchTrackerPage('moderators')">Moderators</button>
+      <button class="page-toggle-btn" id="toggle-devices" onclick="switchTrackerPage('devices')">Devices</button>
     </div>
 
     <span class="dash-filter-label">Period</span>
@@ -12103,12 +12312,12 @@ function openCollReminderForCurrent(){
     </div>
   </div>
 
-  <!-- Moderators body — swaps with dash-body -->
-  <div class="dash-body" id="mods-body" style="display:none">
-    <div id="mods-grid-container">
-      <div class="mods-empty">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        <p>Click <strong>Sync</strong> to load moderator data.</p>
+  <!-- Devices body — swaps with dash-body / mods-body -->
+  <div class="dash-body" id="devices-body" style="display:none">
+    <div id="devices-container">
+      <div class="dash-empty">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <p>Click <strong>Sync</strong> to load device inventory from Excel.</p>
       </div>
     </div>
   </div>
