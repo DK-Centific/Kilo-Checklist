@@ -10897,8 +10897,10 @@ async function loadDevices(){
       clientSN: String(_devField(r, ['ClientS/N','ClientSN','Client S/N','ClientSerial','Client Serial']) || '').trim(),
       notes:    String(_devField(r, ['Notes','Note']) || '').trim(),
       setId:    String(_devField(r, ['SetId','Set Id','Set']) || '').trim(),
-    }));
-    console.log('[Devices] Loaded', devicesRows.length, 'rows');
+    }))
+    // Drop completely empty rows (no value in any displayed column) — phantom Excel rows.
+    .filter(d => d.location || d.type || d.status || d.clientSN || d.notes);
+    console.log('[Devices] Loaded', devicesRows.length, 'rows (after dropping empty)');
     renderDevices();
   } catch(err){
     console.error('[Devices] Error:', err);
@@ -10966,9 +10968,22 @@ function renderDeviceTiles(){
   const el = document.getElementById('dev-tiles');
   if(!el) return;
   const rows = getFilteredDevices();
-  const dcDevices = rows.filter(d => d.type.toLowerCase() === 'dc device').length;
+  // Unique device count by Client S/N for a given type matcher.
+  // Rows sharing a Client S/N count once; rows without an S/N each count once.
+  const uniqCount = (typeMatch) => {
+    const seen = new Set(); let noSn = 0;
+    rows.forEach(d => {
+      if(!typeMatch(d.type.toLowerCase())) return;
+      const sn = d.clientSN.toLowerCase().trim();
+      if(sn) seen.add(sn); else noSn++;
+    });
+    return seen.size + noSn;
+  };
+  // "DC Device (Tablet)" etc. → match any type containing "dc device".
+  const dcDevices = uniqCount(t => t.includes('dc device'));
   const working   = rows.filter(d => d.status.toLowerCase() === 'working').length;
-  const laptops   = rows.filter(d => d.type.toLowerCase() === 'laptop').length;
+  // Laptops → match any type containing "laptop", unique by Client S/N.
+  const laptops   = uniqCount(t => t.includes('laptop'));
   const sets      = new Set(rows.map(d => d.setId).filter(Boolean)).size;
   const tile = (label, val, accent) => `
     <div class="kpi-card">
@@ -11008,7 +11023,7 @@ function renderDevicesTableOnly(){
   const head = cols.map(c => `<th onclick="setDeviceSort('${c.key}')" class="dev-th${devicesSort.col===c.key?' sorted':''}">${c.label}<span class="dev-sort-arrow">${arrow(c.key)}</span></th>`).join('');
   const body = rows.length ? rows.map(d => {
     const st = d.status.toLowerCase();
-    const stCls = st==='working' ? 'dev-st-ok' : (st==='damaged'||st==='not working' ? 'dev-st-bad' : 'dev-st-neutral');
+    const stCls = st==='working' ? 'dev-st-ok' : (st==='damaged'||st==='not working'||st==='redline' ? 'dev-st-bad' : 'dev-st-neutral');
     return `<tr>
       <td>${escHtml(d.location)||'—'}</td>
       <td>${escHtml(d.type)||'—'}</td>
