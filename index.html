@@ -4203,6 +4203,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .chart-card.full{grid-column:1/-1}
 .chart-title{font-size:15px;font-weight:600;letter-spacing:-0.02em;color:var(--text);margin-bottom:3px;word-wrap:break-word}
 .chart-sub{font-size:12px;color:var(--text3);margin-bottom:16px}
+/* Daily Completions Tasks/Participants toggle */
+.chart-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:16px}
+.chart-title-row .chart-title{margin-bottom:3px}
+.chart-title-row .chart-sub{margin-bottom:0}
+.daily-toggle{display:inline-flex;background:var(--bg3);border:.5px solid var(--border);border-radius:9px;padding:2px;flex-shrink:0}
+.daily-toggle-btn{font-family:var(--font);font-size:11.5px;font-weight:600;letter-spacing:-0.01em;color:var(--text3);background:none;border:none;border-radius:7px;padding:5px 11px;cursor:pointer;transition:all .18s;white-space:nowrap}
+.daily-toggle-btn:hover{color:var(--text)}
+.daily-toggle-btn.active{background:var(--card-bg);color:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.12)}
 .chart-wrap{position:relative;width:100%}
 
 /* Detail table */
@@ -6098,7 +6106,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       </div>
     </div>
     <div class="sidebar-list" id="sidebar-list"></div>
-    <div class="sidebar-version">v 1.2 (061626)</div>
+    <div class="sidebar-version">v 1.2 (061726)</div>
   </div>
 
   <!-- Main -->
@@ -6370,7 +6378,7 @@ const TASK_VIDEOS = [
 ];
 
 // ── APP VERSION (searchable constant for version-poll notification) ──
-const APP_VERSION = "1.2.061626";
+const APP_VERSION = "1.2.061726";
 
 const TASKS=[
   {id:0,title:"Registration",cat:"Registration",distance:"",lux:"",duration:"",warn:"",note:"",isRegistration:true,steps:[]},
@@ -8674,22 +8682,43 @@ function renderDashboard(){
     return;
   }
   const completedRows=data.filter(r=>r.status==='Complete');
-  // Total Participants = unique participant NAMES who have a Task 14 row (any status).
-  // The app only writes Task 14 to Excel after the moderator marks it complete and
-  // proceeds through the session-complete flow, so any Task 14 row = participant done.
-  // Records with no name are ignored (older data without a captured name).
   const normName = (s) => String(s || '').trim().toLowerCase();
-  const uniqueParts=new Set(
-    data
-      .filter(r => r.participantName && normName(r.participantName) && String(r.taskId).trim() === '14')
-      .map(r => normName(r.participantName))
+
+  // ── Total Participants = participant IDs that completed all NUMBERED tasks ──
+  // For each participant ID, collect the DISTINCT NUMBERED task IDs (1..14) they
+  // have rows for. Registration (task 0) is NOT required — it isn't always logged
+  // as its own row, and requiring it wrongly dropped otherwise-complete people.
+  // Counting DISTINCT task IDs means duplicate submissions never inflate the count
+  // (a participant who re-submits Task 5 still only has Task 5 once).
+  // A participant counts as 1 complete when they have all 14 numbered tasks.
+  const COMPLETE_DISTINCT_TASKS = (typeof TASKS !== "undefined" && TASKS.length > 1) ? (TASKS.length - 1) : 14; // 14
+  const distinctTasksByPart = {};       // participantId -> Set of distinct NUMBERED taskIds (1..14)
+  const rowCountByPart = {};            // participantId -> total rows (sessionIDs) — for diagnostics
+  const allPartIds = new Set();         // every participant ID that appears at all
+  data.forEach(r => {
+    const pid = String(r.participantId || '').trim();
+    if(!pid) return;
+    allPartIds.add(pid);
+    rowCountByPart[pid] = (rowCountByPart[pid] || 0) + 1;
+    const tid = String(r.taskId || '').trim();
+    if(tid === '' || tid === '0') return;   // ignore blank + Registration (task 0) for the completion test
+    (distinctTasksByPart[pid] || (distinctTasksByPart[pid] = new Set())).add(tid);
+  });
+  // Complete participant IDs (have all 14 distinct numbered tasks)
+  const uniqueParts = new Set(
+    Object.keys(distinctTasksByPart).filter(pid => distinctTasksByPart[pid].size >= COMPLETE_DISTINCT_TASKS)
   );
-  // Total unique participants (by name) who have any logged task — denominator for completion rate.
-  // Respects the current dashboard filters. Records with no name are ignored.
-  const uniquePartsAll=new Set(
-    data.filter(r => r.participantName && normName(r.participantName))
-        .map(r => normName(r.participantName))
-  );
+  // Denominator = every participant ID that appears at all (respects current filters)
+  const uniquePartsAll = allPartIds;
+  // Diagnostics — compare interpretations against your raw count
+  try {
+    const byRowsOver14 = Object.keys(rowCountByPart).filter(pid => rowCountByPart[pid] > 14).length;
+    console.log('[Counting] Participant IDs total:', allPartIds.size,
+      '| complete (all 14 distinct numbered tasks):', uniqueParts.size,
+      '| with >14 total rows:', byRowsOver14,
+      '| (threshold =', COMPLETE_DISTINCT_TASKS, 'distinct numbered tasks)');
+  } catch(e){}
+
   const uniqueMods=new Set(data.map(r=>r.moderator).filter(Boolean));
   const uniqueDates=new Set(data.map(r=>r.sessionDate).filter(Boolean));
   // Participant-based completion: how many participants finished all 14 tasks
@@ -8707,12 +8736,17 @@ function renderDashboard(){
   const modNames=Object.keys(modParts).sort();
   const modCounts=modNames.map(m=>modParts[m].size);
   const dailyC={};
+  const dailyPSet={};   // date -> Set of participant IDs (for the Participants toggle)
   completedRows.forEach(r=>{
     const raw = (r.completedAt || r.submittedAt || r.sessionDate || '').split(',')[0].trim();
     const dateKey = toISODate(raw);
     if(!dateKey) return;
     dailyC[dateKey]=(dailyC[dateKey]||0)+1;
+    const pid = String(r.participantId||'').trim();
+    if(pid){ (dailyPSet[dateKey] || (dailyPSet[dateKey] = new Set())).add(pid); }
   });
+  const dailyP={};
+  Object.keys(dailyPSet).forEach(k => { dailyP[k] = dailyPSet[k].size; });
   const sortedDates=Object.keys(dailyC).sort();
   // Build Task Completion Breakdown — show ALL tasks (1-14) sorted ascending by task number
   // Map: taskId → { title, count }
@@ -8737,11 +8771,17 @@ function renderDashboard(){
     const mL  = mR[0]?.location||'—';
     const mD  = mR.filter(r=>r.status==='Complete').length; // completed task rows
 
-    // A participant is "fully complete" when a Task 14 row exists for them
-    const fullyComplete = new Set(
-      mR.filter(r => r.participantId && String(r.taskId).trim() === '14')
-        .map(r => r.participantId)
-    ).size;
+    // A participant is "fully complete" when they have all 14 distinct NUMBERED
+    // tasks (1..14). Registration (task 0) is not required; distinct avoids dup inflation.
+    const mDistinct = {};
+    mR.forEach(r => {
+      const pid = String(r.participantId || '').trim();
+      if(!pid) return;
+      const tid = String(r.taskId || '').trim();
+      if(tid === '' || tid === '0') return;
+      (mDistinct[pid] || (mDistinct[pid] = new Set())).add(tid);
+    });
+    const fullyComplete = Object.keys(mDistinct).filter(pid => mDistinct[pid].size >= COMPLETE_DISTINCT_TASKS).length;
     const mRt = mP > 0 ? Math.round(fullyComplete / mP * 100) : 0;
 
     return {name:m, participants:mP, completed:mD, fullyComplete, total:mR.length, rate:mRt, location:mL};
@@ -8813,8 +8853,16 @@ function renderDashboard(){
         <div class="chart-wrap" style="height:240px"><canvas id="cModBar"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-title">Daily Completions</div>
-        <div class="chart-sub">Completed tasks by date</div>
+        <div class="chart-title-row">
+          <div>
+            <div class="chart-title">Daily Completions</div>
+            <div class="chart-sub" id="daily-sub">${dailyMode==='participants'?'Unique participants by date':'Completed tasks by date'}</div>
+          </div>
+          <div class="daily-toggle">
+            <button class="daily-toggle-btn ${dailyMode==='tasks'?'active':''}" onclick="setDailyMode('tasks')">Tasks</button>
+            <button class="daily-toggle-btn ${dailyMode==='participants'?'active':''}" onclick="setDailyMode('participants')">Participants</button>
+          </div>
+        </div>
         <div class="chart-wrap" style="height:240px"><canvas id="cDailyLine"></canvas></div>
       </div>
       <div class="chart-card full">
@@ -8880,6 +8928,12 @@ function renderDashboard(){
   }
 
   if(sortedDates.length){
+    // Stash the two daily series so the Tasks/Participants toggle can rebuild without a full re-render
+    window._dailyData = { sortedDates, dailyC, dailyP, isDark, so, ttBase, intTicks };
+    const series = (dailyMode === 'participants') ? dailyP : dailyC;
+    const unitFn = (n) => dailyMode === 'participants'
+      ? `  ${n} participant${n!==1?'s':''}`
+      : `  ${n} task${n!==1?'s':''} completed`;
     dashCharts['cDailyLine']=new Chart(document.getElementById('cDailyLine'),{
       type:'line',
       data:{
@@ -8888,7 +8942,7 @@ function renderDashboard(){
           return dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
         }),
         datasets:[{
-          data:sortedDates.map(d=>dailyC[d]),
+          data:sortedDates.map(d=>series[d]||0),
           borderColor:'#EF43B3', backgroundColor:'rgba(239,67,179,.10)',
           borderWidth:2.5, pointRadius:5, pointBackgroundColor:'#EF43B3',
           pointBorderColor:isDark?'#1a1a18':'#fff', pointBorderWidth:2,
@@ -8897,7 +8951,7 @@ function renderDashboard(){
       },
       options:{...so,
         plugins:{...so.plugins, tooltip:{...ttBase, callbacks:{
-          label:i=>`  ${i.raw} task${i.raw!==1?'s':''} completed`
+          label:i=>unitFn(i.raw)
         }}},
         scales:{...so.scales, y:{...so.scales.y, ticks:{...intTicks}}}
       }
@@ -8945,6 +8999,29 @@ function saveDashPaUrl(){
 // ══════════════════════════════════════════════════════════
 
 let currentTrackerPage = 'dashboard'; // 'dashboard' | 'moderators'
+
+// Daily Completions chart mode: 'tasks' (default) | 'participants'
+let dailyMode = 'tasks';
+function setDailyMode(mode){
+  if(mode === dailyMode) return;
+  dailyMode = mode;
+  // Update toggle button states + sub-label
+  document.querySelectorAll('.daily-toggle-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim().toLowerCase() === (mode==='participants'?'participants':'tasks'));
+  });
+  const sub = document.getElementById('daily-sub');
+  if(sub) sub.textContent = mode==='participants' ? 'Unique participants by date' : 'Completed tasks by date';
+  // Rebuild just the daily chart from the stashed data (no full dashboard re-render)
+  const D = window._dailyData;
+  if(!D || !dashCharts['cDailyLine']) return;
+  const series = (mode === 'participants') ? D.dailyP : D.dailyC;
+  const chart = dashCharts['cDailyLine'];
+  chart.data.datasets[0].data = D.sortedDates.map(d => series[d] || 0);
+  chart.options.plugins.tooltip.callbacks.label = (i) => mode === 'participants'
+    ? `  ${i.raw} participant${i.raw!==1?'s':''}`
+    : `  ${i.raw} task${i.raw!==1?'s':''} completed`;
+  chart.update();
+}
 
 function switchTrackerPage(page){
   currentTrackerPage = page;
@@ -9189,25 +9266,27 @@ function renderViewToolbar(){
 // Returns [{participantId, participantName, sessionDate, tasksDone, totalTasks, status}]
 function aggregateParticipants(rows){
   const TOTAL = (typeof TASKS !== 'undefined' && TASKS.length > 1) ? (TASKS.length - 1) : 14;
+  // Complete = all 14 distinct NUMBERED tasks (1..14). Registration (0) not required.
+  const COMPLETE_DISTINCT = TOTAL;
   const byPid = {};
   rows.forEach(r => {
     const pid = (r.participantId || '').trim();
     if(!pid) return;
     if(!byPid[pid]){
-      byPid[pid] = { participantId: pid, participantName: '', sessionDate: '', taskIds: new Set(), reached14: false, lastTs: '' };
+      byPid[pid] = { participantId: pid, participantName: '', sessionDate: '', taskIds: new Set(), lastTs: '' };
     }
     const rec = byPid[pid];
     if(r.participantName && !rec.participantName) rec.participantName = r.participantName;
     if(r.sessionDate && !rec.sessionDate) rec.sessionDate = r.sessionDate;
     const tid = String(r.taskId).trim();
+    // taskIds = the 14 numbered tasks (registration / task 0 excluded)
     if(tid && tid !== 'undefined' && tid !== '0') rec.taskIds.add(tid);
-    if(tid === '14') rec.reached14 = true;
     const ts = r.submittedAt || r.completedAt || '';
     if(ts && ts > rec.lastTs) rec.lastTs = ts;
   });
   return Object.values(byPid).map(rec => {
     const tasksDone = rec.taskIds.size;
-    const status = rec.reached14 ? 'Completed' : 'In progress';
+    const status = tasksDone >= COMPLETE_DISTINCT ? 'Completed' : 'In progress';
     return {
       participantId: rec.participantId,
       participantName: rec.participantName || '—',
@@ -9394,10 +9473,17 @@ function renderModsCardView(mods, now, thirtyMinsAgo, showTeamStats){
     const rows = mod.rows;
     const uniqueParts = new Set(rows.map(r=>r.participantId).filter(Boolean));
     const completedTasks = rows.filter(r=>r.status==='Complete').length;
-    const fullyDone = new Set(
-      rows.filter(r => r.participantId && String(r.taskId).trim() === '14')
-        .map(r => r.participantId)
-    ).size;
+    // Fully done = participant IDs with all 14 distinct NUMBERED tasks (1..14); registration (0) excluded
+    const _distinctByPid = {};
+    rows.forEach(r => {
+      const pid = String(r.participantId || '').trim();
+      if(!pid) return;
+      const tid = String(r.taskId || '').trim();
+      if(tid === '' || tid === '0') return;
+      (_distinctByPid[pid] || (_distinctByPid[pid] = new Set())).add(tid);
+    });
+    const _completeThreshold = (typeof TASKS !== 'undefined' && TASKS.length > 1) ? (TASKS.length - 1) : 14;
+    const fullyDone = Object.keys(_distinctByPid).filter(pid => _distinctByPid[pid].size >= _completeThreshold).length;
 
     let isOnline = false;
     let lastActiveStr = 'No activity';
@@ -11108,16 +11194,20 @@ function renderDeviceTiles(){
   // Laptops → match "laptop" or "notebook".
   const laptops   = uniqCount(['laptop', 'notebook']);
   const sets      = new Set(rows.map(d => d.setId).filter(Boolean)).size;
-  const tile = (label, val, accent) => `
-    <div class="kpi-card">
+  // Match the Dashboard KPI card style: color class on the card + big xl value + sub label.
+  const tile = (label, val, colorClass, sub) => `
+    <div class="kpi-card ${colorClass}">
       <div class="kpi-top-row"><div class="kpi-label">${label}</div></div>
-      <div class="kpi-bottom-row"><div class="kpi-value" style="${accent?('color:'+accent):''}">${val}</div></div>
+      <div class="kpi-bottom-row">
+        <div class="kpi-sub">${sub}</div>
+        <div class="kpi-value kpi-value-xl">${val}</div>
+      </div>
     </div>`;
   el.innerHTML =
-    tile('DC Devices', dcDevices, 'var(--accent)') +
-    tile('Working Devices', working, 'var(--green)') +
-    tile('Laptops', laptops, 'var(--blue)') +
-    tile('Sets', sets, 'var(--amber)');
+    tile('DC Devices', dcDevices, 'accent', 'DC Device (Tablet)') +
+    tile('Working Devices', working, 'green', 'status = Working') +
+    tile('Laptops', laptops, 'blue', 'unique by serial') +
+    tile('Sets', sets, 'amber', 'unique set IDs');
 }
 
 function renderDevicesTableOnly(){
@@ -12453,6 +12543,16 @@ function openCollReminderForCurrent(){
     <div class="dash-empty">
       <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="7,12 10,8 13,11 16,7"/></svg>
       <p>Click <strong>Sync</strong> to load the latest data from Excel.</p>
+    </div>
+  </div>
+
+  <!-- Moderators body — swaps with dash-body -->
+  <div class="dash-body" id="mods-body" style="display:none">
+    <div id="mods-grid-container">
+      <div class="mods-empty">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        <p>Click <strong>Sync</strong> to load moderator data.</p>
+      </div>
     </div>
   </div>
 
