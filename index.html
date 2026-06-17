@@ -4161,6 +4161,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .dev-st-ok{background:rgba(34,197,94,.14);color:var(--green)}
 .dev-st-bad{background:rgba(239,68,68,.14);color:var(--red)}
 .dev-st-neutral{background:var(--bg4);color:var(--text3)}
+/* multi-select filter dropdown */
+.dev-ms{position:relative;display:inline-block}
+.dev-ms-btn{cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.dev-ms-lbl{color:var(--text3)}
+.dev-ms-btn strong{color:var(--text);font-weight:600}
+.dev-ms-caret{font-size:9px;color:var(--text3)}
+.dev-ms-panel{position:absolute;top:calc(100% + 4px);left:0;z-index:60;min-width:190px;max-height:280px;overflow-y:auto;background:var(--card-bg);border:.5px solid var(--border-strong);border-radius:10px;box-shadow:var(--shadow-md);padding:6px;display:none}
+.dev-ms-panel.open{display:block}
+.dev-ms-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text)}
+.dev-ms-item:hover{background:var(--bg3)}
+.dev-ms-item input{accent-color:var(--accent);width:15px;height:15px;flex-shrink:0}
+.dev-ms-all{border-bottom:.5px solid var(--border);margin-bottom:4px;color:var(--text2);font-weight:500;border-radius:0}
 @media(max-width:760px){.dev-tiles{grid-template-columns:repeat(2,1fr)}.dev-notes{max-width:160px}}
 .kpi-card{
   background:var(--card-bg);border:.5px solid var(--border);border-radius:var(--rl);
@@ -8226,6 +8238,50 @@ document.getElementById('config-banner').classList.add('hidden');
 renderSidebar();
 updateProgress();
 
+// ── Prevent blank-screen / wrong-screen FLASH on hard refresh ──────────
+// The full login restore runs in the deferred block below. Before that fires,
+// the moderator .layout is visible by its CSS default — so admins briefly saw
+// the wrong/blank screen. We fix the flash in two steps:
+//   1. SYNCHRONOUSLY (here, mid-parse): hide .layout for admins + not-logged-in,
+//      and show the login screen if needed. These elements exist by now.
+//   2. The admin top-level container (landing/dashboard) is revealed as soon as
+//      the DOM is ready (it's defined later in the document, so it may not exist
+//      at this point during parsing).
+(function paintInitialScreenImmediately(){
+  try{
+    const layoutEl = document.querySelector('.layout');
+    const loginEl  = document.getElementById('login-screen');
+    if(currentUser && currentUser.isAdmin){
+      if(layoutEl && (sessionStorage.getItem('centific_admin_view')||'landing') !== 'checklist'){
+        layoutEl.style.display = 'none';   // hide checklist unless admin was in checklist view
+      }
+    } else if(!currentUser){
+      if(layoutEl) layoutEl.style.display = 'none';
+      if(loginEl) loginEl.classList.add('visible');
+    }
+  }catch(e){ console.warn('[Boot] initial paint guard:', e); }
+})();
+
+// Reveal the correct admin container the instant the DOM is parsed (these
+// elements are defined later in the document than this script position).
+function _revealInitialAdminScreen(){
+  try{
+    if(!(currentUser && currentUser.isAdmin)) return;
+    const savedView = sessionStorage.getItem('centific_admin_view') || 'landing';
+    const al = document.getElementById('admin-landing');
+    const dp = document.getElementById('dashboard-page');
+    const layoutEl = document.querySelector('.layout');
+    if(savedView === 'dashboard' && dp){ dp.classList.add('visible'); if(layoutEl) layoutEl.style.display='none'; }
+    else if(savedView === 'checklist'){ if(layoutEl) layoutEl.style.display='flex'; }
+    else if(al){ al.classList.add('visible'); if(layoutEl) layoutEl.style.display='none'; }
+  }catch(e){ console.warn('[Boot] reveal admin screen:', e); }
+}
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', _revealInitialAdminScreen);
+} else {
+  _revealInitialAdminScreen();
+}
+
 // ── Restore login state ──────────────────────────────
 // Defer to next frame so DOM + Chart.js are fully ready
 setTimeout(function(){
@@ -8284,27 +8340,26 @@ function gotoDashboard(){
   const la=_layout(); if(la) la.style.display='none';
   sessionStorage.setItem('centific_admin_view','dashboard');
   updateAdminSwitchBtn();
-  setTimeout(function(){
-    if(dashData){
-      populateModFilter();
-      const savedSub = sessionStorage.getItem('centific_tracker_page') || 'dashboard';
-      if(savedSub === 'moderators'){
-        switchTrackerPage('moderators');
-      } else {
-        switchTrackerPage('dashboard');
-        setTimeout(function(){
-          Object.values(dashCharts).forEach(c=>{ try{ c.resize(); }catch(e){} });
-        }, 100);
-      }
-    } else {
-      switchTrackerPage('dashboard');
-    }
-    // Always auto-refresh data from Excel on opening dashboard
-    if(typeof dashSync === 'function' && dashPaUrl){
-      console.log('[Dashboard] Auto-refreshing on open');
-      dashSync().catch(err => console.error('[Dashboard] Auto-refresh failed:', err));
-    }
-  }, 80);
+  // Render whatever we have cached RIGHT AWAY so the page is never blank while
+  // the network sync runs. dashData is restored from localStorage on boot.
+  if(dashData){
+    populateModFilter();
+    const savedSub = sessionStorage.getItem('centific_tracker_page') || 'dashboard';
+    if(savedSub === 'moderators') switchTrackerPage('moderators');
+    else if(savedSub === 'devices') switchTrackerPage('devices');
+    else switchTrackerPage('dashboard');
+    setTimeout(function(){
+      Object.values(dashCharts).forEach(c=>{ try{ c.resize(); }catch(e){} });
+    }, 100);
+  } else {
+    // No cache — show the dashboard shell (it has its own "click Sync" empty state)
+    switchTrackerPage('dashboard');
+  }
+  // Refresh from Excel in the background (non-blocking); UI already painted.
+  if(typeof dashSync === 'function' && dashPaUrl){
+    console.log('[Dashboard] Background refresh on open');
+    dashSync().catch(err => console.error('[Dashboard] Auto-refresh failed:', err));
+  }
 }
 
 function adminSwitchView(){
@@ -10854,7 +10909,7 @@ const DEVICES_READ_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.envir
 
 let devicesRows = null;             // normalized rows
 let devicesSort = { col: 'location', dir: 'asc' };
-let devicesFilters = { location:'all', type:'all', status:'all', search:'' };
+let devicesFilters = { location:[], type:[], status:[], search:'' };  // arrays = multi-select ([] means All)
 
 function _devField(obj, names){
   for(const n of names){
@@ -10863,6 +10918,19 @@ function _devField(obj, names){
     }
   }
   return '';
+}
+
+// Treat dash/placeholder-only cells ("-", "--", "—", ".", "n/a", "none", etc.)
+// as EMPTY so phantom rows full of dashes are dropped and don't render.
+function _devClean(v){
+  const s = String(v == null ? '' : v).trim();
+  if(!s) return '';
+  // If the cell contains NO letters or digits at all (only dashes of any kind,
+  // dots, symbols, punctuation, or whitespace) treat it as empty. This catches
+  // every dash/placeholder variant without having to enumerate Unicode dashes.
+  if(!/[a-z0-9]/i.test(s)) return '';
+  if(/^(n\/?a|none|null|undefined|tbd)$/i.test(s)) return '';
+  return s;
 }
 
 async function loadDevices(){
@@ -10891,16 +10959,21 @@ async function loadDevices(){
     if(rows.length === 256) console.warn('[Devices] Exactly 256 rows — PA pagination may be capped.');
 
     devicesRows = rows.map(r => ({
-      location: String(_devField(r, ['Location']) || '').trim(),
-      type:     String(_devField(r, ['Type','Item Type','ItemType']) || '').trim(),
-      status:   String(_devField(r, ['Status']) || '').trim(),
-      clientSN: String(_devField(r, ['ClientS/N','ClientSN','Client S/N','ClientSerial','Client Serial']) || '').trim(),
-      notes:    String(_devField(r, ['Notes','Note']) || '').trim(),
-      setId:    String(_devField(r, ['SetId','Set Id','Set']) || '').trim(),
+      location: _devClean(_devField(r, ['Location'])),
+      type:     _devClean(_devField(r, ['Type','Item Type','ItemType','Device Type','DeviceType','Equipment Type','Equipment','Category','Device'])),
+      status:   _devClean(_devField(r, ['Status'])),
+      clientSN: _devClean(_devField(r, ['ClientS/N','ClientSN','Client S/N','Client Serial','ClientSerial','Serial','SerialNumber','Serial Number'])),
+      notes:    _devClean(_devField(r, ['Notes','Note'])),
+      setId:    _devClean(_devField(r, ['SetId','Set Id','Set'])),
+      // Lowercased blob of ALL raw cell values — fallback for tile categorization
+      // when the device-type label lives in an unexpected column.
+      _blob:    Object.values(r).map(x => String(x==null?'':x)).join(' ').toLowerCase(),
     }))
-    // Drop completely empty rows (no value in any displayed column) — phantom Excel rows.
+    // Drop completely empty rows (no real value in any displayed column) — phantom Excel rows.
     .filter(d => d.location || d.type || d.status || d.clientSN || d.notes);
     console.log('[Devices] Loaded', devicesRows.length, 'rows (after dropping empty)');
+    console.log('[Devices] Raw column keys:', rows.length ? Object.keys(rows[0]) : []);
+    console.log('[Devices] Distinct Type values:', [...new Set(devicesRows.map(d=>d.type).filter(Boolean))]);
     renderDevices();
   } catch(err){
     console.error('[Devices] Error:', err);
@@ -10912,10 +10985,11 @@ function getFilteredDevices(){
   if(!devicesRows) return [];
   const f = devicesFilters;
   const q = f.search.toLowerCase().trim();
+  const inFilter = (arr, val) => !arr.length || arr.includes(val);  // empty array = All
   return devicesRows.filter(d => {
-    if(f.location !== 'all' && d.location !== f.location) return false;
-    if(f.type !== 'all' && d.type !== f.type) return false;
-    if(f.status !== 'all' && d.status !== f.status) return false;
+    if(!inFilter(f.location, d.location)) return false;
+    if(!inFilter(f.type, d.type)) return false;
+    if(!inFilter(f.status, d.status)) return false;
     if(q){
       const hay = (d.location+' '+d.type+' '+d.status+' '+d.clientSN+' '+d.notes+' '+d.setId).toLowerCase();
       if(!hay.includes(q)) return false;
@@ -10924,12 +10998,43 @@ function getFilteredDevices(){
   });
 }
 
-function setDeviceFilter(key, val){ devicesFilters[key] = val; renderDevices(); }
 function setDeviceSearch(val){ devicesFilters.search = val; renderDevicesTableOnly(); renderDeviceTiles(); }
 function setDeviceSort(col){
   if(devicesSort.col === col){ devicesSort.dir = devicesSort.dir === 'asc' ? 'desc' : 'asc'; }
   else { devicesSort.col = col; devicesSort.dir = 'asc'; }
   renderDevicesTableOnly();
+}
+// ── Multi-select filter dropdowns ──
+function toggleDevMsPanel(e, key){
+  e.stopPropagation();
+  const panel = document.getElementById('dev-ms-panel-'+key);
+  if(!panel) return;
+  const wasOpen = panel.classList.contains('open');
+  document.querySelectorAll('.dev-ms-panel.open').forEach(p => p.classList.remove('open'));
+  if(!wasOpen) panel.classList.add('open');
+}
+function toggleDevFilterValue(key, val){
+  const arr = devicesFilters[key];
+  const i = arr.indexOf(val);
+  if(i >= 0) arr.splice(i, 1); else arr.push(val);
+  updateDevMsSummary(key);
+  renderDeviceTiles();
+  renderDevicesTableOnly();
+}
+function clearDevFilter(e, key){
+  e.stopPropagation();
+  devicesFilters[key] = [];
+  // uncheck all boxes in this panel
+  const panel = document.getElementById('dev-ms-panel-'+key);
+  if(panel) panel.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+  updateDevMsSummary(key);
+  renderDeviceTiles();
+  renderDevicesTableOnly();
+}
+function updateDevMsSummary(key){
+  const sel = devicesFilters[key];
+  const sum = document.getElementById('dev-ms-sum-'+key);
+  if(sum) sum.textContent = sel.length ? (sel.length === 1 ? sel[0] : sel.length + ' selected') : 'All';
 }
 
 function renderDevices(){
@@ -10941,21 +11046,36 @@ function renderDevices(){
   }
   // Build filter dropdown options from data
   const uniq = (key) => [...new Set(devicesRows.map(d => d[key]).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-  const opts = (key, list) => ['<option value="all">All</option>'].concat(
-    list.map(v => `<option value="${escAttr(v)}"${devicesFilters[key]===v?' selected':''}>${escHtml(v)}</option>`)
-  ).join('');
+  // Multi-select dropdown: label + checkbox panel. Empty selection = All.
+  const msFilter = (key, label) => {
+    const values = uniq(key);
+    const sel = devicesFilters[key];
+    const summary = sel.length ? (sel.length === 1 ? sel[0] : sel.length + ' selected') : 'All';
+    const items = values.map(v => `
+      <label class="dev-ms-item">
+        <input type="checkbox" ${sel.includes(v)?'checked':''} onchange="toggleDevFilterValue('${key}','${escAttr(v)}')"/>
+        <span>${escHtml(v)}</span>
+      </label>`).join('');
+    return `<div class="dev-ms">
+      <button class="dash-select dev-ms-btn" onclick="toggleDevMsPanel(event,'${key}')">
+        <span class="dev-ms-lbl">${label}:</span> <strong id="dev-ms-sum-${key}">${escHtml(summary)}</strong>
+        <span class="dev-ms-caret">▾</span>
+      </button>
+      <div class="dev-ms-panel" id="dev-ms-panel-${key}">
+        <div class="dev-ms-item dev-ms-all" onclick="clearDevFilter(event,'${key}')">Show all</div>
+        ${items}
+      </div>
+    </div>`;
+  };
 
   container.innerHTML = `
     <div class="dev-tiles" id="dev-tiles"></div>
     <div class="dev-toolbar">
       <span class="dash-filter-label">Search</span>
       <input type="text" class="dash-select dev-search" id="dev-search" placeholder="Search devices…" value="${escAttr(devicesFilters.search)}" oninput="setDeviceSearch(this.value)"/>
-      <span class="dash-filter-label">Location</span>
-      <select class="dash-select" onchange="setDeviceFilter('location',this.value)">${opts('location',uniq('location'))}</select>
-      <span class="dash-filter-label">Type</span>
-      <select class="dash-select" onchange="setDeviceFilter('type',this.value)">${opts('type',uniq('type'))}</select>
-      <span class="dash-filter-label">Status</span>
-      <select class="dash-select" onchange="setDeviceFilter('status',this.value)">${opts('status',uniq('status'))}</select>
+      ${msFilter('location','Location')}
+      ${msFilter('type','Type')}
+      ${msFilter('status','Status')}
       <div style="flex:1"></div>
       <span class="dev-count" id="dev-count"></span>
     </div>
@@ -10968,22 +11088,25 @@ function renderDeviceTiles(){
   const el = document.getElementById('dev-tiles');
   if(!el) return;
   const rows = getFilteredDevices();
-  // Unique device count by Client S/N for a given type matcher.
+  // Unique device count by Client S/N for a given matcher.
+  // The matcher checks the Type field first; if Type is empty it falls back to
+  // scanning the whole row (handles the device-type label living in another column).
   // Rows sharing a Client S/N count once; rows without an S/N each count once.
-  const uniqCount = (typeMatch) => {
+  const uniqCount = (needles) => {
     const seen = new Set(); let noSn = 0;
     rows.forEach(d => {
-      if(!typeMatch(d.type.toLowerCase())) return;
+      const hay = d.type ? d.type.toLowerCase() : (d._blob || '');
+      if(!needles.some(n => hay.includes(n))) return;
       const sn = d.clientSN.toLowerCase().trim();
       if(sn) seen.add(sn); else noSn++;
     });
     return seen.size + noSn;
   };
-  // "DC Device (Tablet)" etc. → match any type containing "dc device".
-  const dcDevices = uniqCount(t => t.includes('dc device'));
+  // "DC Device (Tablet)" → match "dc device" or "tablet".
+  const dcDevices = uniqCount(['dc device', 'tablet']);
   const working   = rows.filter(d => d.status.toLowerCase() === 'working').length;
-  // Laptops → match any type containing "laptop", unique by Client S/N.
-  const laptops   = uniqCount(t => t.includes('laptop'));
+  // Laptops → match "laptop" or "notebook".
+  const laptops   = uniqCount(['laptop', 'notebook']);
   const sets      = new Set(rows.map(d => d.setId).filter(Boolean)).size;
   const tile = (label, val, accent) => `
     <div class="kpi-card">
@@ -11039,6 +11162,12 @@ function renderDevicesTableOnly(){
 // Small escapers (escHtml may already exist elsewhere; these are scoped helpers)
 function escHtml(s){ return String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
 function escAttr(s){ return escHtml(s).replace(/'/g,'&#39;'); }
+
+// Close any open Devices multi-select panel when clicking outside it.
+document.addEventListener('click', function(e){
+  if(e.target.closest && e.target.closest('.dev-ms')) return;
+  document.querySelectorAll('.dev-ms-panel.open').forEach(p => p.classList.remove('open'));
+});
 
 const INVENTORY_READ_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b2275fce01e94b80a78a6623662d34e5/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=MZjqr1o8iq1fi_dP6wtxX0pYsvrxBhGIIUJw0pXQFVs';
 const INVENTORY_LOG_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/83e85c70c0cc4107ad21eb73f8ae41aa/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=BwlH-IKrjb60SuWlLpojbfTqOFRYXLvVhlZTlAKYNO0';
