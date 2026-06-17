@@ -6137,6 +6137,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="entry-label">Session Date</div>
         <input type="text" id="g-date" class="entry-input" readonly style="cursor:default;color:var(--text2)" oninput="syncGlobal()"/>
       </div>
+      <div class="entry-field">
+        <div class="entry-label">Device Set <span style="color:var(--text3);font-weight:400;font-size:10px;letter-spacing:0">(from equipment check)</span></div>
+        <input type="text" id="g-device-set" class="entry-input entry-input-locked" placeholder="KC28-EVT-E2-B-M (set serial)" readonly tabindex="-1" aria-readonly="true" title="Set from your equipment check-out selection"/>
+      </div>
+      <!-- Backend-only Device ID (not displayed); value derived from the selected set -->
       <div class="entry-field" style="display:none">
         <div class="entry-label">Device ID</div>
         <input type="text" id="g-device" class="entry-input" value="Device A" oninput="syncGlobal()"/>
@@ -6403,7 +6408,7 @@ const taskDone  = new Array(15).fill(false);
 const stepDone  = TASKS.map(t=>new Array(t.steps.length).fill(false));
 const taskData  = TASKS.map(()=>({lux:'',notes:'',status:'Not Started',completedAt:''}));
 const taskSynced= new Array(15).fill(false);
-let globalData  = {participant:'',operator:'',date:'',device:'Device A'};
+let globalData  = {participant:'',operator:'',date:'',device:'Device A',deviceSetKey:''};
 let activeTask  = null;
 let activePanel = null; // 'reminders' | 'trouble' | 'settings' | null
 let currentFilter='all';
@@ -6565,6 +6570,10 @@ if(savedOk && globalData.participantName){
 }
 if(savedOk && globalData.operator)   document.getElementById('g-operator').value   = globalData.operator;
 if(savedOk && globalData.device)     document.getElementById('g-device').value     = globalData.device;
+// Restore the Device Set display field from the saved equipment selection
+if(savedOk && (globalData.deviceSetKey || globalData.deviceSetName)){
+  setTimeout(() => { if(typeof refreshDeviceSetField === 'function') refreshDeviceSetField(); }, 300);
+}
 applyTheme(currentTheme,false);
 document.getElementById('config-banner').classList.add('hidden');
 updateSyncStatus('idle','Ready to sync');
@@ -7525,6 +7534,10 @@ function _onLoginSuccessInner(){
     // Check 24-hour inventory eligibility for moderators (admins skip)
     if(typeof checkInventoryEligibility === 'function'){
       setTimeout(() => checkInventoryEligibility(), 800);
+    }
+    // Reflect any already-selected equipment set in the Device Set field
+    if(typeof refreshDeviceSetField === 'function'){
+      setTimeout(() => refreshDeviceSetField(), 300);
     }
   }
   // ── Feedback inbox runs for ALL roles (admins included) ──
@@ -9770,7 +9783,9 @@ function _doStartNewSession(){
   sessionStorage.removeItem('centific_ir_disable_shown');
   const keepOperator = globalData.operator || '';
   const keepDate     = globalData.date || '';
-  const keepDevice   = globalData.device || 'Device A';
+  const keepDevice   = globalData.device || '';
+  const keepSetKey   = globalData.deviceSetKey || '';
+  const keepSetName  = globalData.deviceSetName || '';
 
   localStorage.removeItem(STORAGE_KEY);
   taskDone.fill(false);
@@ -9785,13 +9800,15 @@ function _doStartNewSession(){
   taskSynced.fill(false);
 
   // Restore preserved fields — clear only Participant ID
-  globalData = {participant:'', participantName:'', operator: keepOperator, date: keepDate, device: keepDevice};
+  globalData = {participant:'', participantName:'', operator: keepOperator, date: keepDate, device: keepDevice, deviceSetKey: keepSetKey, deviceSetName: keepSetName};
   document.getElementById('g-participant').value = '';
   const pnEl2 = document.getElementById('g-participant-name');
   if(pnEl2) pnEl2.value = '';
   document.getElementById('g-operator').value = keepOperator;
   if(document.getElementById('g-date')) setDateField(keepDate);
   document.getElementById('g-device').value = keepDevice;
+  // Keep the same equipment set for the next participant — refresh the display field
+  if(typeof refreshDeviceSetField === 'function') refreshDeviceSetField();
 
   // Reset to welcome screen
   activeTask = null; activePanel = null;
@@ -10898,7 +10915,7 @@ function autoLogoutAfterCheckout(){
       if(d.regDeviceSteps) d.regDeviceSteps.fill(false);
     });
     // Reset participant/global data
-    globalData = {participant:'', participantName:'', operator:'', date:'', device:'Device A'};
+    globalData = {participant:'', participantName:'', operator:'', date:'', device:'Device A', deviceSetKey:''};
     // Reset registration sub-task selection
     if(typeof regSubTask !== 'undefined') regSubTask = null;
     // Clear active task/panel pointers
@@ -11401,6 +11418,64 @@ async function openInventoryCheck(){
   }
 }
 
+// ── Device Set → DeviceId mapping ──────────────────────────────────────
+// The moderator picks their equipment set in the existing equipment-checkout
+// popup. We mirror that selection into the (read-only) Device Set field and
+// derive the backend DeviceId "KC28-EVT-E2-B-M (serial)". Fixed prefix; the
+// serial comes from the set's DC Device (Tablet) item.
+const DEVICE_ID_PREFIX = 'KC28-EVT-E2-B-M';
+
+// Representative serial for a set: prefer the DC Device (Tablet) item; else first with a serial.
+function _setSerial(group){
+  if(!group || !Array.isArray(group.items)) return '';
+  const dc = group.items.find(it => /dc device|tablet/i.test(it.itemType || ''));
+  if(dc && dc.sn) return dc.sn;
+  const anySn = group.items.find(it => it.sn);
+  return anySn ? anySn.sn : '';
+}
+
+// Build the backend DeviceId string for a set group.
+function _deviceIdForSet(group){
+  const sn = _setSerial(group);
+  return sn ? `${DEVICE_ID_PREFIX} (${sn})` : DEVICE_ID_PREFIX;
+}
+
+// Apply a chosen equipment set: fill the read-only Device Set display field and
+// the hidden backend DeviceId. `group` has {setId, setName, items:[{itemType, sn}]}.
+function applyDeviceSetFromGroup(group){
+  if(!group) return;
+  const deviceId = _deviceIdForSet(group);
+  const devEl = document.getElementById('g-device');
+  if(devEl) devEl.value = deviceId;
+  globalData.device = deviceId;
+  globalData.deviceSetKey = group.setId || group.setName || '';
+  globalData.deviceSetName = group.setName || group.setId || '';
+  // Show the backend DeviceId in the read-only field: "KC28-EVT-E2-B-M (serial)"
+  const dsEl = document.getElementById('g-device-set');
+  if(dsEl) dsEl.value = deviceId;
+  if(typeof syncGlobal === 'function') syncGlobal();
+  if(typeof saveProgress === 'function') saveProgress();
+}
+
+// Refresh the Device Set display field from whatever equipment set is currently
+// selected — reads the live selection, else the one saved in sessionStorage.
+function refreshDeviceSetField(){
+  const dsEl = document.getElementById('g-device-set');
+  if(!dsEl) return;
+  let group = (typeof inventorySelected !== 'undefined' && inventorySelected) ? inventorySelected : null;
+  if(!group){
+    try {
+      const saved = JSON.parse(sessionStorage.getItem('centific_inv_set') || 'null');
+      if(saved && (saved.setId || saved.setName)) group = saved;
+    } catch(e){}
+  }
+  if(group){ applyDeviceSetFromGroup(group); }
+  else if(globalData && globalData.device){
+    // Already-derived DeviceId from a prior session/resume
+    dsEl.value = globalData.device;
+  }
+}
+
 function renderInventoryTiles(){
   const body = document.getElementById('inv-body');
   const footer = document.getElementById('inv-footer');
@@ -11527,6 +11602,9 @@ async function confirmInventorySet(){
       itemCount: inventorySelected.items.length,
       items: inventorySelected.items
     }));
+
+    // Mirror the chosen set into the Device Set field + backend DeviceId
+    if(typeof applyDeviceSetFromGroup === 'function') applyDeviceSetFromGroup(inventorySelected);
 
     // Close modal — user returns to welcome screen
     document.getElementById('inv-overlay').classList.add('hidden');
