@@ -213,7 +213,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .main{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
 .entry-bar{background:var(--bg2);border-bottom:.5px solid var(--border);padding:10px 24px;display:flex;gap:14px;align-items:center;flex-wrap:nowrap;flex-shrink:0;box-shadow:var(--shadow-sm);overflow-x:auto}
 .entry-field{display:flex;flex-direction:column;gap:5px;min-width:110px;flex:1}
-.entry-label{display:block;font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);white-space:nowrap}
+.entry-label{display:block;font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .entry-input{font-family:var(--font);font-size:14px;color:var(--text);background:var(--input-bg);border:.5px solid var(--border-strong);border-radius:var(--r);padding:7px 10px;outline:none;transition:all .2s ease;width:100%;letter-spacing:-0.01em}
 .entry-input-locked{background:var(--bg3);color:var(--text2);cursor:not-allowed;border-style:dashed;opacity:.92}
 .entry-input-locked:focus{border-color:var(--border-strong);box-shadow:none}
@@ -11441,6 +11441,40 @@ function _deviceIdForSet(group){
   return sn ? `${DEVICE_ID_PREFIX} (${sn})` : DEVICE_ID_PREFIX;
 }
 
+// Auto-fit text in the read-only display fields (Moderator, Device Set) so a long value —
+// e.g. the full "KC28-EVT-E2-B-M (serial)" DeviceId or a long name — shrinks to fit the
+// field instead of clipping. Only shrinks (never enlarges past the CSS base of 14/13px).
+function fitEntryInputFont(el){
+  if(!el) return;
+  el.style.fontSize = '';            // reset to CSS base so we can re-grow when there's room
+  const text = el.value || '';
+  if(!text) return;
+  const w = el.clientWidth;
+  if(!w) return;                     // not laid out / hidden — skip (re-run on resize)
+  const cs = getComputedStyle(el);
+  const base = parseFloat(cs.fontSize) || 14;
+  const avail = w - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 1;
+  if(avail <= 0) return;
+  const canvas = fitEntryInputFont._c || (fitEntryInputFont._c = document.createElement('canvas'));
+  const ctx = canvas.getContext('2d');
+  let size = base;
+  ctx.font = size + 'px ' + cs.fontFamily;
+  while(size > 9 && ctx.measureText(text).width > avail){
+    size -= 0.5;
+    ctx.font = size + 'px ' + cs.fontFamily;
+  }
+  if(size < base) el.style.fontSize = size + 'px';
+}
+function fitLockedEntryInputs(){
+  document.querySelectorAll('.entry-input-locked').forEach(fitEntryInputFont);
+}
+// Re-fit on resize (debounced) — field widths change with the viewport.
+let _fitEntryTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(_fitEntryTimer);
+  _fitEntryTimer = setTimeout(fitLockedEntryInputs, 120);
+});
+
 // Apply a chosen equipment set: fill the read-only Device Set display field and
 // the hidden backend DeviceId. `group` has {setId, setName, items:[{itemType, sn}]}.
 function applyDeviceSetFromGroup(group){
@@ -11453,7 +11487,7 @@ function applyDeviceSetFromGroup(group){
   globalData.deviceSetName = group.setName || group.setId || '';
   // Show the backend DeviceId in the read-only field: "KC28-EVT-E2-B-M (serial)"
   const dsEl = document.getElementById('g-device-set');
-  if(dsEl) dsEl.value = deviceId;
+  if(dsEl){ dsEl.value = deviceId; fitEntryInputFont(dsEl); }
   if(typeof syncGlobal === 'function') syncGlobal();
   if(typeof saveProgress === 'function') saveProgress();
 }
@@ -11475,6 +11509,8 @@ function refreshDeviceSetField(){
     // Already-derived DeviceId from a prior session/resume
     dsEl.value = globalData.device;
   }
+  // Fit both locked fields (Device Set + Moderator) once values are in place
+  fitLockedEntryInputs();
 }
 
 function renderInventoryTiles(){
