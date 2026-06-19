@@ -6106,7 +6106,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       </div>
     </div>
     <div class="sidebar-list" id="sidebar-list"></div>
-    <div class="sidebar-version">v 1.2 (061726)</div>
+    <div class="sidebar-version">v 1.2 (061926)</div>
   </div>
 
   <!-- Main -->
@@ -6383,7 +6383,7 @@ const TASK_VIDEOS = [
 ];
 
 // ── APP VERSION (searchable constant for version-poll notification) ──
-const APP_VERSION = "1.2.061726";
+const APP_VERSION = "1.2.061926";
 
 const TASKS=[
   {id:0,title:"Registration",cat:"Registration",distance:"",lux:"",duration:"",warn:"",note:"",isRegistration:true,steps:[]},
@@ -6403,6 +6403,20 @@ const TASKS=[
   {id:14,title:"Seated — 0–10 Lux at 8 ft",cat:"Seated",distance:"~8 ft",lux:"0–10",duration:"Auto 30 sec",warn:"",note:"",steps:["Place a chair approximately 8 ft from the device","Tap SET CAMERA → IR LED MODE → select ON, then IR LED POWER MODE → select MANUAL HIGH","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Press START SESSION → select NV Visual ID","Select Seated-0-10lux-8ft. Complete metadata.","Participant sits facing the camera","Measure lux on face. Confirm 0–10 lux. Enter value.","Start recording","Look straight for >3 seconds","Turn face to the left","Turn back, look straight for >3 seconds","Turn face to the right","Turn back, look straight for >3 seconds","Recording auto-ends after 30 seconds"]},
   {id:15,title:"Seated — 30–50 Lux at 4 ft",cat:"Seated",distance:"~4 ft",lux:"30–50",duration:"Auto 30 sec",warn:"",note:"",steps:["Place a chair approximately 4 ft from the device","Tap SET CAMERA → IR LED MODE → select OFF, then IR LED POWER MODE → select AUTO","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Press START SESSION → select NV Visual ID","Select Seated-30-50lux-4ft. Complete metadata.","Participant sits facing the camera","Measure lux on face. Confirm 30–50 lux. Enter value.","Start recording","Look straight for >3 seconds","Turn face to the left","Turn back, look straight for >3 seconds","Turn face to the right","Turn back, look straight for >3 seconds","Recording auto-ends after 30 seconds"]}
 ];
+
+// ── Task-count constants (single source of truth) ──────────────────────
+// Two DIFFERENT numbers that were previously conflated behind TASKS.length-1:
+//   KILO_TASK_COUNT       = how many NUMBERED tasks exist (TASKS[0] is
+//                           Registration, so real tasks = TASKS.length - 1).
+//                           Used as the denominator for progress / totals /
+//                           the task breakdown chart / per-mod task pips.
+//   KILO_COMPLETE_THRESHOLD = how many DISTINCT numbered tasks a participant
+//                           needs to count as "complete" in dashboard totals.
+//                           PINNED at 14 so 14+ (i.e. 14 or 15) counts as
+//                           complete — a 15th task was added without forcing
+//                           historical 14-task participants to fall short.
+const KILO_TASK_COUNT = (typeof TASKS !== 'undefined' && TASKS.length > 1) ? (TASKS.length - 1) : 14;
+const KILO_COMPLETE_THRESHOLD = 14;
 
 // ── State ──────────────────────────────────────────────
 const taskDone  = new Array(TASKS.length).fill(false);
@@ -6554,6 +6568,12 @@ let dashCharts = {};
 
 const DEFAULT_PA_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/6e31d0ca6c4240f0af0f6c4a3734b3aa/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=reuYXEx6a4HhPSV76DKzRtzcOE1XefhJlIQJ1vB23s0';
 let paUrl       = localStorage.getItem('centific_pa_url') || DEFAULT_PA_URL;
+
+// ── Schedule / Session-Notification (Stage a) ──────────────────────────
+// Read flow for the Schedule table (PrimaryModerator → today's session lookup).
+// Empty until the PA "Schedule, Read" flow is built — see handoff. All schedule
+// code below is written to degrade silently to a no-op while this is ''.
+const SCHEDULE_PA_READ_URL = '';  // ← paste the read-flow URL here
 let currentTheme= localStorage.getItem('centific_theme')||'dark';
 
 // ── Init ──────────────────────────────────────────────
@@ -6734,7 +6754,7 @@ async function postToPA(idx){
 function completedCount(){ return taskDone.slice(1).filter(Boolean).length; } // exclude reg task
 function updateProgress(){
   // Total = number of real tasks (TASKS[0] is Registration so subtract 1)
-  const total = (typeof TASKS !== 'undefined' && TASKS.length > 1) ? (TASKS.length - 1) : 14;
+  const total = KILO_TASK_COUNT;
   const c=completedCount(),pct=total > 0 ? Math.round(c/total*100) : 0;
   document.getElementById('nav-fill').style.width=pct+'%';
   document.getElementById('nav-label').textContent=c+'/'+total;
@@ -6958,8 +6978,8 @@ function renderDetail(i){
       <span class="meta-chip">${t.duration}</span>
       ${(function(){
         // IR LED POWER MODE chip: Manual | High for IR-ON tasks, Auto for IR-OFF tasks
-        const POWER_MANUAL_HIGH = [1, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
-        const POWER_AUTO        = [2, 3, 14];
+        const POWER_MANUAL_HIGH = [1, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+        const POWER_AUTO        = [2, 4, 15];
         if(POWER_MANUAL_HIGH.indexOf(t.id) !== -1){
           return `<span class="meta-chip">IR LED Power: Manual | High</span>`;
         } else if(POWER_AUTO.indexOf(t.id) !== -1){
@@ -6968,8 +6988,8 @@ function renderDetail(i){
         return '';
       })()}
       ${(function(){
-        const IR_ON  = [1, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
-        const IR_OFF = [2, 3, 14];
+        const IR_ON  = [1, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+        const IR_OFF = [2, 4, 15];
         if(IR_ON.indexOf(t.id) !== -1){
           return `<span class="ir-mode-chip on" onclick="showIRReminder()" title="How to enable IR Camera">
             <span class="ir-mode-chip-icon"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="3"/><path d="M3 8h2M11 8h2M8 3v2M8 11v2"/></svg></span>
@@ -7242,7 +7262,7 @@ function exportToExcel(){
   const rows=[['CENTIFIC DATA COLLECTION — SESSION EXPORT'],[],
     ['Participant ID',globalData.participant,'Operator',globalData.operator],
     ['Session Date',globalData.date,'Device ID',globalData.device],
-    ['Export Time',new Date().toLocaleString(),'Tasks Complete',completedCount()+' / '+((typeof TASKS !== 'undefined' && TASKS.length > 1) ? (TASKS.length - 1) : 14)],[],
+    ['Export Time',new Date().toLocaleString(),'Tasks Complete',completedCount()+' / '+KILO_TASK_COUNT],[],
     ['Task ID','Title','Category','Distance','Duration','Lux Reading','Status','Steps Done','Steps Total','Synced','Completed At','Notes']
   ];
   TASKS.forEach((t,i)=>{const d=taskData[i];rows.push([`TASK ${String(t.id).padStart(2,'0')}`,t.title,t.cat,t.distance,t.duration,d.lux||'',d.status,stepDone[i].filter(Boolean).length,t.steps.length,taskSynced[i]?'Yes':'No',d.completedAt||'',d.notes||'']);});
@@ -7491,6 +7511,212 @@ function onLoginSuccess(){
     if(btn){ btn.disabled=false; btn.innerHTML='<span id="login-btn-text">Sign In</span>'; }
   }
 }
+/* =====================================================================
+   SCHEDULE / SESSION-NOTIFICATION MODULE  (Stage a)
+   =====================================================================
+   On fresh moderator sign-in, look up today's row(s) in the Schedule
+   table where PrimaryModerator matches the logged-in moderator's name
+   (the same name shown in the locked "Moderator" entry-bar field, i.e.
+   currentUser.modName), case/space-insensitive, and show a popup.
+
+   Design notes / locked decisions:
+   - Match on PrimaryModerator ONLY, case/space-insensitive.
+   - All Excel columns are Text; SessionDate may arrive as an Excel serial
+     number (days since 1899-12-30) — converted here.
+   - SessionType is a LOCATION (e.g. "Redmond Session"), shown as a
+     location tag — never "in-person/remote".
+   - SessionTime column is OPTIONAL and not present yet. The reader looks
+     for it tolerantly; when absent we degrade to a date+location notice
+     and the timed reminder (stage c) stays off. Adding the column later
+     lights up timed behavior with NO code change.
+   - SCHEDULE_PA_READ_URL is '' until the read flow is built, so every
+     entry point below no-ops silently (no popup, no errors) until wired.
+   ===================================================================== */
+
+// Case/space-insensitive field getter (tolerant to column-name variants).
+function _schGetField(obj, names){
+  if(!obj) return '';
+  const norm = s => String(s).toLowerCase().replace(/\s+/g,'');
+  for(const n of names){
+    const want = norm(n);
+    for(const k of Object.keys(obj)){
+      if(norm(k) === want) return obj[k];
+    }
+  }
+  return '';
+}
+
+// Canonicalize a name for matching: trim, collapse spaces, lowercase.
+function _schCanon(s){ return String(s==null?'':s).trim().replace(/\s+/g,' ').toLowerCase(); }
+
+// Normalize a SessionDate value (string OR Excel serial) → "YYYY-MM-DD" (or '').
+function _schToYMD(v){
+  if(v===null || v===undefined || v==='') return '';
+  const s = String(v).trim();
+  // Already an ISO-ish date
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0,10);
+  // Excel serial number (days since 1899-12-30). Guard a sane range.
+  if(/^\d{1,6}(\.\d+)?$/.test(s)){
+    const serial = parseFloat(s);
+    if(serial > 20000 && serial < 80000){
+      const ed = new Date(Date.UTC(1899,11,30) + Math.round(serial)*86400000);
+      if(!isNaN(ed)){
+        return ed.getUTCFullYear()+'-'+String(ed.getUTCMonth()+1).padStart(2,'0')+'-'+String(ed.getUTCDate()).padStart(2,'0');
+      }
+    }
+  }
+  // Fallback: let Date parse it, render in local time.
+  const d = new Date(s);
+  if(!isNaN(d)) return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  return '';
+}
+
+// Today's date in PST/PDT as "YYYY-MM-DD" (team-wide reference date).
+function _schTodayYMD(){
+  try{
+    return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+  }catch(e){
+    const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+}
+
+// Pull a rows array out of whatever envelope the PA flow returns.
+function _schExtractArray(data){
+  if(!data) return [];
+  if(Array.isArray(data)) return data;
+  if(Array.isArray(data.value)) return data.value;
+  if(Array.isArray(data.rows))  return data.rows;
+  if(Array.isArray(data.body))  return data.body;
+  if(data.body && Array.isArray(data.body.value)) return data.body.value;
+  return [];
+}
+
+// Resilient read: POST {} to the schedule read flow, 2 tries. Returns [].
+async function _schReadRows(url){
+  if(!url) return [];                       // not wired yet → silent no-op
+  for(let attempt=0; attempt<2; attempt++){
+    try{
+      const res = await fetch(url, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},  // text/plain silently fails on PA
+        body:'{}'
+      });
+      if(!res.ok){ if(attempt===0) continue; return []; }
+      const text = await res.text();
+      let data; try{ data = JSON.parse(text); }catch(_){ return []; }
+      const rows = _schExtractArray(data);
+      if(rows.length === 256){
+        console.warn('[Schedule] Got exactly 256 rows — likely the PA pagination ceiling. Turn on pagination (threshold 5000) in the read flow.');
+      }
+      return rows;
+    }catch(e){
+      if(attempt===0) continue;
+      console.warn('[Schedule] read failed:', e && e.message);
+      return [];
+    }
+  }
+  return [];
+}
+
+// Normalize one raw schedule row into a clean session object.
+function _schParseRow(row){
+  const fullName = String(_schGetField(row, ['ParticipantName','Participant Name','participantName']) || '').trim();
+  const first    = fullName.split(/\s+/)[0] || '';
+  const timeRaw  = String(_schGetField(row, ['SessionTime','Session Time','sessionTime','Time']) || '').trim();
+  return {
+    date:      _schToYMD(_schGetField(row, ['SessionDate','Session Date','sessionDate'])),
+    status:    String(_schGetField(row, ['SessionStatus','Session Status','sessionStatus','Status']) || '').trim(),
+    location:  String(_schGetField(row, ['SessionType','Session Type','sessionType']) || '').trim(),
+    name:      fullName,
+    firstName: first,
+    email:     String(_schGetField(row, ['Email','email','ParticipantEmail']) || '').trim(),
+    phone:     String(_schGetField(row, ['PhoneNumber','Phone Number','phoneNumber','Phone']) || '').trim(),
+    moderator: String(_schGetField(row, ['PrimaryModerator','Primary Moderator','primaryModerator']) || '').trim(),
+    time:      timeRaw,        // '' when the column is absent/empty (current state)
+    _raw:      row
+  };
+}
+
+// Filter parsed rows to those for THIS moderator on the given YMD date.
+// Pure function (no DOM/fetch) so the Node harness can exercise it directly.
+function getTodaysSessionsForMod(rows, modName, todayYMD){
+  const wantMod = _schCanon(modName);
+  if(!wantMod) return [];
+  return (rows||[])
+    .map(_schParseRow)
+    .filter(s => _schCanon(s.moderator) === wantMod && s.date === todayYMD);
+}
+
+// Cache of today's sessions for this moderator (consumed by stage b pill).
+let _todaySessions = [];
+
+// Entry point: fetch, match, and show the popup. Safe to call when unwired.
+async function maybeShowTodaySessionPopup(){
+  try{
+    if(!SCHEDULE_PA_READ_URL) return;                 // not wired → nothing to do
+    if(!currentUser || !currentUser.modName) return;  // need a moderator name to match
+    if(currentUser.isAdmin) return;                   // admins use the landing chooser
+    const rows = await _schReadRows(SCHEDULE_PA_READ_URL);
+    const today = _schTodayYMD();
+    const sessions = getTodaysSessionsForMod(rows, currentUser.modName, today);
+    _todaySessions = sessions;                         // stash for the nav pill (stage b)
+    console.log('[Schedule] today =', today, '| modName =', currentUser.modName,
+                '| matched', sessions.length, 'session(s)');
+    if(sessions.length === 0) return;                  // no match → silent (no popup)
+    showTodaySessionPopup(sessions);
+  }catch(e){
+    console.warn('[Schedule] popup error:', e && e.message);
+  }
+}
+
+// Build + show the login session popup for one or more sessions.
+function showTodaySessionPopup(sessions){
+  const overlay = document.getElementById('session-popup-overlay');
+  if(!overlay) return;
+  const esc = (typeof escapeHtml === 'function') ? escapeHtml : (s=>String(s==null?'':s));
+  const n = sessions.length;
+  const sub = n === 1 ? 'You\u2019re meeting one participant' : ('You have ' + n + ' sessions today');
+
+  const cardHtml = sessions.map(s => {
+    const loc = s.location
+      ? '<span class="session-loc-tag"><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>' + esc(s.location) + '</span>'
+      : '';
+    const dateLabel = s.date
+      ? new Date(s.date + 'T00:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'})
+      : '\u2014';
+    // Time row only when the optional SessionTime column carried a value.
+    const timeRow = s.time
+      ? '<tr><td><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Time</td><td class="val">' + esc(s.time) + '</td></tr>'
+      : '';
+    const statusHtml = s.status
+      ? '<span class="session-status-chip">' + esc(s.status) + '</span>'
+      : '<span class="session-status-chip">Scheduled</span>';
+    return ''
+      + '<div class="session-card">'
+      +   '<div class="session-card-top">'
+      +     '<div class="session-name">' + esc(s.name || 'Participant') + '</div>'
+      +     loc
+      +   '</div>'
+      +   '<table class="session-meta">'
+      +     '<tr><td><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>Date</td><td class="val">' + esc(dateLabel) + '</td></tr>'
+      +     timeRow
+      +     '<tr><td><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>Status</td><td class="val">' + statusHtml + '</td></tr>'
+      +     (s.email ? '<tr><td><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>Email</td><td class="val email">' + esc(s.email) + '</td></tr>' : '')
+      +     (s.phone ? '<tr><td><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-3 2a11 11 0 0 0 5 5l2-3 5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>Phone</td><td class="val">' + esc(s.phone) + '</td></tr>' : '')
+      +   '</table>'
+      + '</div>';
+  }).join('');
+
+  overlay.querySelector('#session-popup-sub').textContent = sub;
+  overlay.querySelector('#session-popup-cards').innerHTML = cardHtml;
+  overlay.classList.remove('hidden');
+}
+
+function closeTodaySessionPopup(){
+  const overlay = document.getElementById('session-popup-overlay');
+  if(overlay) overlay.classList.add('hidden');
+}
+
 function _onLoginSuccessInner(){
   // If returning user (not first login), skip video requirement
   if(localStorage.getItem('centific_videos_seen_complete')){
@@ -7540,6 +7766,10 @@ function _onLoginSuccessInner(){
     if(typeof refreshDeviceSetField === 'function'){
       setTimeout(() => refreshDeviceSetField(), 300);
     }
+    // ── Today's-session popup (Stage a) ──
+    // Fires only here (fresh moderator sign-in, non-admin). No-ops silently
+    // until SCHEDULE_PA_READ_URL is wired. Deferred so login UI settles first.
+    setTimeout(() => { try{ maybeShowTodaySessionPopup(); }catch(e){ console.warn(e); } }, 700);
   }
   // ── Feedback inbox runs for ALL roles (admins included) ──
   // The recipient is matched by name/loginId, so anyone addressed gets the popup.
@@ -7853,7 +8083,7 @@ const REG_DEVICE_STEPS = [
   "Every participant must complete registration before performing any tasks. Participants must NOT wear a hat/baseball cap during registration.",
   "On Device A, swipe down → tap Settings icon.",
   "Go to START SESSION → select Registration.",
-  "Enter first name.",
+  "Enter their first name_vid and last name. (e.g. David_vid Kang)",
   "Fill out remaining fields and tap START.",
   "Participant stands/sits 2–4 ft from the device.",
   {t:"Perform the following head movements in sequence:",s:["Front → Left → Front → Right → Front → Upward → Front → Downward → Front"]},
@@ -7861,7 +8091,7 @@ const REG_DEVICE_STEPS = [
   {t:"Part 3 — Registration (IR Disabled)", section:true},
   {t:"⚠ Disable IR Camera before continuing. IR Camera must be DISABLED for this registration.", reminder:"irDisable"},
   "Go to START SESSION → select Registration.",
-  "Enter first name.",
+  "Enter their first name_vid and last name. (e.g. David_vid Kang)",
   "Fill out remaining fields and tap START.",
   "Participant stands/sits 2–4 ft from the device.",
   {t:"Perform the following head movements in sequence:",s:["Front → Left → Front → Right → Front → Upward → Front → Downward → Front"]},
@@ -8704,8 +8934,8 @@ function renderDashboard(){
   // as its own row, and requiring it wrongly dropped otherwise-complete people.
   // Counting DISTINCT task IDs means duplicate submissions never inflate the count
   // (a participant who re-submits Task 5 still only has Task 5 once).
-  // A participant counts as 1 complete when they have all 14 numbered tasks.
-  const COMPLETE_DISTINCT_TASKS = (typeof TASKS !== "undefined" && TASKS.length > 1) ? (TASKS.length - 1) : 14; // 14
+  // A participant counts as 1 complete when they have at least KILO_COMPLETE_THRESHOLD (14) numbered tasks.
+  const COMPLETE_DISTINCT_TASKS = KILO_COMPLETE_THRESHOLD; // 14 — 14+ distinct numbered tasks = complete
   const distinctTasksByPart = {};       // participantId -> Set of distinct NUMBERED taskIds (1..14)
   const rowCountByPart = {};            // participantId -> total rows (sessionIDs) — for diagnostics
   const allPartIds = new Set();         // every participant ID that appears at all
@@ -8741,8 +8971,8 @@ function renderDashboard(){
     if(!r.participantId) return;
     partTaskCount[r.participantId] = (partTaskCount[r.participantId]||0) + 1;
   });
-  // Threshold matches total task count (TASKS[0] is Registration, so real tasks count = TASKS.length - 1)
-  const taskCount = (typeof TASKS !== "undefined" && TASKS.length > 1) ? (TASKS.length - 1) : 14;
+  // Real numbered-task count (denominator); distinct from the completion threshold above.
+  const taskCount = KILO_TASK_COUNT;
   const fullyCompleteParticipants = uniqueParts.size; // alias — same value, used by older code
   const rate = uniquePartsAll.size > 0 ? Math.round(uniqueParts.size / uniquePartsAll.size * 100) : 0;
   const modParts={};
@@ -8762,11 +8992,11 @@ function renderDashboard(){
   const dailyP={};
   Object.keys(dailyPSet).forEach(k => { dailyP[k] = dailyPSet[k].size; });
   const sortedDates=Object.keys(dailyC).sort();
-  // Build Task Completion Breakdown — show ALL tasks (1-14) sorted ascending by task number
+  // Build Task Completion Breakdown — show ALL numbered tasks sorted ascending by task number
   // Map: taskId → { title, count }
   const taskBreakdown = {};
-  // Seed all 14 tasks so each appears even if 0 completions
-  for(let tid = 1; tid <= 14; tid++){
+  // Seed every numbered task so each appears even if 0 completions
+  for(let tid = 1; tid <= KILO_TASK_COUNT; tid++){
     const taskDef = (typeof TASKS !== 'undefined') ? TASKS.find(t => t.id === tid) : null;
     const title = taskDef ? `Task ${String(tid).padStart(2,'0')} — ${taskDef.title}` : `Task ${String(tid).padStart(2,'0')}`;
     taskBreakdown[tid] = { title, count: 0 };
@@ -8888,11 +9118,11 @@ function renderDashboard(){
 
     <div class="chart-card full" style="overflow-x:auto">
       <div class="chart-title">Moderator Summary</div>
-      <div class="chart-sub">Detailed breakdown by moderator — 1 participant = 12 tasks complete</div>
+      <div class="chart-sub">Detailed breakdown by moderator — 1 participant = 14+ tasks complete</div>
       <table class="detail-table">
         <thead><tr>
           <th>Moderator</th><th>Location</th>
-          <th>Participants</th><th>Fully Reached Task 14</th>
+          <th>Participants</th><th>Fully Complete (14+)</th>
           <th>Tasks Completed</th><th>Completion Rate</th>
         </tr></thead>
         <tbody>${modRows.map(r=>`<tr>
@@ -9279,9 +9509,9 @@ function renderViewToolbar(){
 // Aggregate a moderator's rows into per-participant records.
 // Returns [{participantId, participantName, sessionDate, tasksDone, totalTasks, status}]
 function aggregateParticipants(rows){
-  const TOTAL = (typeof TASKS !== 'undefined' && TASKS.length > 1) ? (TASKS.length - 1) : 14;
-  // Complete = all 14 distinct NUMBERED tasks (1..14). Registration (0) not required.
-  const COMPLETE_DISTINCT = TOTAL;
+  const TOTAL = KILO_TASK_COUNT; // display denominator = real numbered-task count (15)
+  // Complete = at least KILO_COMPLETE_THRESHOLD (14) distinct NUMBERED tasks. Registration (0) not required.
+  const COMPLETE_DISTINCT = KILO_COMPLETE_THRESHOLD;
   const byPid = {};
   rows.forEach(r => {
     const pid = (r.participantId || '').trim();
@@ -9481,7 +9711,7 @@ function renderModsCardView(mods, now, thirtyMinsAgo, showTeamStats){
     return ai - bi;
   });
 
-  const TASK_LABELS = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12','T13','T14'];
+  const TASK_LABELS = Array.from({length: KILO_TASK_COUNT}, (_, i) => 'T' + (i + 1));
 
   const cards = mods.map(mod=>{
     const rows = mod.rows;
@@ -9496,7 +9726,7 @@ function renderModsCardView(mods, now, thirtyMinsAgo, showTeamStats){
       if(tid === '' || tid === '0') return;
       (_distinctByPid[pid] || (_distinctByPid[pid] = new Set())).add(tid);
     });
-    const _completeThreshold = (typeof TASKS !== 'undefined' && TASKS.length > 1) ? (TASKS.length - 1) : 14;
+    const _completeThreshold = KILO_COMPLETE_THRESHOLD;
     const fullyDone = Object.keys(_distinctByPid).filter(pid => _distinctByPid[pid].size >= _completeThreshold).length;
 
     let isOnline = false;
@@ -9528,7 +9758,7 @@ function renderModsCardView(mods, now, thirtyMinsAgo, showTeamStats){
     const taskStatus = {};
     sessionRows.forEach(r=>{
       const id = parseInt(r.taskId)||0;
-      if(id>=1&&id<=14) taskStatus[id] = r.status;
+      if(id>=1&&id<=KILO_TASK_COUNT) taskStatus[id] = r.status;
     });
 
     const initials = mod.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
@@ -12837,6 +13067,95 @@ function openCollReminderForCurrent(){
         <svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>
         Reviewed and Uploaded
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Today's-Session Popup (Stage a) ── -->
+<style>
+.session-popup-overlay{
+  position:fixed;inset:0;z-index:620;
+  background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.session-popup-overlay.hidden{display:none!important}
+.session-popup-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);
+  border-radius:24px;width:100%;max-width:440px;
+  box-shadow:var(--shadow-lg);overflow:hidden;
+  display:flex;flex-direction:column;max-height:calc(100vh - 48px);
+  animation:fadeUp .4s cubic-bezier(.34,1.1,.64,1);
+}
+.session-popup-header{display:flex;align-items:center;gap:12px;padding:22px 24px 14px}
+.session-popup-icon{
+  width:42px;height:42px;border-radius:50%;flex-shrink:0;
+  background:rgba(239,67,179,.12);border:.5px solid rgba(239,67,179,.3);
+  display:flex;align-items:center;justify-content:center;
+}
+.session-popup-icon svg{width:21px;height:21px;stroke:var(--pink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.session-popup-title{font-size:17px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.session-popup-sub{font-size:13px;color:var(--text2);letter-spacing:-0.01em;margin-top:1px}
+.session-popup-body{padding:4px 24px 0;overflow-y:auto}
+.session-card{
+  background:var(--bg2);border:.5px solid var(--border);
+  border-radius:var(--rl);padding:15px 16px;margin-bottom:12px;
+}
+.session-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.session-name{font-size:18px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.session-loc-tag{
+  display:inline-flex;align-items:center;gap:4px;flex-shrink:0;
+  font-size:11px;font-weight:600;letter-spacing:.01em;
+  padding:3px 9px;border-radius:99px;
+  background:rgba(239,67,179,.1);color:var(--pink);border:.5px solid rgba(239,67,179,.25);
+}
+.session-loc-tag svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.session-meta{width:100%;border-collapse:collapse;font-size:13px}
+.session-meta td{padding:5px 0;vertical-align:middle}
+.session-meta td:first-child{color:var(--text2);white-space:nowrap}
+.session-meta td.val{text-align:right;color:var(--text);font-weight:500}
+.session-meta td.val.email{color:var(--pink);word-break:break-all}
+.session-meta svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px;margin-right:7px}
+.session-status-chip{
+  display:inline-block;font-size:11px;font-weight:600;letter-spacing:.01em;
+  padding:2px 9px;border-radius:99px;background:rgba(239,67,179,.1);color:var(--pink);
+}
+.session-popup-note{
+  display:flex;gap:10px;align-items:flex-start;
+  background:var(--amber-bg);border:.5px solid #f5d08a;
+  border-radius:var(--r);padding:11px 13px;margin:2px 0 4px;
+}
+.session-popup-note svg{width:16px;height:16px;stroke:var(--amber-text);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-top:1px}
+.session-popup-note p{font-size:12px;color:var(--amber-text);line-height:1.5;font-weight:500}
+.session-popup-actions{padding:14px 24px 22px;display:flex}
+.session-popup-btn{
+  flex:1;padding:13px;border-radius:var(--r);border:none;cursor:pointer;
+  font-family:var(--font);font-size:15px;font-weight:600;letter-spacing:-0.01em;
+  background:var(--pink);color:#fff;transition:all .2s;
+}
+.session-popup-btn:hover{background:var(--pink-dim,#c4359a);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.28)}
+.session-popup-btn:active{transform:scale(.98)}
+</style>
+<div class="session-popup-overlay hidden" id="session-popup-overlay" onclick="if(event.target===this)closeTodaySessionPopup()">
+  <div class="session-popup-modal">
+    <div class="session-popup-header">
+      <div class="session-popup-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>
+      </div>
+      <div>
+        <div class="session-popup-title">Today's session</div>
+        <div class="session-popup-sub" id="session-popup-sub">You have a session today</div>
+      </div>
+    </div>
+    <div class="session-popup-body">
+      <div id="session-popup-cards"></div>
+      <div class="session-popup-note">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+        <p>Please contact the participant before the session time. If they're a no-show or cancel last minute, notify management and update the record in One Data.</p>
+      </div>
+    </div>
+    <div class="session-popup-actions">
+      <button class="session-popup-btn" onclick="closeTodaySessionPopup()">Got it</button>
     </div>
   </div>
 </div>
