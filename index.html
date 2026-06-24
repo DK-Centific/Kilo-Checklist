@@ -5718,6 +5718,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .fb-send-btn:disabled,.rt-submit-btn:disabled{opacity:.6;cursor:not-allowed}
 
 /* ── Rating scale ── */
+.rt-cat-label{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);text-align:left;margin:4px 0 6px}
+.rt-cats{display:flex;gap:6px;margin-bottom:14px}
+.rt-cat{
+  flex:1;padding:9px 4px;border-radius:9px;
+  border:.5px solid var(--border-strong);background:var(--bg2);
+  font-family:var(--font);font-size:12px;font-weight:600;color:var(--text2);
+  cursor:pointer;transition:all .15s;line-height:1.2;letter-spacing:-0.01em;
+}
+.rt-cat:hover{background:rgba(245,158,11,.12);border-color:var(--amber);color:var(--amber)}
+.rt-cat.active{background:var(--amber);border-color:var(--amber);color:#fff}
 .rt-scale{display:flex;gap:5px;justify-content:center;margin-bottom:10px;flex-wrap:wrap}
 .rt-num{
   width:34px;height:38px;border-radius:9px;
@@ -5753,6 +5763,79 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .mod-rating-display strong{color:var(--amber);font-weight:700}
 .mod-rating-display.none-yet{background:rgba(115,115,115,.08);border-color:rgba(115,115,115,.2);color:var(--text3)}
 .mod-rating-display.none-yet svg{stroke:var(--text3);fill:none}
+
+/* ── Per-category breakdown chips (Team card + List) ── */
+.rt-breakdown{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.rt-bd-chip{
+  font-size:10px;font-weight:600;letter-spacing:.01em;
+  padding:2px 8px;border-radius:99px;
+  background:rgba(245,158,11,.1);color:var(--amber);border:.5px solid rgba(245,158,11,.25);
+}
+.rt-bd-chip b{font-weight:700}
+
+/* ── List view: rating cell ── */
+.mods-list-table .ml-rate-cell{white-space:nowrap}
+.ml-rate-btn{
+  display:inline-flex;align-items:center;gap:4px;margin-top:5px;
+  padding:4px 10px;border-radius:8px;cursor:pointer;
+  font-family:var(--font);font-size:11px;font-weight:600;letter-spacing:-0.01em;
+  background:rgba(245,158,11,.1);border:.5px solid rgba(245,158,11,.3);color:var(--amber);
+  transition:all .18s;
+}
+.ml-rate-btn:hover{background:rgba(245,158,11,.2);transform:translateY(-1px)}
+.ml-rate-btn svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ml-bd{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
+.ml-bd span{font-size:9.5px;font-weight:600;color:var(--text2);background:var(--bg3);border-radius:99px;padding:1px 6px}
+
+/* ── "View all ratings" toolbar button ── */
+.rt-history-btn{
+  margin-left:auto;display:inline-flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:10px;cursor:pointer;
+  font-family:var(--font);font-size:12px;font-weight:600;letter-spacing:-0.01em;
+  background:rgba(245,158,11,.1);border:.5px solid rgba(245,158,11,.3);color:var(--amber);
+  transition:all .18s;
+}
+.rt-history-btn:hover{background:rgba(245,158,11,.2);transform:translateY(-1px)}
+.rt-history-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Ratings History overlay ── */
+.rth-overlay{
+  position:fixed;inset:0;z-index:640;background:rgba(0,0,0,.55);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeUp .25s cubic-bezier(.4,0,.2,1);
+}
+.rth-overlay.hidden{display:none!important}
+.rth-modal{
+  background:var(--card-bg);border:.5px solid var(--border-strong);border-radius:20px;
+  width:100%;max-width:640px;max-height:calc(100vh - 48px);
+  box-shadow:var(--shadow-lg);display:flex;flex-direction:column;overflow:hidden;
+  animation:fadeUp .35s cubic-bezier(.34,1.1,.64,1);
+}
+.rth-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 14px;border-bottom:.5px solid var(--border)}
+.rth-title{font-size:17px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.rth-sub{font-size:12px;color:var(--text2);margin-top:1px}
+.rth-close{cursor:pointer;color:var(--text3);font-size:20px;line-height:1;padding:4px}
+.rth-close:hover{color:var(--text)}
+.rth-filters{display:flex;gap:6px;padding:12px 22px;border-bottom:.5px solid var(--border);flex-wrap:wrap}
+.rth-fbtn{
+  padding:5px 12px;border-radius:99px;cursor:pointer;
+  font-family:var(--font);font-size:11px;font-weight:600;letter-spacing:.01em;
+  background:var(--bg2);border:.5px solid var(--border-strong);color:var(--text2);transition:all .15s;
+}
+.rth-fbtn:hover{color:var(--text)}
+.rth-fbtn.active{background:var(--amber);border-color:var(--amber);color:#fff}
+.rth-body{flex:1;overflow-y:auto;padding:6px 0}
+.rth-row{padding:12px 22px;border-bottom:.5px solid var(--border)}
+.rth-row:last-child{border-bottom:none}
+.rth-row-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rth-mod{font-weight:600;color:var(--text);font-size:14px}
+.rth-cat{font-size:10px;font-weight:600;letter-spacing:.02em;padding:2px 9px;border-radius:99px;background:rgba(245,158,11,.12);color:var(--amber);border:.5px solid rgba(245,158,11,.25)}
+.rth-cat.uncat{background:rgba(115,115,115,.12);color:var(--text3);border-color:rgba(115,115,115,.2)}
+.rth-score{font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;background:rgba(239,67,179,.12);color:var(--pink)}
+.rth-meta{margin-left:auto;font-size:11px;color:var(--text3);white-space:nowrap}
+.rth-notes{font-size:12px;color:var(--text2);line-height:1.5;margin-top:6px}
+.rth-empty{text-align:center;color:var(--text3);font-size:13px;padding:40px 20px}
 
 /* ── Moderator feedback popup ── */
 .inbox-popup-modal{
@@ -9503,6 +9586,10 @@ function renderViewToolbar(){
         List
       </button>
     </div>
+    <button class="rt-history-btn" onclick="openRatingsHistory()" title="View every rating with notes, latest first">
+      <svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg>
+      View all ratings
+    </button>
   </div>`;
 }
 
@@ -9612,7 +9699,7 @@ function renderModsListView(mods, now, thirtyMinsAgo){
     }).join('');
 
     const detailPanel = `<tr class="mlx-detail-row" id="mlx-detail-${safe}" style="display:${isOpen?'':'none'}">
-      <td colspan="6" class="mlx-detail-cell">
+      <td colspan="7" class="mlx-detail-cell">
         <div class="mlx-detail-wrap">
           ${visible.length ? `<table class="mlx-sub-table">
             <thead><tr><th>Participant ID</th><th>Name</th><th>Session Date</th><th>Tasks</th><th>Status</th></tr></thead>
@@ -9622,17 +9709,27 @@ function renderModsListView(mods, now, thirtyMinsAgo){
       </td>
     </tr>`;
 
+    const safeNm = mod.name.replace(/'/g,"\\'");
+    const loginIdAttr = (mod.modId || '').replace(/'/g,"\\'");
+    const rtL = (typeof getModRating === 'function') ? getModRating(mod.name, mod.modId) : null;
+    const bdL = (typeof getModRatingBreakdown === 'function') ? getModRatingBreakdown(mod.name, mod.modId) : [];
+    const ratingInner = (rtL && rtL.count > 0)
+      ? `<span class="ml-rating-val">${rtL.avg}</span> <span class="ml-rating-none" style="font-style:normal">/10 (${rtL.count})</span>${bdL.length ? `<div class="ml-bd">${bdL.map(c => `<span>${c.short} ${c.avg}</span>`).join('')}</div>` : ''}`
+      : `<span class="ml-rating-none">No ratings</span>`;
+    const rateBtn = `<button class="ml-rate-btn" onclick="event.stopPropagation(); openRatingModal('${safeNm}','${loginIdAttr}')"><svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg>Rate</button>`;
+
     return `<tr class="mlx-mod-row${isOpen?' open':''}" onclick="toggleModRow('${key.replace(/'/g,"\\'")}')">
         <td class="mlx-chev-cell"><span class="mlx-chev${isOpen?' open':''}" id="mlx-chev-${safe}"><svg viewBox="0 0 16 16"><polyline points="5,3 10,8 5,13"/></svg></span></td>
         <td class="ml-name">${mod.name}</td>
         <td class="ml-loc">${mod.location}</td>
         <td class="ml-num">${unique}</td>
         <td class="ml-num">${reached14}</td>
+        <td class="ml-rate-cell"><div>${ratingInner}</div>${rateBtn}</td>
         <td class="ml-status ${isOnline?'online':'offline'}"><span class="dot"></span>${isOnline?'Active':'Inactive'}</td>
       </tr>${detailPanel}`;
   }).join('');
 
-  const tableBody = rows.trim() ? rows : `<tr><td colspan="6" class="mlx-empty-sub" style="padding:24px">No moderators match the current filter.</td></tr>`;
+  const tableBody = rows.trim() ? rows : `<tr><td colspan="7" class="mlx-empty-sub" style="padding:24px">No moderators match the current filter.</td></tr>`;
 
   return filterBar + `<table class="mods-list-table mlx-table">
     <thead><tr>
@@ -9641,6 +9738,7 @@ function renderModsListView(mods, now, thirtyMinsAgo){
       <th>Location</th>
       <th>Participants</th>
       <th>Completed</th>
+      <th>Rating</th>
       <th>Status</th>
     </tr></thead>
     <tbody>${tableBody}</tbody>
@@ -9810,9 +9908,13 @@ function renderModsCardView(mods, now, thirtyMinsAgo, showTeamStats){
     if(showTeamStats){
       const rt = (typeof getModRating === 'function') ? getModRating(mod.name, mod.modId) : null;
       if(rt && rt.count > 0){
-        ratingHtml = `<div class="mod-rating-display">
-          <svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg>
-          <span>Average rating: <strong>${rt.avg} / 10</strong> (${rt.count} rating${rt.count!==1?'s':''})</span>
+        const bd = (typeof getModRatingBreakdown === 'function') ? getModRatingBreakdown(mod.name, mod.modId) : [];
+        const bdHtml = bd.length ? `<div class="rt-breakdown">${bd.map(c => `<span class="rt-bd-chip">${c.short} <b>${c.avg}</b> (${c.count})</span>`).join('')}</div>` : '';
+        ratingHtml = `<div class="mod-rating-display" style="flex-direction:column;align-items:stretch">
+          <span style="display:flex;align-items:center;gap:6px">
+            <svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg>
+            Average rating: <strong>${rt.avg} / 10</strong> (${rt.count} rating${rt.count!==1?'s':''})
+          </span>${bdHtml}
         </div>`;
       } else {
         ratingHtml = `<div class="mod-rating-display none-yet">
@@ -12348,6 +12450,39 @@ async function submitFeedback(){
 // ══════════════════════════════════════════════════════════
 // ── ADMIN: RATE MODERATOR ─────────────────────────────────
 // ══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+// ── RATING CATEGORIES (Admin / Performance HR / Performance QA) ──
+// Category is encoded into the ratingId as RT-<CODE>-<ts> so the read
+// side can parse it with NO backend/Excel change. We also send a plain
+// `category` field in the payload for forward-compat if a column is added.
+const RATING_CATEGORIES = [
+  { code:'ADMIN', label:'Admin',            short:'Admin' },
+  { code:'HR',    label:'Performance (HR)', short:'HR'    },
+  { code:'QA',    label:'Performance (QA)', short:'QA'    },
+];
+const RATING_UNCAT = { code:'UNCAT', label:'Uncategorized', short:'—' };
+
+function ratingCategoryByCode(code){
+  const c = String(code||'').toUpperCase().trim();
+  return RATING_CATEGORIES.find(x => x.code === c) || null;
+}
+// Derive the category {code,label,short} for a raw rating row.
+// Priority: explicit category field → ratingId prefix → Uncategorized.
+function parseRatingCategory(row){
+  if(!row) return RATING_UNCAT;
+  const explicit = String(_frField(row, ['category','Category','ratingCategory','RatingCategory','categoryId','CategoryId']) || '').trim();
+  if(explicit){
+    const byCode = ratingCategoryByCode(explicit);
+    if(byCode) return byCode;
+    const byLabel = RATING_CATEGORIES.find(x => x.label.toLowerCase() === explicit.toLowerCase());
+    if(byLabel) return byLabel;
+  }
+  const id = String(_frField(row, ['ratingId','RatingId','ratingid']) || '');
+  const m = id.match(/^RT-(ADMIN|HR|QA)-/i);
+  if(m) return ratingCategoryByCode(m[1]) || RATING_UNCAT;
+  return RATING_UNCAT;
+}
+
 let _rtTargetMod = null;
 
 function openRatingModal(modName, modLoginId){
@@ -12357,7 +12492,11 @@ function openRatingModal(modName, modLoginId){
   document.getElementById('rt-target').textContent = modName;
   document.getElementById('rt-error').textContent = '';
   _rtSelected = 0;
+  _rtCategory = '';
+  renderRatingCategories();
   renderRatingScale();
+  // Reset notes each open
+  const nt = document.getElementById('rt-notes'); if(nt) nt.value = '';
   ov.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
 }
@@ -12367,6 +12506,20 @@ function closeRatingModal(){
   document.body.style.overflow = '';
 }
 let _rtSelected = 0;
+let _rtCategory = '';   // selected category CODE (ADMIN/HR/QA)
+// Render the three category segmented buttons.
+function renderRatingCategories(){
+  const wrap = document.getElementById('rt-cats');
+  if(!wrap) return;
+  wrap.innerHTML = RATING_CATEGORIES.map(c =>
+    `<button type="button" class="rt-cat${_rtCategory === c.code ? ' active' : ''}" onclick="selectRatingCategory('${c.code}')">${escapeHtml(c.label)}</button>`
+  ).join('');
+}
+function selectRatingCategory(code){
+  _rtCategory = code;
+  renderRatingCategories();
+  renderRatingScale();
+}
 function renderRatingScale(){
   const wrap = document.getElementById('rt-scale');
   if(!wrap) return;
@@ -12376,7 +12529,11 @@ function renderRatingScale(){
   }
   wrap.innerHTML = h;
   const lbl = document.getElementById('rt-selected-label');
-  if(lbl) lbl.textContent = _rtSelected > 0 ? (_rtSelected + ' / 10') : 'Select a score';
+  if(lbl){
+    const cat = ratingCategoryByCode(_rtCategory);
+    const catTxt = cat ? cat.short + ' · ' : '';
+    lbl.textContent = _rtSelected > 0 ? (catTxt + _rtSelected + ' / 10') : (cat ? 'Select a score' : 'Pick a category, then a score');
+  }
 }
 function hoverRating(n){
   const btns = document.querySelectorAll('#rt-scale .rt-num');
@@ -12391,6 +12548,8 @@ function selectRating(n){
 }
 async function submitRating(){
   const errEl = document.getElementById('rt-error');
+  const cat = ratingCategoryByCode(_rtCategory);
+  if(!cat){ if(errEl) errEl.textContent = 'Please choose a category (Admin / HR / QA).'; return; }
   if(!_rtSelected || _rtSelected < 1){ if(errEl) errEl.textContent = 'Please select a score 1-10.'; return; }
   if(!_rtTargetMod){ if(errEl) errEl.textContent = 'No moderator selected.'; return; }
   const notes = (document.getElementById('rt-notes').value || '').trim();
@@ -12401,13 +12560,17 @@ async function submitRating(){
   if(!loginId && _rtTargetMod.name){
     loginId = _rtTargetMod.name.split(/\s+/)[0] + '-Kilo';
   }
+  const ratedAt = new Date().toISOString();
   const payload = {
-    ratingId: 'RT-' + Date.now(),
+    // Category encoded into the ratingId → parseable on read with no schema change
+    ratingId: 'RT-' + cat.code + '-' + Date.now(),
     modLoginId: loginId,
     modName: _rtTargetMod.name,
     adminName: (currentUser && currentUser.modName) || 'Admin',
     rating: _rtSelected,
-    ratedAt: new Date().toISOString(),
+    category: cat.label,      // forward-compat: populates a `category` column if one exists
+    categoryId: cat.code,     // forward-compat machine-readable code
+    ratedAt: ratedAt,
     notes: notes
   };
   console.log('[Rating] Submitting:', payload);
@@ -12418,13 +12581,21 @@ async function submitRating(){
     clearTimeout(timer);
     if(!res.ok && res.status !== 200 && res.status !== 202) throw new Error('HTTP ' + res.status);
     console.log('[Rating] Submitted OK');
-    // Optimistic cache update
+    // Optimistic cache update — store the full record (rating + category) so
+    // per-category averages and the history view reflect it immediately.
+    const rec = { modName: _rtTargetMod.name, modLoginId: loginId, rating: _rtSelected,
+                  categoryCode: cat.code, categoryLabel: cat.label, ratedAt: ratedAt,
+                  adminName: payload.adminName, notes: notes, ratingId: payload.ratingId };
     if(!window.modRatings) window.modRatings = {};
-    const key = (loginId || _rtTargetMod.name).toLowerCase();
-    if(!window.modRatings[key]) window.modRatings[key] = [];
-    window.modRatings[key].push(_rtSelected);
+    [String(loginId||'').toLowerCase().trim(), String(_rtTargetMod.name||'').toLowerCase().trim()].forEach(key => {
+      if(!key) return;
+      if(!window.modRatings[key]) window.modRatings[key] = [];
+      window.modRatings[key].push({ rating: _rtSelected, categoryCode: cat.code });
+    });
+    if(!window.modRatingsRecords) window.modRatingsRecords = [];
+    window.modRatingsRecords.push(rec);
     closeRatingModal();
-    if(typeof showToast === 'function') showToast('Rated ' + _rtTargetMod.name + ': ' + _rtSelected + '/10 ✓');
+    if(typeof showToast === 'function') showToast('Rated ' + _rtTargetMod.name + ' (' + cat.short + '): ' + _rtSelected + '/10 ✓');
     if(typeof renderModeratorsPage === 'function') renderModeratorsPage();
   } catch(err){
     console.error('[Rating] Submit error:', err);
@@ -12433,8 +12604,9 @@ async function submitRating(){
   }
 }
 
-// ----- Load all ratings (admin side) → build avg map keyed by loginId AND name -----
+// ----- Load all ratings (admin side) → records + per-key arrays w/ category -----
 window.modRatings = window.modRatings || {};
+window.modRatingsRecords = window.modRatingsRecords || [];  // full history
 async function loadModRatings(){
   try {
     const res = await fetch(RATING_READ_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' });
@@ -12443,25 +12615,106 @@ async function loadModRatings(){
     let data; try { data = JSON.parse(text); } catch(e){ return; }
     const rows = _frExtractRows(data, ['ratings','rows','value']);
     const map = {};
+    const records = [];
     rows.forEach(r => {
       const loginId = String(_frField(r, ['modLoginId','ModLoginId']) || '').toLowerCase().trim();
       const name    = String(_frField(r, ['modName','ModName']) || '').toLowerCase().trim();
       const rating  = parseInt(_frField(r, ['rating','Rating']), 10);
       if(isNaN(rating)) return;
-      // Key by both loginId and name so lookup works either way
+      const cat = parseRatingCategory(r);
+      // Key by both loginId and name so lookup works either way (store {rating,categoryCode})
       [loginId, name].forEach(key => {
         if(!key) return;
         if(!map[key]) map[key] = [];
-        map[key].push(rating);
+        map[key].push({ rating: rating, categoryCode: cat.code });
+      });
+      records.push({
+        modName:      String(_frField(r, ['modName','ModName']) || '').trim(),
+        modLoginId:   String(_frField(r, ['modLoginId','ModLoginId']) || '').trim(),
+        rating:       rating,
+        categoryCode: cat.code,
+        categoryLabel:cat.label,
+        adminName:    String(_frField(r, ['adminName','AdminName']) || '').trim(),
+        ratedAt:      String(_frField(r, ['ratedAt','RatedAt']) || '').trim(),
+        notes:        String(_frField(r, ['notes','Notes']) || '').trim(),
+        ratingId:     String(_frField(r, ['ratingId','RatingId']) || '').trim()
       });
     });
     window.modRatings = map;
-    console.log('[Rating] Loaded ratings for', Object.keys(map).length, 'keys');
+    window.modRatingsRecords = records;
+    console.log('[Rating] Loaded', records.length, 'ratings across', Object.keys(map).length, 'keys');
     if(typeof renderModeratorsPage === 'function'){
       const c = document.getElementById('mods-grid-container');
       if(c && c.innerHTML) renderModeratorsPage();
     }
   } catch(err){ console.error('[Rating] Load error:', err); }
+}
+
+// Normalize a cached entry to a number (supports legacy number entries + new objects).
+function _rtVal(e){ return (e && typeof e === 'object') ? e.rating : e; }
+function _rtCode(e){ return (e && typeof e === 'object') ? e.categoryCode : 'UNCAT'; }
+
+// ══════════════════════════════════════════════════════════
+// ── ALL RATINGS HISTORY (global, latest → oldest) ─────────
+let _rthFilter = 'ALL';
+function openRatingsHistory(){
+  const ov = document.getElementById('rth-overlay');
+  if(!ov) return;
+  _rthFilter = 'ALL';
+  // Lazy-load if we don't have records yet, then re-render.
+  if((!window.modRatingsRecords || !window.modRatingsRecords.length) && typeof loadModRatings === 'function'){
+    loadModRatings().then(() => renderRatingsHistory());
+  }
+  renderRatingsHistory();
+  ov.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+function closeRatingsHistory(){
+  const ov = document.getElementById('rth-overlay');
+  if(ov) ov.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+function setRatingsHistoryFilter(code){ _rthFilter = code; renderRatingsHistory(); }
+function renderRatingsHistory(){
+  const body = document.getElementById('rth-body');
+  const fwrap = document.getElementById('rth-filters');
+  const sub = document.getElementById('rth-sub');
+  if(!body) return;
+  const recs = (window.modRatingsRecords || []).slice();
+  // Sort latest → oldest by epoch (never lexical); undated sink to the bottom.
+  recs.sort((a,b) => (Date.parse(b.ratedAt) || 0) - (Date.parse(a.ratedAt) || 0));
+
+  if(fwrap){
+    const cats = [{code:'ALL', short:'All'}].concat(RATING_CATEGORIES.map(c => ({code:c.code, short:c.short})));
+    if(recs.some(r => r.categoryCode === 'UNCAT')) cats.push({code:'UNCAT', short:'Uncat.'});
+    fwrap.innerHTML = cats.map(c =>
+      `<button class="rth-fbtn${_rthFilter===c.code?' active':''}" onclick="setRatingsHistoryFilter('${c.code}')">${c.short}</button>`
+    ).join('');
+  }
+  const filtered = _rthFilter === 'ALL' ? recs : recs.filter(r => r.categoryCode === _rthFilter);
+  if(sub) sub.textContent = filtered.length + ' rating' + (filtered.length!==1?'s':'') + ' · latest first';
+  if(!filtered.length){
+    body.innerHTML = `<div class="rth-empty">No ratings yet${_rthFilter!=='ALL'?' in this category':''}.</div>`;
+    return;
+  }
+  body.innerHTML = filtered.map(r => {
+    const cat = ratingCategoryByCode(r.categoryCode);
+    const catLabel = cat ? cat.label : (r.categoryLabel || 'Uncategorized');
+    const isUncat = !cat;
+    // ratedAt is a full ISO timestamp (an instant), so local date formatting is safe.
+    const dt = r.ratedAt ? new Date(r.ratedAt) : null;
+    const dStr = (dt && !isNaN(dt)) ? dt.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}) : '';
+    const by = r.adminName ? (' · by ' + escapeHtml(r.adminName)) : '';
+    return `<div class="rth-row">
+      <div class="rth-row-top">
+        <span class="rth-mod">${escapeHtml(r.modName || '—')}</span>
+        <span class="rth-cat${isUncat?' uncat':''}">${escapeHtml(catLabel)}</span>
+        <span class="rth-score">${r.rating} / 10</span>
+        <span class="rth-meta">${escapeHtml(dStr)}${by}</span>
+      </div>
+      ${r.notes ? `<div class="rth-notes">${escapeHtml(r.notes)}</div>` : ''}
+    </div>`;
+  }).join('');
 }
 
 // Get avg rating for a mod (by name or loginId) → {avg, count} or null
@@ -12472,12 +12725,33 @@ function getModRating(modName, modLoginId){
   if(modName) keys.push(String(modName).toLowerCase().trim());
   for(const k of keys){
     if(window.modRatings[k] && window.modRatings[k].length){
-      const arr = window.modRatings[k];
+      const arr = window.modRatings[k].map(_rtVal).filter(n => !isNaN(n));
+      if(!arr.length) continue;
       const avg = arr.reduce((a,b)=>a+b,0) / arr.length;
       return { avg: Math.round(avg*10)/10, count: arr.length };
     }
   }
   return null;
+}
+
+// Per-category breakdown for a mod → [{code,short,avg,count}] for categories with ratings.
+function getModRatingBreakdown(modName, modLoginId){
+  if(!window.modRatings) return [];
+  const keys = [];
+  if(modLoginId) keys.push(String(modLoginId).toLowerCase().trim());
+  if(modName) keys.push(String(modName).toLowerCase().trim());
+  let entries = null;
+  for(const k of keys){ if(window.modRatings[k] && window.modRatings[k].length){ entries = window.modRatings[k]; break; } }
+  if(!entries) return [];
+  const out = [];
+  RATING_CATEGORIES.forEach(c => {
+    const vals = entries.filter(e => _rtCode(e) === c.code).map(_rtVal).filter(n => !isNaN(n));
+    if(vals.length){
+      const avg = vals.reduce((a,b)=>a+b,0) / vals.length;
+      out.push({ code:c.code, short:c.short, avg: Math.round(avg*10)/10, count: vals.length });
+    }
+  });
+  return out;
 }
 
 
@@ -13433,11 +13707,28 @@ function openCollReminderForCurrent(){
     </div>
     <div class="rt-title">Rate Performance</div>
     <div class="rt-sub">Rating <strong id="rt-target">Moderator</strong> — 10 is best</div>
+    <div class="rt-cat-label">Category</div>
+    <div class="rt-cats" id="rt-cats"></div>
     <div class="rt-scale" id="rt-scale"></div>
     <div class="rt-selected-label" id="rt-selected-label">Select a score</div>
     <textarea class="rt-notes" id="rt-notes" placeholder="Optional notes…" rows="2"></textarea>
     <div class="rt-error" id="rt-error"></div>
     <button class="rt-submit-btn" id="rt-submit-btn" onclick="submitRating()">Submit Rating</button>
+  </div>
+</div>
+
+<!-- ── Admin: All Ratings History ── -->
+<div class="rth-overlay hidden" id="rth-overlay" onclick="if(event.target===this)closeRatingsHistory()">
+  <div class="rth-modal">
+    <div class="rth-header">
+      <div>
+        <div class="rth-title">All ratings</div>
+        <div class="rth-sub" id="rth-sub">Latest first</div>
+      </div>
+      <div class="rth-close" onclick="closeRatingsHistory()">✕</div>
+    </div>
+    <div class="rth-filters" id="rth-filters"></div>
+    <div class="rth-body" id="rth-body"></div>
   </div>
 </div>
 
