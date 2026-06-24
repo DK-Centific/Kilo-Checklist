@@ -5837,6 +5837,27 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .rth-notes{font-size:12px;color:var(--text2);line-height:1.5;margin-top:6px}
 .rth-empty{text-align:center;color:var(--text3);font-size:13px;padding:40px 20px}
 
+/* ── Feedback history rows ── */
+.fbh-row{padding:12px 22px;border-bottom:.5px solid var(--border)}
+.fbh-row:last-child{border-bottom:none}
+.fbh-row-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fbh-from{font-size:12px;color:var(--text2)}
+.fbh-from strong{color:var(--text);font-weight:600}
+.fbh-meta{margin-left:auto;font-size:11px;color:var(--text3);white-space:nowrap}
+.fbh-msg{font-size:13px;color:var(--text2);line-height:1.55;margin-top:6px}
+.fbh-badge{font-size:10px;font-weight:600;letter-spacing:.02em;padding:2px 9px;border-radius:99px}
+.fbh-badge.unread{background:var(--amber-bg);color:var(--amber-text);border:.5px solid #f5d08a}
+.fbh-badge.read{background:rgba(59,130,246,.12);color:var(--blue,#3b82f6);border:.5px solid rgba(59,130,246,.25)}
+.fbh-badge.ack{background:var(--green-bg);color:var(--green-text);border:.5px solid rgba(34,197,94,.3)}
+
+/* ── History action button (mod card) ── */
+.mod-action-btn.history{background:rgba(127,119,221,.08);border-color:rgba(127,119,221,.3);color:var(--purple,#7F77DD)}
+.mod-action-btn.history:hover{background:rgba(127,119,221,.16);transform:translateY(-1px)}
+
+/* ── Clickable moderator name (opens feedback history) ── */
+.mod-name.clickable,.ml-name.clickable{cursor:pointer;border-bottom:1px dotted var(--text3);transition:color .15s}
+.mod-name.clickable:hover,.ml-name.clickable:hover{color:var(--pink)}
+
 /* ── Moderator feedback popup ── */
 .inbox-popup-modal{
   background:var(--card-bg);border:.5px solid var(--border-strong);
@@ -6470,7 +6491,7 @@ const APP_VERSION = "1.2.061926";
 
 const TASKS=[
   {id:0,title:"Registration",cat:"Registration",distance:"",lux:"",duration:"",warn:"",note:"",isRegistration:true,steps:[]},
-  {id:1,title:"Registration — Hat (IR Mode)",cat:"Registration",distance:"2–4 ft",lux:"50–300",duration:"Manual",warn:"",note:"Repeat the registration video a third time with the participant wearing a hat/baseball cap.",steps:["Tap SET CAMERA → IR LED MODE → select ON, then IR LED POWER MODE → select MANUAL HIGH","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Press START SESSION → select NV Visual ID","Select registration_hat from the dropdown, then have the participant wear a hat/baseball cap (ensure the hat is not hiding their face)","Participant stands/sits at 2–4 ft","Tap START to begin recording",{t:"Perform head movements:",s:["Front → Left → Front → Right → Front → Upward → Front → Downward → Front"]},"Tap STOP SESSION","Remove the hat before continuing to remaining tasks"]},
+  {id:1,title:"Registration — Hat (IR Mode)",cat:"Registration",distance:"2–4 ft",lux:"0–10",duration:"Manual",warn:"",note:"Repeat the registration video a third time with the participant wearing a hat/baseball cap.",steps:["Tap SET CAMERA → IR LED MODE → select ON, then IR LED POWER MODE → select MANUAL HIGH","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Press START SESSION → select NV Visual ID","Select registration_hat from the dropdown, then have the participant wear a hat/baseball cap (ensure the hat is not hiding their face)","Participant stands/sits at 2–4 ft","Tap START to begin recording",{t:"Perform head movements:",s:["Front → Left → Front → Right → Front → Upward → Front → Downward → Front"]},"Tap STOP SESSION","Remove the hat before continuing to remaining tasks"]},
   {id:2,title:"Registration — Hat (RGB Mode)",cat:"Registration",distance:"2–4 ft",lux:"50–300",duration:"Manual",warn:"",note:"Repeat the registration video a third time with the participant wearing a hat/baseball cap.",steps:["Tap SET CAMERA → IR LED MODE → select OFF, then IR LED POWER MODE → select AUTO","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Press START SESSION → select NV Visual ID","Select registration_hat from the dropdown, then have the participant wear a hat/baseball cap (ensure the hat is not hiding their face)","Participant stands/sits at 2–4 ft","Tap START to begin recording",{t:"Perform head movements:",s:["Front → Left → Front → Right → Front → Upward → Front → Downward → Front"]},"Tap STOP SESSION","Remove the hat before continuing to remaining tasks"]},
   {id:3,title:"Device Visible Range (IR)",cat:"Movement",distance:"2–8 ft",lux:"0–10",duration:"Auto 2 min",warn:"",note:"",steps:["Tap SET CAMERA → IR LED MODE → select ON, then IR LED POWER MODE → select MANUAL HIGH","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Press START SESSION → select NV Visual ID","Select Device Visible Range from the dropdown","Measure lux on participant's face at 8 ft facing device. Confirm 0–10 lux.","Enter lux value in the metadata field","Start recording","Face the device and walk backwards at normal speed to 8 ft","Take 2 steps toward the device, turn face left or right, turn back, look at device for 2–3 seconds","Repeat until approximately 2 ft from the device","Recording auto-ends after 2 minutes"]},
   {id:4,title:"Device Visible Range (RGB)",cat:"Movement",distance:"2–8 ft",lux:"300+",duration:"Auto 2 min",warn:"",note:"",steps:["Tap SET CAMERA → IR LED MODE → select OFF, then IR LED POWER MODE → select AUTO","Tap the 3 dots icon in the upper right-hand corner → make sure '2104x1560 and 4280x3120' is displayed","If '2104x1560 only' is displayed, tap it once so '2104x1560 and 4280x3120' is displayed","Press START SESSION → select NV Visual ID","Select Device Visible Range from the dropdown","Measure lux on participant's face at 8 ft facing device. Confirm 300+ lux.","Enter lux value in the metadata field","Start recording","Face the device and walk backwards at normal speed to 8 ft","Take 2 steps toward the device, turn face left or right, turn back, look at device for 2–3 seconds","Repeat until approximately 2 ft from the device","Recording auto-ends after 2 minutes"]},
@@ -9720,7 +9741,7 @@ function renderModsListView(mods, now, thirtyMinsAgo){
 
     return `<tr class="mlx-mod-row${isOpen?' open':''}" onclick="toggleModRow('${key.replace(/'/g,"\\'")}')">
         <td class="mlx-chev-cell"><span class="mlx-chev${isOpen?' open':''}" id="mlx-chev-${safe}"><svg viewBox="0 0 16 16"><polyline points="5,3 10,8 5,13"/></svg></span></td>
-        <td class="ml-name">${mod.name}</td>
+        <td class="ml-name"><span class="ml-name clickable" onclick="event.stopPropagation(); openFeedbackHistory('${safeNm}','${loginIdAttr}')" title="View feedback history">${mod.name}</span></td>
         <td class="ml-loc">${mod.location}</td>
         <td class="ml-num">${unique}</td>
         <td class="ml-num">${reached14}</td>
@@ -9901,6 +9922,10 @@ function renderModsCardView(mods, now, thirtyMinsAgo, showTeamStats){
         <svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg>
         Rating
       </button>
+      <button class="mod-action-btn history" onclick="openFeedbackHistory('${safeName}','${loginIdAttr}')">
+        <svg viewBox="0 0 16 16"><path d="M8 4v4l3 2"/><circle cx="8" cy="8" r="6.5"/></svg>
+        History
+      </button>
     </div>`;
 
     // Rating display (Team/List views show average)
@@ -9938,7 +9963,7 @@ function renderModsCardView(mods, now, thirtyMinsAgo, showTeamStats){
       <div class="mod-card-header">
         <div class="mod-avatar">${initials}</div>
         <div class="mod-info">
-          <div class="mod-name">${mod.name}</div>
+          <div class="mod-name clickable" onclick="openFeedbackHistory('${mod.name.replace(/'/g, "\\'")}','${(mod.modId || '').replace(/'/g, "\\'")}')" title="View feedback history">${mod.name}</div>
           <div class="mod-location">
             <svg viewBox="0 0 16 16"><path d="M8 2a4 4 0 0 1 4 4c0 3-4 8-4 8S4 9 4 6a4 4 0 0 1 4-4z"/><circle cx="8" cy="6" r="1.5" fill="currentColor" stroke="none"/></svg>
             ${mod.location}
@@ -12756,6 +12781,101 @@ function getModRatingBreakdown(modName, modLoginId){
 
 
 // ══════════════════════════════════════════════════════════
+// ── ADMIN: PER-MODERATOR FEEDBACK HISTORY ─────────────────
+// Loads ALL feedback rows fresh on each open (dynamic), filters to the
+// clicked moderator by loginId / name / derived "<first>-kilo", and shows
+// every message latest→oldest with its delivery status.
+window.adminFeedback = window.adminFeedback || [];
+let _fbhTarget = null;
+
+async function loadAllFeedback(){
+  try{
+    const res = await fetch(FEEDBACK_READ_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' });
+    if(!res.ok){ console.warn('[FB History] HTTP', res.status); return []; }
+    const text = await res.text();
+    let data; try{ data = JSON.parse(text); }catch(e){ return []; }
+    const rows = _frExtractRows(data, ['feedback','rows','value']);
+    const recs = rows.map(r => ({
+      feedbackId: String(_frField(r, ['feedbackId','FeedbackId']) || ''),
+      modLoginId: String(_frField(r, ['modLoginId','ModLoginId']) || '').trim(),
+      modName:    String(_frField(r, ['modName','ModName']) || '').trim(),
+      adminName:  String(_frField(r, ['adminName','AdminName']) || 'Admin').trim(),
+      message:    String(_frField(r, ['message','Message']) || ''),
+      sentAt:     String(_frField(r, ['sentAt','SentAt']) || ''),
+      status:     String(_frField(r, ['status','Status']) || 'unread').toLowerCase().trim()
+    })).filter(f => f.feedbackId && f.message);
+    window.adminFeedback = recs;
+    console.log('[FB History] Loaded', recs.length, 'feedback rows');
+    return recs;
+  }catch(e){ console.warn('[FB History] load error:', e && e.message); return []; }
+}
+
+// All feedback for one mod, sorted latest→oldest (epoch sort, never lexical).
+function getFeedbackForMod(modName, modLoginId){
+  const ids = [];
+  if(modLoginId) ids.push(String(modLoginId).toLowerCase().trim());
+  if(modName){
+    const n = String(modName).toLowerCase().trim();
+    ids.push(n);
+    const first = n.split(/\s+/)[0];
+    if(first) ids.push(first + '-kilo');
+  }
+  const set = new Set(ids.filter(Boolean));
+  return (window.adminFeedback || []).filter(f => {
+    const fl = String(f.modLoginId || '').toLowerCase().trim();
+    const fn = String(f.modName || '').toLowerCase().trim();
+    return set.has(fl) || set.has(fn);
+  }).sort((a,b) => (Date.parse(b.sentAt) || 0) - (Date.parse(a.sentAt) || 0));
+}
+
+function openFeedbackHistory(modName, modLoginId){
+  _fbhTarget = { name: modName, loginId: modLoginId || '' };
+  const ov = document.getElementById('fbh-overlay');
+  if(!ov) return;
+  const sub = document.getElementById('fbh-sub');
+  const body = document.getElementById('fbh-body');
+  if(sub) sub.textContent = modName + ' · loading…';
+  if(body) body.innerHTML = '<div class="rth-empty">Loading feedback…</div>';
+  ov.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  // Dynamic: always pull fresh so status (read/acknowledged) is current.
+  loadAllFeedback().then(() => renderFeedbackHistory());
+}
+function closeFeedbackHistory(){
+  const ov = document.getElementById('fbh-overlay');
+  if(ov) ov.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+function _fbStatusBadge(status){
+  const s = String(status || 'unread').toLowerCase();
+  if(s === 'acknowledged') return '<span class="fbh-badge ack">Acknowledged</span>';
+  if(s === 'read')         return '<span class="fbh-badge read">Read</span>';
+  return '<span class="fbh-badge unread">Unread</span>';
+}
+function renderFeedbackHistory(){
+  if(!_fbhTarget) return;
+  const body = document.getElementById('fbh-body');
+  const sub = document.getElementById('fbh-sub');
+  if(!body) return;
+  const list = getFeedbackForMod(_fbhTarget.name, _fbhTarget.loginId);
+  if(sub) sub.textContent = _fbhTarget.name + ' · ' + list.length + ' message' + (list.length!==1?'s':'') + ' · latest first';
+  if(!list.length){ body.innerHTML = '<div class="rth-empty">No feedback sent to this moderator yet.</div>'; return; }
+  body.innerHTML = list.map(f => {
+    const dt = f.sentAt ? new Date(f.sentAt) : null;   // sentAt is a full ISO instant → safe to format locally
+    const dStr = (dt && !isNaN(dt)) ? dt.toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}) : '';
+    return `<div class="fbh-row">
+      <div class="fbh-row-top">
+        <span class="fbh-from">From <strong>${escapeHtml(f.adminName || 'Admin')}</strong></span>
+        ${_fbStatusBadge(f.status)}
+        <span class="fbh-meta">${escapeHtml(dStr)}</span>
+      </div>
+      <div class="fbh-msg">${escapeHtml(f.message)}</div>
+    </div>`;
+  }).join('');
+}
+
+
+// ══════════════════════════════════════════════════════════
 // ── MODERATOR: FEEDBACK INBOX ─────────────────────────────
 // ══════════════════════════════════════════════════════════
 window.modInbox = [];          // all feedback rows for this mod
@@ -13729,6 +13849,20 @@ function openCollReminderForCurrent(){
     </div>
     <div class="rth-filters" id="rth-filters"></div>
     <div class="rth-body" id="rth-body"></div>
+  </div>
+</div>
+
+<!-- ── Admin: Per-Moderator Feedback History ── -->
+<div class="rth-overlay hidden" id="fbh-overlay" onclick="if(event.target===this)closeFeedbackHistory()">
+  <div class="rth-modal">
+    <div class="rth-header">
+      <div>
+        <div class="rth-title">Feedback history</div>
+        <div class="rth-sub" id="fbh-sub">Latest first</div>
+      </div>
+      <div class="rth-close" onclick="closeFeedbackHistory()">✕</div>
+    </div>
+    <div class="rth-body" id="fbh-body"></div>
   </div>
 </div>
 
