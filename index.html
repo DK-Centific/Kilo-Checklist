@@ -5783,6 +5783,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   transition:all .18s;
 }
 .ml-rate-btn:hover{background:rgba(245,158,11,.2);transform:translateY(-1px)}
+.ml-rate-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ml-hist-btn{background:var(--bg3);border-color:var(--border-strong);color:var(--text2)}
+.ml-hist-btn:hover{background:var(--bg4);color:var(--text);transform:translateY(-1px)}
 .ml-rate-btn svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .ml-bd{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
 .ml-bd span{font-size:9.5px;font-weight:600;color:var(--text2);background:var(--bg3);border-radius:99px;padding:1px 6px}
@@ -9815,6 +9818,7 @@ function renderModsListView(mods, now, thirtyMinsAgo){
       ? `<span class="ml-rating-val">${rtL.avg}</span> <span class="ml-rating-none" style="font-style:normal">/10 (${rtL.count})</span>${bdL.length ? `<div class="ml-bd">${bdL.map(c => `<span>${c.short} ${c.avg}</span>`).join('')}</div>` : ''}`
       : `<span class="ml-rating-none">No ratings</span>`;
     const rateBtn = `<button class="ml-rate-btn" onclick="event.stopPropagation(); openRatingModal('${safeNm}','${loginIdAttr}')"><svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg>Rate</button>`;
+    const histBtnL = `<button class="ml-rate-btn ml-hist-btn" onclick="event.stopPropagation(); openModRatingsHistory('${safeNm}','${loginIdAttr}')" title="View rating history &amp; notes"><svg viewBox="0 0 16 16"><path d="M8 4v4l3 2"/><circle cx="8" cy="8" r="6.5"/></svg>History</button>`;
 
     return `<tr class="mlx-mod-row${isOpen?' open':''}" onclick="toggleModRow('${key.replace(/'/g,"\\'")}')">
         <td class="mlx-chev-cell"><span class="mlx-chev${isOpen?' open':''}" id="mlx-chev-${safe}"><svg viewBox="0 0 16 16"><polyline points="5,3 10,8 5,13"/></svg></span></td>
@@ -9822,7 +9826,7 @@ function renderModsListView(mods, now, thirtyMinsAgo){
         <td class="ml-loc">${mod.location}</td>
         <td class="ml-num">${unique}</td>
         <td class="ml-num">${reached14}</td>
-        <td class="ml-rate-cell"><div>${ratingInner}</div>${rateBtn}</td>
+        <td class="ml-rate-cell"><div>${ratingInner}</div><div class="ml-rate-actions">${rateBtn}${histBtnL}</div></td>
         <td class="ml-status ${isOnline?'online':'offline'}"><span class="dot"></span>${isOnline?'Active':'Inactive'}</td>
       </tr>${detailPanel}`;
   }).join('');
@@ -10002,7 +10006,7 @@ function renderModsCardView(mods, now, thirtyMinsAgo, showTeamStats){
         <svg viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9 12,14 8,11 4,14 5,9 1,6 6,6"/></svg>
         Rating
       </button>
-      <button class="mod-action-btn history" onclick="openFeedbackHistory('${safeName}','${loginIdAttr}')">
+      <button class="mod-action-btn history" onclick="openModRatingsHistory('${safeName}','${loginIdAttr}')" title="View rating history & notes">
         <svg viewBox="0 0 16 16"><path d="M8 4v4l3 2"/><circle cx="8" cy="8" r="6.5"/></svg>
         History
       </button>
@@ -12762,11 +12766,27 @@ function _rtCode(e){ return (e && typeof e === 'object') ? e.categoryCode : 'UNC
 // ══════════════════════════════════════════════════════════
 // ── ALL RATINGS HISTORY (global, latest → oldest) ─────────
 let _rthFilter = 'ALL';
+let _rthMod = null;   // {name, loginId} → per-moderator scope; null → all moderators
 function openRatingsHistory(){
   const ov = document.getElementById('rth-overlay');
   if(!ov) return;
   _rthFilter = 'ALL';
+  _rthMod = null;   // toolbar entry point = every moderator
   // Lazy-load if we don't have records yet, then re-render.
+  if((!window.modRatingsRecords || !window.modRatingsRecords.length) && typeof loadModRatings === 'function'){
+    loadModRatings().then(() => renderRatingsHistory());
+  }
+  renderRatingsHistory();
+  ov.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+// Per-moderator ratings history + notes (Team-card History button + List row).
+// Reuses the same overlay/renderer as the global view, scoped to one mod.
+function openModRatingsHistory(modName, modLoginId){
+  const ov = document.getElementById('rth-overlay');
+  if(!ov) return;
+  _rthFilter = 'ALL';
+  _rthMod = { name: String(modName || '').trim(), loginId: String(modLoginId || '').trim() };
   if((!window.modRatingsRecords || !window.modRatingsRecords.length) && typeof loadModRatings === 'function'){
     loadModRatings().then(() => renderRatingsHistory());
   }
@@ -12784,8 +12804,22 @@ function renderRatingsHistory(){
   const body = document.getElementById('rth-body');
   const fwrap = document.getElementById('rth-filters');
   const sub = document.getElementById('rth-sub');
+  const titleEl = document.getElementById('rth-title');
   if(!body) return;
-  const recs = (window.modRatingsRecords || []).slice();
+  const all = (window.modRatingsRecords || []).slice();
+  // Per-moderator scope: keep only this mod's ratings, matched case-insensitively
+  // by loginId or name. _rthMod === null → every moderator (toolbar view).
+  let recs = all;
+  if(_rthMod){
+    const wantId = (_rthMod.loginId || '').toLowerCase();
+    const wantNm = (_rthMod.name || '').toLowerCase();
+    recs = all.filter(r => {
+      const rid = String(r.modLoginId || '').toLowerCase().trim();
+      const rnm = String(r.modName || '').toLowerCase().trim();
+      return (wantId && rid === wantId) || (wantNm && rnm === wantNm);
+    });
+  }
+  if(titleEl) titleEl.textContent = _rthMod ? ((_rthMod.name || 'Moderator') + ' — ratings') : 'All ratings';
   // Sort latest → oldest by epoch (never lexical); undated sink to the bottom.
   recs.sort((a,b) => (Date.parse(b.ratedAt) || 0) - (Date.parse(a.ratedAt) || 0));
 
@@ -12799,7 +12833,7 @@ function renderRatingsHistory(){
   const filtered = _rthFilter === 'ALL' ? recs : recs.filter(r => r.categoryCode === _rthFilter);
   if(sub) sub.textContent = filtered.length + ' rating' + (filtered.length!==1?'s':'') + ' · latest first';
   if(!filtered.length){
-    body.innerHTML = `<div class="rth-empty">No ratings yet${_rthFilter!=='ALL'?' in this category':''}.</div>`;
+    body.innerHTML = `<div class="rth-empty">No ratings yet${_rthMod?' for this moderator':''}${_rthFilter!=='ALL'?' in this category':''}.</div>`;
     return;
   }
   body.innerHTML = filtered.map(r => {
@@ -13922,7 +13956,7 @@ function openCollReminderForCurrent(){
   <div class="rth-modal">
     <div class="rth-header">
       <div>
-        <div class="rth-title">All ratings</div>
+        <div class="rth-title" id="rth-title">All ratings</div>
         <div class="rth-sub" id="rth-sub">Latest first</div>
       </div>
       <div class="rth-close" onclick="closeRatingsHistory()">✕</div>
