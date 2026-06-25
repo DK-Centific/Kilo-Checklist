@@ -6522,6 +6522,41 @@ const TASKS=[
 const KILO_TASK_COUNT = (typeof TASKS !== 'undefined' && TASKS.length > 1) ? (TASKS.length - 1) : 14;
 const KILO_COMPLETE_THRESHOLD = 14;
 
+// ── Date-aware completion threshold ────────────────────────────────────
+// The numbered-task set grew from 14 → 15 on 2026-06-18. Completion is
+// therefore date-dependent, decided by the participant's SESSION date:
+//   session date <= 2026-06-18  → 14 distinct numbered tasks = complete
+//                                  (so 14 OR 15 both qualify on/before the cutoff)
+//   session date >  2026-06-18  → 15 distinct numbered tasks required
+// The governing date is the participant's EARLIEST valid date (the rule-set
+// in effect when their session ran). Undated participants default to the
+// lenient pre-cutoff threshold (14) — undated rows are a data-quality
+// anomaly and we don't want to silently drop otherwise-complete people.
+const KILO_TASK15_CUTOFF   = '2026-06-18';  // ISO; "<= cutoff" → 14, "> cutoff" → 15
+const KILO_THRESHOLD_PRE   = 14;            // on/before cutoff
+const KILO_THRESHOLD_POST  = 15;            // strictly after cutoff
+
+// Threshold (14 or 15) for a given governing ISO date (YYYY-MM-DD).
+// Empty/unresolvable date → lenient pre-cutoff threshold.
+function kiloThresholdForDate(iso){
+  if(!iso) return KILO_THRESHOLD_PRE;
+  return (iso > KILO_TASK15_CUTOFF) ? KILO_THRESHOLD_POST : KILO_THRESHOLD_PRE;
+}
+
+// Earliest valid governing date for ONE participant, from a list of their
+// rows. Resolves completedAt → submittedAt → sessionDate via toISODate and
+// returns the earliest YYYY-MM-DD, or '' if no row carries a usable date.
+// (toISODate is a hoisted function declaration defined later in this file.)
+function kiloEarliestDate(rows){
+  let best = '';
+  for(const r of rows){
+    const raw = (r.completedAtDate || r.completedAt || r.submittedAt || r.sessionDate || '');
+    const iso = toISODate(String(raw).split(',')[0].trim());
+    if(iso && (best === '' || iso < best)) best = iso;
+  }
+  return best;
+}
+
 // ── State ──────────────────────────────────────────────
 const taskDone  = new Array(TASKS.length).fill(false);
 const stepDone  = TASKS.map(t=>new Array(t.steps.length).fill(false));
@@ -7709,8 +7744,8 @@ async function _schReadRows(url){
       const text = await res.text();
       let data; try{ data = JSON.parse(text); }catch(_){ return []; }
       const rows = _schExtractArray(data);
-      if(rows.length === 256){
-        console.warn('[Schedule] Got exactly 256 rows — likely the PA pagination ceiling. Turn on pagination (threshold 5000) in the read flow.');
+      if(rows.length >= 256 && rows.length % 256 === 0){
+        console.warn('[Schedule] ' + rows.length + ' rows (= ' + (rows.length/256) + ' x 256, a PA page boundary) — likely truncated. Raise the read flow pagination threshold above the table size (max 100000).');
       }
       return rows;
     }catch(e){
@@ -8828,15 +8863,17 @@ async function dashSync(){
     // returns only that many rows and the NEWEST rows are dropped — which
     // looks like "only old data" and undercounts completed participants
     // (~15 task rows per complete participant, so a 5000 cap ≈ 333 people).
-    // We can't read the threshold from here, so flag any exact match against
-    // the known PA boundaries AND surface the raw row count inline (below)
-    // so truncation is never invisible again.
-    const PA_PAGINATION_BOUNDARIES = [256, 5000, 100000];
+    // We can't read the threshold from here, so we detect the page-boundary
+    // signature (exact multiple of 256) AND surface the raw row count inline
+    // (below) so truncation is never invisible again. (A complete table whose
+    // true row count is itself an exact 256-multiple is a rare false positive;
+    // the hint is non-fatal and hedged, so that's an acceptable trade.)
+    const PA_PAGE_SIZE = 256;
     window._dashRowCount  = dashData.length;
-    window._dashTruncated = PA_PAGINATION_BOUNDARIES.includes(dashData.length);
+    window._dashTruncated = dashData.length >= PA_PAGE_SIZE && (dashData.length % PA_PAGE_SIZE === 0);
     if(window._dashTruncated){
-      console.warn('[Dashboard] Exactly ' + dashData.length + ' rows returned — this is a known PA pagination boundary. The table is almost certainly larger and the newest rows are being truncated. Raise the read flow\u2019s List-rows Pagination Threshold above the table size (max 100000), or switch to server-side date filtering.');
-      showToast('\u26a0 ' + dashData.length + ' rows \u2014 likely truncated by PA pagination. See console.');
+      console.warn('[Dashboard] ' + dashData.length + ' rows returned (= ' + (dashData.length/PA_PAGE_SIZE) + ' x 256, an exact PA page boundary). The table is almost certainly larger and the newest rows are being truncated at the read flow pagination threshold. Raise that threshold above the table size (max 100000), or switch to server-side date filtering.');
+      showToast('\u26a0 ' + dashData.length.toLocaleString() + ' rows likely truncated by PA pagination — raise the read flow threshold. See console.');
     }
     localStorage.setItem('centific_dash_data', JSON.stringify(dashData));
     const now = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
@@ -9065,8 +9102,10 @@ function renderDashboard(){
   // Counting DISTINCT task IDs means duplicate submissions never inflate the count
   // (a participant who re-submits Task 5 still only has Task 5 once).
   // A participant counts as 1 complete when they have at least KILO_COMPLETE_THRESHOLD (14) numbered tasks.
-  const COMPLETE_DISTINCT_TASKS = KILO_COMPLETE_THRESHOLD; // 14 — 14+ distinct numbered tasks = complete
-  const distinctTasksByPart = {};       // participantId -> Set of distinct NUMBERED taskIds (1..14)
+  // Date-aware completion: each participant's threshold (14 or 15) is decided
+  // by their earliest session date vs the 2026-06-18 cutoff (see kiloThresholdForDate).
+  const distinctTasksByPart = {};       // participantId -> Set of distinct NUMBERED taskIds
+  const earliestDateByPart  = {};       // participantId -> earliest governing ISO date
   const rowCountByPart = {};            // participantId -> total rows (sessionIDs) — for diagnostics
   const allPartIds = new Set();         // every participant ID that appears at all
   data.forEach(r => {
@@ -9074,23 +9113,28 @@ function renderDashboard(){
     if(!pid) return;
     allPartIds.add(pid);
     rowCountByPart[pid] = (rowCountByPart[pid] || 0) + 1;
+    // Fold this row's date into the participant's earliest governing date.
+    const _raw = (r.completedAtDate || r.completedAt || r.submittedAt || r.sessionDate || '');
+    const _iso = toISODate(String(_raw).split(',')[0].trim());
+    if(_iso && (!earliestDateByPart[pid] || _iso < earliestDateByPart[pid])) earliestDateByPart[pid] = _iso;
     const tid = String(r.taskId || '').trim();
     if(tid === '' || tid === '0') return;   // ignore blank + Registration (task 0) for the completion test
     (distinctTasksByPart[pid] || (distinctTasksByPart[pid] = new Set())).add(tid);
   });
-  // Complete participant IDs (have all 14 distinct numbered tasks)
+  // Complete participant IDs — distinct numbered tasks >= that participant's date-aware threshold
   const uniqueParts = new Set(
-    Object.keys(distinctTasksByPart).filter(pid => distinctTasksByPart[pid].size >= COMPLETE_DISTINCT_TASKS)
+    Object.keys(distinctTasksByPart).filter(pid =>
+      distinctTasksByPart[pid].size >= kiloThresholdForDate(earliestDateByPart[pid] || ''))
   );
   // Denominator = every participant ID that appears at all (respects current filters)
   const uniquePartsAll = allPartIds;
   // Diagnostics — compare interpretations against your raw count
   try {
-    const byRowsOver14 = Object.keys(rowCountByPart).filter(pid => rowCountByPart[pid] > 14).length;
+    const _post = Object.keys(distinctTasksByPart).filter(pid => (earliestDateByPart[pid] || '') > KILO_TASK15_CUTOFF).length;
     console.log('[Counting] Participant IDs total:', allPartIds.size,
-      '| complete (all 14 distinct numbered tasks):', uniqueParts.size,
-      '| with >14 total rows:', byRowsOver14,
-      '| (threshold =', COMPLETE_DISTINCT_TASKS, 'distinct numbered tasks)');
+      '| complete (date-aware 14/15):', uniqueParts.size,
+      '| after-cutoff participants (need 15):', _post,
+      '| cutoff =', KILO_TASK15_CUTOFF);
   } catch(e){}
 
   const uniqueMods=new Set(data.map(r=>r.moderator).filter(Boolean));
@@ -9148,14 +9192,18 @@ function renderDashboard(){
     // A participant is "fully complete" when they have all 14 distinct NUMBERED
     // tasks (1..14). Registration (task 0) is not required; distinct avoids dup inflation.
     const mDistinct = {};
+    const mDateByPid = {};
     mR.forEach(r => {
       const pid = String(r.participantId || '').trim();
       if(!pid) return;
+      const _raw = (r.completedAtDate || r.completedAt || r.submittedAt || r.sessionDate || '');
+      const _iso = toISODate(String(_raw).split(',')[0].trim());
+      if(_iso && (!mDateByPid[pid] || _iso < mDateByPid[pid])) mDateByPid[pid] = _iso;
       const tid = String(r.taskId || '').trim();
       if(tid === '' || tid === '0') return;
       (mDistinct[pid] || (mDistinct[pid] = new Set())).add(tid);
     });
-    const fullyComplete = Object.keys(mDistinct).filter(pid => mDistinct[pid].size >= COMPLETE_DISTINCT_TASKS).length;
+    const fullyComplete = Object.keys(mDistinct).filter(pid => mDistinct[pid].size >= kiloThresholdForDate(mDateByPid[pid] || '')).length;
     const mRt = mP > 0 ? Math.round(fullyComplete / mP * 100) : 0;
 
     return {name:m, participants:mP, completed:mD, fullyComplete, total:mR.length, rate:mRt, location:mL};
@@ -9644,27 +9692,30 @@ function renderViewToolbar(){
 // Returns [{participantId, participantName, sessionDate, tasksDone, totalTasks, status}]
 function aggregateParticipants(rows){
   const TOTAL = KILO_TASK_COUNT; // display denominator = real numbered-task count (15)
-  // Complete = at least KILO_COMPLETE_THRESHOLD (14) distinct NUMBERED tasks. Registration (0) not required.
-  const COMPLETE_DISTINCT = KILO_COMPLETE_THRESHOLD;
+  // Completion is date-aware (14 on/before 2026-06-18, 15 after) — see kiloThresholdForDate.
   const byPid = {};
   rows.forEach(r => {
     const pid = (r.participantId || '').trim();
     if(!pid) return;
     if(!byPid[pid]){
-      byPid[pid] = { participantId: pid, participantName: '', sessionDate: '', taskIds: new Set(), lastTs: '' };
+      byPid[pid] = { participantId: pid, participantName: '', sessionDate: '', taskIds: new Set(), lastTs: '', govDate: '' };
     }
     const rec = byPid[pid];
     if(r.participantName && !rec.participantName) rec.participantName = r.participantName;
     if(r.sessionDate && !rec.sessionDate) rec.sessionDate = r.sessionDate;
+    // Earliest governing date for the date-aware threshold.
+    const _raw = (r.completedAtDate || r.completedAt || r.submittedAt || r.sessionDate || '');
+    const _iso = toISODate(String(_raw).split(',')[0].trim());
+    if(_iso && (rec.govDate === '' || _iso < rec.govDate)) rec.govDate = _iso;
     const tid = String(r.taskId).trim();
-    // taskIds = the 14 numbered tasks (registration / task 0 excluded)
+    // taskIds = the numbered tasks (registration / task 0 excluded)
     if(tid && tid !== 'undefined' && tid !== '0') rec.taskIds.add(tid);
     const ts = r.submittedAt || r.completedAt || '';
     if(ts && ts > rec.lastTs) rec.lastTs = ts;
   });
   return Object.values(byPid).map(rec => {
     const tasksDone = rec.taskIds.size;
-    const status = tasksDone >= COMPLETE_DISTINCT ? 'Completed' : 'In progress';
+    const status = tasksDone >= kiloThresholdForDate(rec.govDate || '') ? 'Completed' : 'In progress';
     return {
       participantId: rec.participantId,
       participantName: rec.participantName || '—',
@@ -9864,15 +9915,18 @@ function renderModsCardView(mods, now, thirtyMinsAgo, showTeamStats){
     const completedTasks = rows.filter(r=>r.status==='Complete').length;
     // Fully done = participant IDs with all 14 distinct NUMBERED tasks (1..14); registration (0) excluded
     const _distinctByPid = {};
+    const _dateByPid = {};
     rows.forEach(r => {
       const pid = String(r.participantId || '').trim();
       if(!pid) return;
+      const _raw = (r.completedAtDate || r.completedAt || r.submittedAt || r.sessionDate || '');
+      const _iso = toISODate(String(_raw).split(',')[0].trim());
+      if(_iso && (!_dateByPid[pid] || _iso < _dateByPid[pid])) _dateByPid[pid] = _iso;
       const tid = String(r.taskId || '').trim();
       if(tid === '' || tid === '0') return;
       (_distinctByPid[pid] || (_distinctByPid[pid] = new Set())).add(tid);
     });
-    const _completeThreshold = KILO_COMPLETE_THRESHOLD;
-    const fullyDone = Object.keys(_distinctByPid).filter(pid => _distinctByPid[pid].size >= _completeThreshold).length;
+    const fullyDone = Object.keys(_distinctByPid).filter(pid => _distinctByPid[pid].size >= kiloThresholdForDate(_dateByPid[pid] || '')).length;
 
     let isOnline = false;
     let lastActiveStr = 'No activity';
@@ -10004,7 +10058,7 @@ function renderModsCardView(mods, now, thirtyMinsAgo, showTeamStats){
       <div class="mod-stats-row">
         <div class="mod-stat"><div class="mod-stat-val pink">${uniqueParts.size}</div><div class="mod-stat-lbl">Participants</div></div>
         <div class="mod-stat"><div class="mod-stat-val green">${completedTasks}</div><div class="mod-stat-lbl">Tasks Done</div></div>
-        <div class="mod-stat"><div class="mod-stat-val blue">${fullyDone}</div><div class="mod-stat-lbl">Reached Task 14</div></div>
+        <div class="mod-stat"><div class="mod-stat-val blue">${fullyDone}</div><div class="mod-stat-lbl">Fully Complete</div></div>
       </div>
       ${timeStatsHtml}
       ${ratingHtml}
@@ -11443,7 +11497,7 @@ async function loadDevices(){
     else if(typeof data.rows === 'string'){ try{ rows = JSON.parse(data.rows); }catch(e){} }
     // Strip OData props
     rows = rows.map(r => { const c={}; Object.keys(r).forEach(k=>{ if(!k.startsWith('@odata') && k!=='ItemInternalId') c[k]=r[k]; }); return c; });
-    if(rows.length === 256) console.warn('[Devices] Exactly 256 rows — PA pagination may be capped.');
+    if(rows.length >= 256 && rows.length % 256 === 0) console.warn('[Devices] ' + rows.length + ' rows (= ' + (rows.length/256) + ' x 256, a PA page boundary) — pagination may be truncating. Raise the read flow threshold above the table size.');
 
     devicesRows = rows.map(r => ({
       location: _devClean(_devField(r, ['Location'])),
