@@ -1681,6 +1681,17 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .file-transfer-doc-link .ext-arrow{
   width:11px;height:11px;opacity:.55;
 }
+/* Light-yellow variant — "Open S3 upload site" tile */
+.file-transfer-s3-link{
+  background:rgba(250,208,46,.16);
+  border-color:rgba(245,200,40,.55);
+}
+.file-transfer-s3-link:hover{
+  background:rgba(250,208,46,.26);
+  border-color:rgba(245,200,40,.8);
+}
+.file-transfer-s3-link svg{ stroke:#b8860b; }
+[data-theme="dark"] .file-transfer-s3-link svg{ stroke:#fcd34d; }
 .file-transfer-ext{color:var(--text3)}
 .file-transfer-hint{font-size:12px;color:var(--text3);margin-bottom:22px;line-height:1.5}
 .file-transfer-hint code{
@@ -4211,6 +4222,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .daily-toggle-btn{font-family:var(--font);font-size:11.5px;font-weight:600;letter-spacing:-0.01em;color:var(--text3);background:none;border:none;border-radius:7px;padding:5px 11px;cursor:pointer;transition:all .18s;white-space:nowrap}
 .daily-toggle-btn:hover{color:var(--text)}
 .daily-toggle-btn.active{background:var(--card-bg);color:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+/* Avg-daily-throughput target checkbox (Participants view) */
+.daily-target-check{display:inline-flex;align-items:center;gap:8px;margin:-6px 0 12px;cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);letter-spacing:-0.01em;user-select:none}
+.daily-target-check.hidden{display:none}
+.daily-target-check input{position:absolute;opacity:0;width:0;height:0}
+.daily-target-check .dtc-swatch{width:16px;height:16px;border-radius:5px;border:1.5px solid var(--border-strong);background:transparent;flex-shrink:0;position:relative;transition:all .18s}
+.daily-target-check input:checked ~ .dtc-swatch{background:#F59E0B;border-color:#F59E0B}
+.daily-target-check input:checked ~ .dtc-swatch::after{content:'';position:absolute;left:5px;top:2px;width:4px;height:8px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg)}
+.daily-target-check input:checked ~ span:last-child{color:var(--text)}
 .chart-wrap{position:relative;width:100%}
 
 /* Detail table */
@@ -6558,6 +6577,43 @@ function kiloEarliestDate(rows){
     if(iso && (best === '' || iso < best)) best = iso;
   }
   return best;
+}
+
+// Count complete participants in a row set, date-aware (≥14 on/before cutoff,
+// ≥15 after). Same logic the dashboard KPI uses inline; extracted so the
+// Completion Rate can count the OVERALL (unfiltered) dataset.
+function kiloCountCompleteParticipants(rows){
+  const tasks = {}, dates = {};
+  (rows || []).forEach(r => {
+    const pid = String(r.participantId || '').trim();
+    if(!pid) return;
+    const raw = (r.completedAtDate || r.completedAt || r.submittedAt || r.sessionDate || '');
+    const iso = toISODate(String(raw).split(',')[0].trim());
+    if(iso && (!dates[pid] || iso < dates[pid])) dates[pid] = iso;
+    const tid = String(r.taskId || '').trim();
+    if(tid === '' || tid === '0') return;
+    (tasks[pid] || (tasks[pid] = new Set())).add(tid);
+  });
+  return Object.keys(tasks).filter(pid => tasks[pid].size >= kiloThresholdForDate(dates[pid] || '')).length;
+}
+
+// Campaign goal — Completion Rate is measured against this fixed target,
+// independent of the dashboard's Period filter.
+const PARTICIPANT_TARGET = 1000;
+
+// Avg-daily-throughput benchmark by week-range (2026). Each day maps to its
+// range's value; used as the "Avg daily throughput (target)" compare line on
+// the Daily Completions (Participants) chart. ISO YYYY-MM-DD compares lexically.
+function kiloDailyThroughput(iso){
+  if(!iso) return null;
+  if(iso <= '2026-05-31') return 7.9;
+  if(iso <= '2026-06-07') return 14;
+  if(iso <= '2026-06-14') return 15;
+  if(iso <= '2026-06-21') return 16.5;
+  if(iso <= '2026-06-28') return 30;
+  if(iso <= '2026-07-05') return 30;
+  if(iso <= '2026-07-12') return 29.5;
+  return 29.5;  // carry the last known week forward
 }
 
 // ── State ──────────────────────────────────────────────
@@ -9151,7 +9207,11 @@ function renderDashboard(){
   // Real numbered-task count (denominator); distinct from the completion threshold above.
   const taskCount = KILO_TASK_COUNT;
   const fullyCompleteParticipants = uniqueParts.size; // alias — same value, used by older code
-  const rate = uniquePartsAll.size > 0 ? Math.round(uniqueParts.size / uniquePartsAll.size * 100) : 0;
+  // Completion Rate is measured against the fixed campaign goal (1000) and
+  // ignores the Period filter — it always reflects OVERALL progress, counted
+  // from the full unfiltered dataset.
+  const overallComplete = kiloCountCompleteParticipants(dashData || []);
+  const rate = Math.round(overallComplete / PARTICIPANT_TARGET * 100);
   const modParts={};
   data.forEach(r=>{ if(!r.moderator||!r.participantId) return; if(!modParts[r.moderator]) modParts[r.moderator]=new Set(); modParts[r.moderator].add(r.participantId); });
   const modNames=Object.keys(modParts).sort();
@@ -9265,7 +9325,7 @@ function renderDashboard(){
       <div class="kpi-card amber">
         <div class="kpi-top-row"><div class="kpi-label">Completion Rate</div></div>
         <div class="kpi-bottom-row">
-          <div class="kpi-sub">${uniqueParts.size} of ${uniquePartsAll.size} participants done</div>
+          <div class="kpi-sub">${overallComplete.toLocaleString()} of ${PARTICIPANT_TARGET.toLocaleString()} target</div>
           <div class="kpi-value kpi-value-xl ">${rate}<span style="font-size:0.45em;font-weight:500;opacity:.7">%</span></div>
         </div>
       </div>
@@ -9288,6 +9348,11 @@ function renderDashboard(){
             <button class="daily-toggle-btn ${dailyMode==='participants'?'active':''}" onclick="setDailyMode('participants')">Participants</button>
           </div>
         </div>
+        <label class="daily-target-check ${dailyMode==='participants'?'':'hidden'}" id="daily-target-check" title="Toggle the avg daily throughput target line (Participants view)">
+          <input type="checkbox" id="daily-target-cb" ${_dailyTargetOn?'checked':''} onchange="toggleDailyTarget(this.checked)">
+          <span class="dtc-swatch"></span>
+          <span>Avg daily throughput (target)</span>
+        </label>
         <div class="chart-wrap" style="height:240px"><canvas id="cDailyLine"></canvas></div>
       </div>
       <div class="chart-card full">
@@ -9353,12 +9418,16 @@ function renderDashboard(){
   }
 
   if(sortedDates.length){
-    // Stash the two daily series so the Tasks/Participants toggle can rebuild without a full re-render
-    window._dailyData = { sortedDates, dailyC, dailyP, isDark, so, ttBase, intTicks };
+    const throughput = sortedDates.map(d => kiloDailyThroughput(d));
+    // Stash the daily series + throughput so the toggle/checkbox can rebuild without a full re-render
+    window._dailyData = { sortedDates, dailyC, dailyP, throughput, isDark, so, ttBase, intTicks };
     const series = (dailyMode === 'participants') ? dailyP : dailyC;
     const unitFn = (n) => dailyMode === 'participants'
       ? `  ${n} participant${n!==1?'s':''}`
       : `  ${n} task${n!==1?'s':''} completed`;
+    // Compare line is meaningful only against participants/day → shown in
+    // Participants mode when the checkbox is on. Hidden in Tasks mode.
+    const targetHidden = !(dailyMode === 'participants' && _dailyTargetOn);
     dashCharts['cDailyLine']=new Chart(document.getElementById('cDailyLine'),{
       type:'line',
       data:{
@@ -9367,16 +9436,24 @@ function renderDashboard(){
           return dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
         }),
         datasets:[{
+          label:'Completed',
           data:sortedDates.map(d=>series[d]||0),
           borderColor:'#EF43B3', backgroundColor:'rgba(239,67,179,.10)',
           borderWidth:2.5, pointRadius:5, pointBackgroundColor:'#EF43B3',
           pointBorderColor:isDark?'#1a1a18':'#fff', pointBorderWidth:2,
-          fill:true, tension:0.4,
+          fill:true, tension:0.4, order:1,
+        },{
+          label:'Avg daily throughput (target)',
+          data:throughput,
+          borderColor:'#F59E0B', backgroundColor:'transparent',
+          borderWidth:2, borderDash:[6,4], pointRadius:0, pointHoverRadius:4,
+          pointBackgroundColor:'#F59E0B', fill:false, tension:0,
+          hidden:targetHidden, order:2,
         }]
       },
       options:{...so,
         plugins:{...so.plugins, tooltip:{...ttBase, callbacks:{
-          label:i=>unitFn(i.raw)
+          label:i=> i.datasetIndex===1 ? `  Target: ${i.raw}/day` : unitFn(i.raw)
         }}},
         scales:{...so.scales, y:{...so.scales.y, ticks:{...intTicks}}}
       }
@@ -9427,6 +9504,8 @@ let currentTrackerPage = 'dashboard'; // 'dashboard' | 'moderators'
 
 // Daily Completions chart mode: 'tasks' (default) | 'participants'
 let dailyMode = 'tasks';
+// Avg-daily-throughput compare line — shown by default (Participants view only)
+let _dailyTargetOn = true;
 function setDailyMode(mode){
   if(mode === dailyMode) return;
   dailyMode = mode;
@@ -9436,16 +9515,33 @@ function setDailyMode(mode){
   });
   const sub = document.getElementById('daily-sub');
   if(sub) sub.textContent = mode==='participants' ? 'Unique participants by date' : 'Completed tasks by date';
+  // Show the target checkbox only in Participants view (throughput = participants/day)
+  const cbWrap = document.getElementById('daily-target-check');
+  if(cbWrap) cbWrap.classList.toggle('hidden', mode !== 'participants');
   // Rebuild just the daily chart from the stashed data (no full dashboard re-render)
   const D = window._dailyData;
   if(!D || !dashCharts['cDailyLine']) return;
   const series = (mode === 'participants') ? D.dailyP : D.dailyC;
   const chart = dashCharts['cDailyLine'];
   chart.data.datasets[0].data = D.sortedDates.map(d => series[d] || 0);
-  chart.options.plugins.tooltip.callbacks.label = (i) => mode === 'participants'
-    ? `  ${i.raw} participant${i.raw!==1?'s':''}`
-    : `  ${i.raw} task${i.raw!==1?'s':''} completed`;
+  // Compare line: visible only in Participants mode when the checkbox is on
+  if(chart.data.datasets[1]) chart.data.datasets[1].hidden = !(mode === 'participants' && _dailyTargetOn);
+  chart.options.plugins.tooltip.callbacks.label = (i) => i.datasetIndex===1
+    ? `  Target: ${i.raw}/day`
+    : (mode === 'participants'
+        ? `  ${i.raw} participant${i.raw!==1?'s':''}`
+        : `  ${i.raw} task${i.raw!==1?'s':''} completed`);
   chart.update();
+}
+
+// Checkbox handler — toggle the avg-daily-throughput compare line (Participants view).
+function toggleDailyTarget(on){
+  _dailyTargetOn = !!on;
+  const chart = dashCharts['cDailyLine'];
+  if(chart && chart.data.datasets[1]){
+    chart.data.datasets[1].hidden = !(dailyMode === 'participants' && _dailyTargetOn);
+    chart.update();
+  }
 }
 
 function switchTrackerPage(page){
@@ -10148,17 +10244,30 @@ function showSessionComplete(){
     const setRaw = sessionStorage.getItem('centific_inv_set');
     if(setRaw){
       const set = JSON.parse(setRaw);
-      if(set && Array.isArray(set.items)){
-        // Find item whose itemType contains "phone" (case-insensitive)
-        const phoneItem = set.items.find(it => /phone/i.test(it.itemType || ''));
-        if(phoneItem && phoneItem.itemType){
-          // Use the itemType directly, but strip generic word "phone" alone (keep "iPhone 15", etc.)
-          const raw = String(phoneItem.itemType).trim();
-          if(raw.toLowerCase() !== 'phone'){
-            // Sanitize for filename: replace spaces with nothing, remove special chars
-            phoneModel = raw.replace(/\s+/g, '').replace(/[^\w-]/g, '');
-          }
+      if(set && Array.isArray(set.items) && set.items.length){
+        // Resolve the ACTUAL phone item from the selected Set. The old logic
+        // matched /phone/i, which wrongly caught "Microphone", "Headphone",
+        // "Phone charger/case/stand", etc. Now: (1) reject accessories and
+        // *phone homophones, (2) prefer a recognized phone brand/model, then
+        // (3) fall back to a bare "phone"-typed item that survived the rejects.
+        const itemTypeOf = it => String((it && it.itemType) || '').trim();
+        const NEG = /(micro-?phone|head-?phone|ear-?phone|ear-?buds?|charger|cable|case|cover|stand|mount|tripod|holder|adapter|adaptor|dock|ring ?light|light|battery|power ?bank|sd ?card|lens|strap|bag|pouch)/i;
+        const BRAND = /\b(iphone|samsung|galaxy|pixel|oneplus|one ?plus|xiaomi|redmi|oppo|vivo|motorola|moto|nokia|xperia|huawei|honor|realme|nothing ?phone|rog phone)\b/i;
+        const candidates = set.items.filter(it => itemTypeOf(it) && !NEG.test(itemTypeOf(it)));
+        // 1) Prefer an explicit phone brand/model.
+        let phoneItem = candidates.find(it => BRAND.test(itemTypeOf(it)));
+        // 2) Otherwise the first surviving item that still references a "phone"
+        //    (homophones already excluded above) and isn't the bare word "phone".
+        if(!phoneItem) phoneItem = candidates.find(it => /phone/i.test(itemTypeOf(it)) && itemTypeOf(it).toLowerCase() !== 'phone');
+        if(phoneItem){
+          // Sanitize for filename: drop spaces + non-word chars (keep letters, digits, hyphen)
+          const clean = itemTypeOf(phoneItem).replace(/\s+/g, '').replace(/[^\w-]/g, '');
+          if(clean) phoneModel = clean;
         }
+        console.log('[FileTransfer] Set:', set.setName || set.setId || '(unknown)',
+          '| items:', set.items.map(itemTypeOf).filter(Boolean).join(', '),
+          '| resolved phone model:', phoneModel,
+          phoneItem ? '' : '(no phone matched — check the Set\u2019s Item Type values)');
       }
     }
   } catch(e){ console.warn('[FileTransfer] Could not read inventory set', e); }
@@ -13548,6 +13657,11 @@ function openCollReminderForCurrent(){
     <a href="https://digitaltechedge.sharepoint.com/:w:/r/sites/ProjectKiloModerators/Shared%20Documents/Learning%20Material/Moderators%20Training%20and%20Resources/Kilo%20DC%20Moderator%20Workflow.docx?d=w052b6173af6049889416329175b457ed&csf=1&web=1&e=UQxBZR&nav=eyJoIjoiNzU4NzUxODE0In0" target="_blank" rel="noopener noreferrer" class="file-transfer-doc-link">
       <svg viewBox="0 0 16 16"><path d="M2 3.5h12v9H2z" fill="none"/><line x1="2" y1="6" x2="14" y2="6"/></svg>
       <span>How to upload the file</span>
+      <svg viewBox="0 0 16 16" class="ext-arrow"><path d="M6 3h7v7"/><line x1="13" y1="3" x2="7" y2="9"/></svg>
+    </a>
+    <a href="https://us-east-2.console.aws.amazon.com/s3/buckets/centific-uploads?region=us-east-2&amp;tab=objects" target="_blank" rel="noopener noreferrer" class="file-transfer-doc-link file-transfer-s3-link">
+      <svg viewBox="0 0 16 16"><path d="M2 4.3c0-.9 2.7-1.5 6-1.5s6 .6 6 1.5M2 4.3c0 .9 2.7 1.5 6 1.5s6-.6 6-1.5M2 4.3v7.4c0 .9 2.7 1.5 6 1.5s6-.6 6-1.5V4.3"/></svg>
+      <span>Open S3 upload site</span>
       <svg viewBox="0 0 16 16" class="ext-arrow"><path d="M6 3h7v7"/><line x1="13" y1="3" x2="7" y2="9"/></svg>
     </a>
     <button class="file-transfer-btn" onclick="onFileTransferred()">
