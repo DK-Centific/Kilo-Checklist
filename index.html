@@ -6210,7 +6210,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       </div>
     </div>
     <div class="sidebar-list" id="sidebar-list"></div>
-    <div class="sidebar-version">v 1.2 (061926)</div>
+    <div class="sidebar-version">v 1.2 (062426)</div>
   </div>
 
   <!-- Main -->
@@ -6487,7 +6487,7 @@ const TASK_VIDEOS = [
 ];
 
 // ── APP VERSION (searchable constant for version-poll notification) ──
-const APP_VERSION = "1.2.061926";
+const APP_VERSION = "1.2.062426";
 
 const TASKS=[
   {id:0,title:"Registration",cat:"Registration",distance:"",lux:"",duration:"",warn:"",note:"",isRegistration:true,steps:[]},
@@ -8820,16 +8820,42 @@ async function dashSync(){
       showToast('Sync succeeded but table appears empty');
     }
 
-    // Warn if response is exactly 256 rows — PA "List rows" default limit
-    if(dashData.length === 256){
-      console.warn('[Dashboard] Exactly 256 rows returned — likely hitting PA pagination limit. Enable pagination on the PA flow and set Top Count to 5000+.');
-      showToast('⚠ Only 256 rows returned. Enable PA pagination — see console.');
+    // ── Truncation detector ──────────────────────────────────────────────
+    // PA "List rows present in a table" returns at most its pagination
+    // threshold. With pagination OFF that's 256; with pagination ON it's
+    // whatever Threshold is set to (commonly 5000, max 100000). When the
+    // append-only table grows past the active threshold, the flow silently
+    // returns only that many rows and the NEWEST rows are dropped — which
+    // looks like "only old data" and undercounts completed participants
+    // (~15 task rows per complete participant, so a 5000 cap ≈ 333 people).
+    // We can't read the threshold from here, so flag any exact match against
+    // the known PA boundaries AND surface the raw row count inline (below)
+    // so truncation is never invisible again.
+    const PA_PAGINATION_BOUNDARIES = [256, 5000, 100000];
+    window._dashRowCount  = dashData.length;
+    window._dashTruncated = PA_PAGINATION_BOUNDARIES.includes(dashData.length);
+    if(window._dashTruncated){
+      console.warn('[Dashboard] Exactly ' + dashData.length + ' rows returned — this is a known PA pagination boundary. The table is almost certainly larger and the newest rows are being truncated. Raise the read flow\u2019s List-rows Pagination Threshold above the table size (max 100000), or switch to server-side date filtering.');
+      showToast('\u26a0 ' + dashData.length + ' rows \u2014 likely truncated by PA pagination. See console.');
     }
     localStorage.setItem('centific_dash_data', JSON.stringify(dashData));
     const now = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
     localStorage.setItem('centific_dash_last_sync', now);
     const syncEl = document.getElementById('dash-last-sync');
-    if(syncEl) syncEl.textContent = 'Synced at '+now;
+    if(syncEl){
+      // Always show the raw row count next to the sync time. If we hit a
+      // pagination boundary, append a visible (not console-only) warning.
+      const countTxt = dashData.length.toLocaleString() + ' rows';
+      syncEl.textContent = 'Synced at ' + now + ' \u00b7 ' + countTxt;
+      if(window._dashTruncated){
+        syncEl.textContent += ' \u26a0 possibly truncated';
+        syncEl.style.color = 'var(--amber)';
+        syncEl.title = 'Returned exactly ' + dashData.length + ' rows — a PA pagination boundary. Raise the read flow pagination threshold above the table size.';
+      } else {
+        syncEl.style.color = '';
+        syncEl.title = '';
+      }
+    }
     populateModFilter(); renderDashboard();
     if(currentTrackerPage === 'moderators') renderModeratorsPage();
     if(currentTrackerPage === 'devices'){ window._devicesForceReload = true; loadDevices(); }
