@@ -288,6 +288,19 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .step-tick svg{width:11px;height:11px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 .step-text{font-size:14px;color:var(--text);line-height:1.6;letter-spacing:-0.01em}
 .step-text.done{color:var(--text3);text-decoration:line-through}
+/* ── Start-with-timer control (recording steps) ── */
+.step-timer{display:inline-flex;align-items:center;gap:8px;margin-top:9px;flex-wrap:wrap}
+.kt-btn{font-family:var(--font);font-size:12px;font-weight:600;letter-spacing:-0.01em;color:var(--pink);background:rgba(239,67,179,.1);border:.5px solid rgba(239,67,179,.3);border-radius:99px;padding:5px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .18s}
+.kt-btn:hover{background:rgba(239,67,179,.2);transform:translateY(-1px)}
+.kt-btn:active{transform:scale(.97)}
+.kt-btn svg{width:12px;height:12px;stroke:currentColor;fill:currentColor;stroke-width:0}
+.kt-run{display:inline-flex;align-items:center;gap:8px}
+.kt-count{font-family:var(--font-num,'Avenir Next',monospace);font-size:20px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;min-width:56px;text-align:center}
+.kt-count.warn{color:var(--amber)}
+.kt-count.done{color:var(--red)}
+.kt-reset{padding:4px 10px;font-size:15px;line-height:1;color:var(--text2);background:var(--bg3);border-color:var(--border-strong)}
+@keyframes ktFlash{0%,100%{background:transparent}25%,75%{background:rgba(239,68,68,.18)}}
+.step-timer.kt-flash{animation:ktFlash .5s ease 0s 4;border-radius:8px}
 .sub-items{margin-top:6px}
 .sub-item{font-size:13px;color:var(--text2);display:flex;gap:6px;padding:2px 0;line-height:1.5}
 .sub-dash{color:var(--text3);flex-shrink:0}
@@ -7092,6 +7105,122 @@ function quickCheck(e,i){
 }
 
 // ── Open task ─────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+// ── START-WITH-TIMER (recording steps) ────────────────────
+// ══════════════════════════════════════════════════════════
+// A "Start with timer" control sits next to any step that says "Tap START to
+// begin recording" or "Start recording". Clicking it runs a visual countdown
+// derived from the task's duration meta-chip. It's a GUIDE only — it doesn't
+// control the capture device or complete the step. At 0:00 it flashes, beeps,
+// and vibrates (where supported).
+window._kiloTimers = window._kiloTimers || {};
+
+// Does this step text start a recording? (covers the registration variant
+// "Tap START to begin recording, then STOP SESSION when complete.")
+function kiloIsRecordingStep(txt){
+  return /^(tap start to begin recording|start recording)\b/i.test(String(txt||'').trim());
+}
+
+// Parse a duration meta-chip → { sec, offerHalf }.
+//   "Auto 2 min" → 120 + offerHalf (lets the user pick 1:30)
+//   "~1.5 min"   → 90 ;  "30 sec"/"Auto 30 sec" → 30 ;  "Manual"/"" → sec null
+function kiloParseDuration(durationStr){
+  const d = String(durationStr || '');
+  const offerHalf = /\b2\s*min/i.test(d);   // only "2 min" tasks offer the 1.5-min option
+  let sec = null;
+  const mMin = d.match(/(\d+(?:\.\d+)?)\s*min/i);
+  const mSec = d.match(/(\d+)\s*sec/i);
+  if(mMin) sec = Math.round(parseFloat(mMin[1]) * 60);
+  else if(mSec) sec = parseInt(mSec[1], 10);
+  return { sec, offerHalf };
+}
+
+function kiloFmtTime(s){
+  s = Math.max(0, s|0);
+  return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+}
+
+// Build the control HTML for a given unique id, default seconds, and whether
+// to offer the 2:00/1:30 choice. Manual/no-duration steps pass sec=30.
+function kiloTimerControlHTML(uid, sec, offerHalf){
+  const play = '<svg viewBox="0 0 16 16"><polygon points="4,3 13,8 4,13"/></svg>';
+  const choices = offerHalf
+    ? `<button class="kt-btn" onclick="event.stopPropagation();startKiloTimer('${uid}',120)">${play}2:00</button>`
+      + `<button class="kt-btn" onclick="event.stopPropagation();startKiloTimer('${uid}',90)">${play}1:30</button>`
+    : `<button class="kt-btn" onclick="event.stopPropagation();startKiloTimer('${uid}',${sec})">${play}Start timer · ${kiloFmtTime(sec)}</button>`;
+  return `<div class="step-timer" id="ktwrap-${uid}" onclick="event.stopPropagation()">`
+    + `<span class="kt-choices" style="display:inline-flex;gap:6px;flex-wrap:wrap">${choices}</span>`
+    + `<span class="kt-run" style="display:none"><span class="kt-count"></span>`
+    + `<button class="kt-btn kt-reset" onclick="event.stopPropagation();resetKiloTimer('${uid}')" aria-label="Reset timer">↺</button></span>`
+    + `</div>`;
+}
+
+function startKiloTimer(uid, totalSec){
+  const wrap = document.getElementById('ktwrap-' + uid);
+  if(!wrap) return;
+  const choices = wrap.querySelector('.kt-choices');
+  const run     = wrap.querySelector('.kt-run');
+  const disp    = wrap.querySelector('.kt-count');
+  if(choices) choices.style.display = 'none';
+  if(run) run.style.display = 'inline-flex';
+  if(window._kiloTimers[uid]) clearInterval(window._kiloTimers[uid]);
+  let remaining = totalSec;
+  const paint = () => {
+    if(!disp) return;
+    disp.textContent = kiloFmtTime(remaining);
+    disp.classList.toggle('warn', remaining <= 10 && remaining > 0);
+    disp.classList.toggle('done', remaining <= 0);
+  };
+  paint();
+  window._kiloTimers[uid] = setInterval(() => {
+    remaining--;
+    if(remaining <= 0){
+      remaining = 0; paint();
+      clearInterval(window._kiloTimers[uid]); delete window._kiloTimers[uid];
+      kiloTimerAlert(uid);
+      return;
+    }
+    paint();
+  }, 1000);
+}
+
+function resetKiloTimer(uid){
+  if(window._kiloTimers[uid]){ clearInterval(window._kiloTimers[uid]); delete window._kiloTimers[uid]; }
+  const wrap = document.getElementById('ktwrap-' + uid);
+  if(!wrap) return;
+  const choices = wrap.querySelector('.kt-choices');
+  const run     = wrap.querySelector('.kt-run');
+  const disp    = wrap.querySelector('.kt-count');
+  if(disp){ disp.textContent = ''; disp.classList.remove('warn','done'); }
+  if(run) run.style.display = 'none';
+  if(choices) choices.style.display = 'inline-flex';
+}
+
+// Fired at 0:00 — visual flash + short double beep + vibrate. Best-effort;
+// audio/vibration are unlocked by the earlier Start tap (a user gesture).
+function kiloTimerAlert(uid){
+  const wrap = document.getElementById('ktwrap-' + uid);
+  if(wrap){ wrap.classList.add('kt-flash'); setTimeout(() => wrap.classList.remove('kt-flash'), 2400); }
+  try{
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if(Ctx){
+      const ac = new Ctx();
+      if(ac.state === 'suspended' && ac.resume) ac.resume();
+      const beep = (at) => {
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.connect(g); g.connect(ac.destination); o.type = 'sine'; o.frequency.value = 880;
+        g.gain.setValueAtTime(0.0001, ac.currentTime + at);
+        g.gain.exponentialRampToValueAtTime(0.3, ac.currentTime + at + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + at + 0.45);
+        o.start(ac.currentTime + at); o.stop(ac.currentTime + at + 0.45);
+      };
+      beep(0); beep(0.55);
+    }
+  }catch(e){}
+  try{ if(navigator.vibrate) navigator.vibrate([200,100,200]); }catch(e){}
+  if(typeof showToast === 'function') showToast('Timer done — recording time reached');
+}
+
 function openTask(i){
   if(!isSessionStarted()){
     showToast('Please tap "Begin a new session" first');
@@ -7155,6 +7284,9 @@ function openTask(i){
 
 // ── Render task detail ────────────────────────────────
 function renderDetail(i){
+  // Clear any running step timers — the DOM they live in is about to be rebuilt,
+  // which would otherwise orphan the interval (stray beep on a detached node).
+  if(window._kiloTimers){ for(const k in window._kiloTimers){ clearInterval(window._kiloTimers[k]); } window._kiloTimers = {}; }
   const t=TASKS[i],d=taskData[i];
   if(t.isRegistration){ renderRegistration(i); return; }
   const done=stepDone[i].filter(Boolean).length;
@@ -7264,9 +7396,15 @@ function renderDetail(i){
     const text=typeof s==='string'?s:s.t;
     const isParticipant = participantSet.has(j+1);
     let subs=typeof s==='object'&&s.s?'<div class="sub-items">'+s.s.map(x=>`<div class="sub-item"><span class="sub-dash">—</span><span>${x}</span></div>`).join('')+'</div>':'';
+    // Recording steps get a "Start with timer" control (duration from the task's meta-chip; Manual → 0:30)
+    let timerHtml='';
+    if(typeof s==='string' && kiloIsRecordingStep(s)){
+      const dur=kiloParseDuration(t.duration);
+      timerHtml=kiloTimerControlHTML(`${i}-${j}`, dur.sec!=null?dur.sec:30, dur.offerHalf);
+    }
     html+=`<li class="step-item" onclick="toggleStep(${i},${j})">
       <div class="step-dot${isDone?' done':''}${isParticipant&&!isDone?' participant':''}"><span>${j+1}</span><div class="step-tick"><svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9.5 10.5,3"/></svg></div></div>
-      <div class="step-content"><div class="step-text${isDone?' done':''}">${text}</div>${subs}</div>
+      <div class="step-content"><div class="step-text${isDone?' done':''}">${text}</div>${subs}${timerHtml}</div>
     </li>`;
   });
   html+='</ul><div class="btn-row">';
@@ -7677,7 +7815,8 @@ async function doLogin(){
       phone:    data.phone    || '',
       role:     role,
       isAdmin:  isAdmin,
-      loginId:  loginId
+      loginId:  loginId,
+      loginAt:  Date.now()   // start of the 10-hour auto-logout window (fresh login)
     };
     console.log('[Login] Role:', role || '(empty)', '→', isAdmin ? 'Admin landing' : 'Checklist app');
     sessionStorage.setItem('centific_user', JSON.stringify(currentUser));
@@ -7916,6 +8055,9 @@ function closeTodaySessionPopup(){
 }
 
 function _onLoginSuccessInner(){
+  // Start (or resume) the 10-hour auto-logout window. Covers both fresh login
+  // and refresh-restored sessions, since both route through onLoginSuccess.
+  if(typeof armAutoLogout === 'function') armAutoLogout();
   // If returning user (not first login), skip video requirement
   if(localStorage.getItem('centific_videos_seen_complete')){
     // already done — no action needed
@@ -7994,8 +8136,65 @@ function updateWelcomeMessage(){
   if(typeof injectActiveSetIndicator === 'function') injectActiveSetIndicator();
 }
 
-function doLogout(){
-  if(!confirm('Sign out of the app?')) return;
+// ══════════════════════════════════════════════════════════
+// ── AUTO-LOGOUT — absolute 10-hour session cap ────────────
+// ══════════════════════════════════════════════════════════
+// Signs the user out 10 hours after LOGIN (not idle time). The clock is
+// anchored to currentUser.loginAt, which is persisted in sessionStorage with
+// the user object — so a page refresh does NOT reset the window (the timer is
+// re-armed for the time remaining). A visibilitychange re-check covers laptops
+// that slept past the deadline (setTimeout doesn't fire reliably while asleep).
+const AUTO_LOGOUT_MS = 10 * 60 * 60 * 1000;   // 10 hours
+let _autoLogoutTimer = null;
+
+function _autoLogoutRemainingMs(){
+  if(!currentUser || !currentUser.loginAt) return Infinity; // nothing to time
+  return (currentUser.loginAt + AUTO_LOGOUT_MS) - Date.now();
+}
+
+// (Re)start the auto-logout timer based on time remaining in the 10h window.
+function armAutoLogout(){
+  if(_autoLogoutTimer){ clearTimeout(_autoLogoutTimer); _autoLogoutTimer = null; }
+  if(!currentUser) return;
+  // Back-fill loginAt for sessions that predate this feature so they aren't
+  // logged out instantly; start their clock now and persist it.
+  if(!currentUser.loginAt){
+    currentUser.loginAt = Date.now();
+    try { sessionStorage.setItem('centific_user', JSON.stringify(currentUser)); } catch(e){}
+  }
+  const remaining = _autoLogoutRemainingMs();
+  if(remaining <= 0){ autoLogoutNow(); return; }
+  // setTimeout is safe here — 10h (36,000,000ms) is well under the 2^31 cap.
+  _autoLogoutTimer = setTimeout(autoLogoutNow, remaining);
+  console.log('[AutoLogout] Armed — signs out in', Math.round(remaining/60000), 'min');
+}
+
+function clearAutoLogout(){
+  if(_autoLogoutTimer){ clearTimeout(_autoLogoutTimer); _autoLogoutTimer = null; }
+}
+
+// Fired when the 10h window elapses — tears down the session via the normal
+// logout path (skipping the confirm) and flags the login screen with a notice.
+function autoLogoutNow(){
+  clearAutoLogout();
+  if(!currentUser) return;
+  console.log('[AutoLogout] 10-hour session window elapsed — signing out.');
+  try { doLogout({ auto: true }); } catch(e){ console.warn('[AutoLogout] teardown error', e); }
+}
+
+// Re-check when the tab regains focus (handles sleep past the deadline).
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState !== 'visible') return;
+  if(!currentUser) return;
+  if(_autoLogoutRemainingMs() <= 0) autoLogoutNow();
+  else armAutoLogout();   // re-arm in case the timer drifted while hidden
+});
+
+function doLogout(opts){
+  opts = opts || {};
+  // Manual sign-out asks for confirmation; the auto path (opts.auto) skips it.
+  if(!opts.auto && !confirm('Sign out of the app?')) return;
+  clearAutoLogout();
   currentUser = null;
   sessionStorage.removeItem('centific_user');
   if(typeof hideCollReminderFab === 'function') hideCollReminderFab();
@@ -8037,6 +8236,12 @@ function doLogout(){
   // Show login screen
   document.getElementById('login-screen').classList.add('visible');
   closeHamburger();
+  // Auto-logout (10h cap): tell the user why they were signed out. Set AFTER
+  // the form reset above (which clears login-error).
+  if(opts.auto){
+    const e = document.getElementById('login-error');
+    if(e) e.textContent = 'You were signed out after 10 hours. Please sign in again.';
+  }
 }
 
 function saveDashPaUrl(){
@@ -8318,6 +8523,8 @@ function openRegistration(){
 }
 
 function renderRegistration(){
+  // Clear running step timers before rebuilding the registration DOM (avoid orphaned intervals).
+  if(window._kiloTimers){ for(const k in window._kiloTimers){ clearInterval(window._kiloTimers[k]); } window._kiloTimers = {}; }
   if(!regSubTask){
     // Show chooser
     document.getElementById('main-content').innerHTML = `
@@ -8448,12 +8655,15 @@ function renderRegistration(){
         const subs = typeof s==='object' && s.s && s.s.length
           ? '<div class="sub-items">' + s.s.map(x=>`<div class="sub-item"><span class="sub-dash">—</span><span>${x}</span></div>`).join('') + '</div>'
           : '';
+        // Registration recording steps have no numeric chip → default 0:30 (QA: registration videos are 30s)
+        const timerHtml = (typeof s === 'string' && kiloIsRecordingStep(s))
+          ? kiloTimerControlHTML(`reg-${j}`, 30, false) : '';
         const dotCls = `step-dot${isDone?' done':''}${isPart&&!isDone?' participant':''}`;
         return `<li class="step-item" onclick="toggleRegStep(${j})">
           <div class="${dotCls}"><span>${displayNum}</span>
             <div class="step-tick"><svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9.5 10.5,3"/></svg></div>
           </div>
-          <div class="step-content"><div class="step-text${isDone?' done':''}">${text}</div>${subs}</div>
+          <div class="step-content"><div class="step-text${isDone?' done':''}">${text}</div>${subs}${timerHtml}</div>
         </li>`;
       }
 
