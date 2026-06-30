@@ -82,6 +82,43 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .nav-prog-bar{width:80px;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden}
 .nav-prog-fill{height:100%;background:var(--pink);border-radius:2px;transition:width .4s cubic-bezier(.4,0,.2,1)}
 .nav-count{font-size:13px;font-weight:500;color:var(--text);background:var(--bg2);border:.5px solid var(--border-strong);border-radius:99px;padding:4px 12px;white-space:nowrap}
+/* Session Tracker pill — replaces the static task-count badge. Tappable;
+   opens My Schedule. Pink-tinted when a current/next session exists, neutral
+   when empty/disconnected. Stays visible on mobile (inherits .nav-count). */
+.nav-session-pill{display:inline-flex;align-items:center;gap:6px;cursor:pointer;transition:background .18s,border-color .18s,transform .12s}
+.nav-session-pill svg{width:13px;height:13px;flex:none;stroke:currentColor;stroke-width:1.8;fill:none}
+.nav-session-pill.has-session{color:var(--pink);background:rgba(239,67,179,.12);border-color:rgba(239,67,179,.35)}
+.nav-session-pill:active{transform:scale(.97)}
+.nav-session-pill .nav-session-go{width:12px;height:12px;margin-left:-1px;opacity:.7;transition:transform .18s,opacity .18s}
+.nav-session-pill:hover .nav-session-go{opacity:1;transform:translateX(2px)}
+/* Slide reminder popover (anchored under the session pill) */
+.sched-reminder-pop{position:fixed;z-index:320;width:320px;background:var(--bg2);border:.5px solid var(--border-strong);border-radius:16px;box-shadow:var(--shadow-md);padding:14px 16px 16px;transform-origin:top right;transform:translateY(-10px) scale(.96);opacity:0;pointer-events:none;transition:transform .26s cubic-bezier(.34,1.2,.64,1),opacity .2s ease}
+.sched-reminder-pop.open{transform:translateY(0) scale(1);opacity:1;pointer-events:auto}
+.srp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.srp-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--pink)}
+.srp-eyebrow.ok{color:var(--green)}
+.srp-x{width:24px;height:24px;border:none;background:none;color:var(--text3);cursor:pointer;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.srp-x:hover{background:var(--bg4);color:var(--text)}
+.srp-x svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.srp-name{font-size:16px;font-weight:600;letter-spacing:-.02em;color:var(--text)}
+.srp-metarow{display:flex;flex-wrap:wrap;gap:10px;margin-top:5px}
+.srp-meta{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--text2)}
+.srp-meta svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.srp-note{font-size:12.5px;color:var(--text2);margin:10px 0 12px;line-height:1.45}
+.srp-actions{display:flex;gap:8px}
+.srp-btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:5px;font-family:var(--font);font-size:12.5px;font-weight:600;border-radius:10px;padding:9px 6px;cursor:pointer;border:.5px solid transparent;transition:transform .12s,background .18s}
+.srp-btn:active{transform:scale(.97)}
+.srp-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.srp-btn.confirm,.srp-btn.begin{background:var(--pink);color:#fff}
+.srp-btn.confirm:hover,.srp-btn.begin:hover{background:var(--pink-dim,#c4359a)}
+.srp-btn.noshow,.srp-btn.calloff{background:var(--bg3);color:var(--text2);border-color:var(--border-strong)}
+.srp-btn.noshow:hover,.srp-btn.calloff:hover{background:var(--bg4);color:var(--text)}
+.srp-hint{font-size:11px;color:var(--text3);margin-top:9px;line-height:1.4}
+.srp-cleared{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--text);margin:6px 0 12px;line-height:1.4}
+.srp-cleared svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--green);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.srp-empty{font-size:13px;color:var(--text2);padding:4px 0 2px}
+/* Begin-session gate — locked look (click still routes to the reminder) */
+.begin-session-btn.gate-locked,.sidebar-begin-pill.gate-locked{opacity:.5;cursor:not-allowed}
 
 /* sync badge */
 .sync-badge{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:4px 10px;border-radius:99px;border:.5px solid var(--border-strong);background:var(--bg2);white-space:nowrap;cursor:default}
@@ -4128,9 +4165,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .admin-tile-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center}
 .admin-tile-icon.checklist{background:rgba(239,67,179,.12);border:.5px solid rgba(239,67,179,.25)}
 .admin-tile-icon.dashboard{background:rgba(59,130,246,.12);border:.5px solid rgba(59,130,246,.25)}
+.admin-tile-icon.schedule{background:rgba(252,208,48,.14);border:.5px solid rgba(252,208,48,.30)}
 .admin-tile-icon svg{width:24px;height:24px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .admin-tile-icon.checklist svg{stroke:var(--pink)}
 .admin-tile-icon.dashboard svg{stroke:var(--blue)}
+.admin-tile-icon.schedule svg{stroke:#fcd030}
 .admin-tile-name{font-size:20px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
 .admin-tile-desc{font-size:14px;font-weight:300;color:var(--text2);line-height:1.5}
 .admin-tile-arrow{font-size:18px;color:var(--text3);margin-top:auto}
@@ -4138,6 +4177,76 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 /* ── Dashboard page ── */
 #dashboard-page{display:none;background:var(--bg);height:calc(100vh - 52px);overflow-y:auto;overflow-x:hidden}
 #dashboard-page.visible{display:block}
+/* ── Admin Scheduling page ── */
+#schedule-admin-page{display:none;background:var(--bg);height:calc(100vh - 52px);overflow-y:auto;overflow-x:hidden}
+#schedule-admin-page.visible{display:block}
+.schad-body{max-width:920px;margin:0 auto;padding:20px 24px 60px}
+.schad-search-wrap{position:relative;display:flex;align-items:center}
+.schad-search-ic{position:absolute;left:10px;width:14px;height:14px;fill:none;stroke:var(--text3);stroke-width:1.8;stroke-linecap:round;pointer-events:none}
+.schad-search{font-family:var(--font);font-size:13px;color:var(--text);background:var(--input-bg);border:.5px solid var(--border-strong);border-radius:10px;padding:7px 10px 7px 30px;min-width:240px;outline:none;transition:border-color .18s,box-shadow .18s}
+.schad-search::placeholder{color:var(--text3)}
+.schad-search:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(239,67,179,.14)}
+.schad-note{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:6px}
+.schad-amt{font-family:var(--font-num,var(--font));font-weight:700;font-size:12px;color:#fff;background:#3a3a3c;border:.5px solid rgba(255,255,255,.14);border-radius:8px;padding:2px 8px;font-variant-numeric:tabular-nums}
+.schad-reason{font-size:12px;font-weight:600;color:var(--text2)}
+.schad-note-txt{font-size:12px;color:var(--text3);font-style:italic}
+.schad-note-txt::before{content:'\201C'}
+.schad-note-txt::after{content:'\201D'}
+.schad-count{font-size:12px;color:var(--text3);white-space:nowrap}
+/* moderator master rows */
+/* moderator accordion */
+.schad-acc{border:.5px solid var(--border);border-radius:var(--rl);margin-bottom:10px;overflow:hidden;background:var(--card-bg);transition:border-color .18s}
+.schad-acc:hover{border-color:var(--border-strong)}
+.schad-mod{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:transparent;border:none;padding:14px 16px;cursor:pointer;transition:background .15s}
+.schad-mod:hover{background:var(--bg3)}
+.schad-mod.open{border-bottom:.5px solid var(--border)}
+.schad-chev svg{transition:transform .26s cubic-bezier(.4,0,.2,1)}
+.schad-mod.open .schad-chev svg{transform:rotate(90deg)}
+.schad-panel{max-height:0;overflow:hidden;transition:max-height .34s cubic-bezier(.4,0,.2,1)}
+.schad-panel-inner{padding:8px 14px 14px}
+.schad-avatar{width:38px;height:38px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;background:rgba(239,67,179,.16);color:var(--pink)}
+.schad-mod-main{flex:1;min-width:0}
+.schad-mod-name{font-size:15px;font-weight:600;color:var(--text);letter-spacing:-.01em}
+.schad-mod-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.schad-chev{flex:none;color:var(--text3)}
+.schad-chev svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
+/* status count chips on the master row */
+.schad-cc{font-size:11px;font-weight:600;border-radius:99px;padding:2px 9px;white-space:nowrap}
+.schad-cc.confirmed{background:var(--green-bg);color:var(--green-text)}
+.schad-cc.noshow{background:var(--red-bg);color:var(--red-text)}
+.schad-cc.cancelled{background:var(--bg3);color:var(--text3)}
+.schad-cc.scheduled{background:var(--bg4);color:var(--text2)}
+/* detail header */
+.schad-detail-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.schad-back2{display:inline-flex;align-items:center;gap:6px;background:var(--bg2);border:.5px solid var(--border-strong);color:var(--text2);border-radius:10px;padding:7px 13px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font)}
+.schad-back2:hover{background:var(--bg4);color:var(--text)}
+.schad-back2 svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}
+.schad-detail-title{font-size:18px;font-weight:600;letter-spacing:-.02em;color:var(--text)}
+.schad-detail-sub{font-size:12px;color:var(--text3);margin-top:2px}
+/* participant cards */
+.schad-part{display:flex;align-items:flex-start;gap:12px;background:var(--card-bg);border:.5px solid var(--border);border-radius:14px;padding:13px 15px;margin-bottom:9px}
+.schad-part-main{flex:1;min-width:0}
+.schad-part-name{font-size:14.5px;font-weight:600;color:var(--text);letter-spacing:-.01em}
+.schad-meta{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:6px}
+.schad-meta span{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
+.schad-meta svg{width:12px;height:12px;flex:none;fill:none;stroke:var(--text3);stroke-width:1.7}
+.schad-chip{font-size:11px;font-weight:600;border-radius:99px;padding:3px 10px;white-space:nowrap;flex:none}
+.schad-chip.confirmed{background:var(--green-bg);color:var(--green-text)}
+.schad-chip.completed{background:var(--green);color:#fff}
+.schad-chip.noshow{background:var(--amber-bg);color:var(--amber-text)}
+.schad-chip.reschedule{background:var(--red-bg);color:var(--red-text)}
+.schad-chip.partial{background:#F3E8FF;color:#6B21A8}
+.schad-chip.cancelled{background:var(--bg3);color:var(--text3);border:.5px solid var(--border-strong)}
+.schad-chip.scheduled{background:var(--bg4);color:var(--text2)}
+.schad-chip-col{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:none}
+.schad-logged{display:inline-flex;align-items:center;gap:3px;font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--green-text);background:var(--green-bg);border-radius:99px;padding:1px 7px 1px 5px}
+.schad-logged svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+/* empty / loading */
+.schad-empty{text-align:center;padding:56px 24px;color:var(--text3)}
+.schad-empty svg{width:44px;height:44px;fill:none;stroke:var(--text3);stroke-width:1.4;opacity:.6;margin-bottom:14px}
+.schad-empty-title{font-size:16px;font-weight:600;color:var(--text2);margin-bottom:6px}
+.schad-empty-sub{font-size:13px;color:var(--text3);max-width:340px;margin:0 auto;line-height:1.5}
+.schad-date-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin:14px 2px 8px}
 .dash-toolbar{
   position:sticky;top:0;z-index:10;background:var(--bg2);border-bottom:.5px solid var(--border);
   padding:12px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
@@ -6141,7 +6250,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       <div class="nav-prog-bar"><div class="nav-prog-fill" id="nav-fill" style="width:0%"></div></div>
       <span style="font-size:11px;color:var(--text3)" id="nav-label">0/14</span>
     </div>
-    <span class="nav-count" id="nav-badge">0 / 14</span>
+    <span class="nav-count nav-session-pill" id="nav-session-pill" role="button" tabindex="0" title="Your upcoming session" onclick="toggleSchedReminder()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSchedReminder();}">No sessions</span>
     <div class="nav-user-chip" id="nav-user-chip" style="display:none">
       <div class="nav-user-avatar" id="nav-user-avatar">?</div>
       <span class="nav-user-name" id="nav-user-name"></span>
@@ -6185,6 +6294,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
           <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor" stroke="none"/></svg>
           <span>Troubleshooting</span>
         </div>
+        <div class="hd-item" id="hd-schedule" onclick="openPanelFromMenu('schedule')" style="display:none">
+          <svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="1.5"/><line x1="2" y1="6" x2="14" y2="6"/><line x1="5" y1="1.5" x2="5" y2="3.5"/><line x1="11" y1="1.5" x2="11" y2="3.5"/></svg>
+          <span>My Schedule</span>
+        </div>
         <div class="hd-item" id="hd-inbox" onclick="openInbox();closeHamburger()" style="display:none">
           <svg viewBox="0 0 16 16"><path d="M2 4h12v8H2z" fill="none"/><polyline points="2,5 8,9 14,5"/></svg>
           <span>Inbox</span>
@@ -6198,6 +6311,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="hd-item" id="hd-switch-view" style="display:none" onclick="adminSwitchView();closeHamburger()">
           <svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="9" rx="1.5"/><polyline points="5,9 7,7 9,8.5 11,6"/><line x1="5" y1="13" x2="11" y2="13"/><line x1="8" y1="12" x2="8" y2="13.5"/></svg>
           <span id="hd-switch-label">Progress Tracker</span>
+        </div>
+        <div class="hd-item" id="hd-sched-admin" style="display:none" onclick="gotoSchedAdmin();closeHamburger()">
+          <svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="1.5"/><line x1="2" y1="6" x2="14" y2="6"/><line x1="5" y1="1.5" x2="5" y2="3.5"/><line x1="11" y1="1.5" x2="11" y2="3.5"/></svg>
+          <span>Scheduling</span>
         </div>
         <a class="hd-item" id="hd-tracker-log" href="https://digitaltechedge.sharepoint.com/:x:/r/sites/DataCollectionUSHUB/_layouts/15/Doc.aspx?sourcedoc=%7BF586CBD7-8912-42AE-ACB5-2C116915417E%7D&file=Kilo%20Tracker%20Log.xlsx&action=default&mobileredirect=true" target="_blank" rel="noopener noreferrer" style="display:none;text-decoration:none;color:inherit" onclick="closeHamburger()">
           <svg viewBox="0 0 16 16"><path d="M2 3.5h12v9H2z"/><line x1="2" y1="6" x2="14" y2="6"/><line x1="6" y1="3.5" x2="6" y2="12.5"/><line x1="10" y1="3.5" x2="10" y2="12.5"/><path d="M11.5 1.5l3 3-3 3" style="opacity:.45;stroke-width:1.4"/></svg>
@@ -6344,6 +6461,22 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       </div>
     </div>
 
+    <!-- ── My Schedule panel ── -->
+    <div class="side-panel" id="panel-schedule">
+      <div class="panel-title-row">
+        <div>
+          <div class="panel-title">My Schedule</div>
+          <div class="panel-sub">Today and upcoming sessions</div>
+        </div>
+        <button class="trouble-refresh-btn" onclick="renderSchedulePanel(true)" title="Refresh schedule">
+          <svg viewBox="0 0 16 16"><path d="M14 8a6 6 0 1 1-1.5-4"/><polyline points="14,2 14,6 10,6"/></svg>
+        </button>
+      </div>
+      <div id="schedule-list-container">
+        <div class="trouble-loading"><div class="trouble-spinner"></div><span>Loading…</span></div>
+      </div>
+    </div>
+
     <!-- ── Settings panel ── -->
     <div class="side-panel" id="panel-settings">
       <div class="panel-title">Settings</div>
@@ -6440,7 +6573,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
             <li>Create a new Automated cloud flow → trigger: <strong>"When a HTTP request is received"</strong></li>
             <li>JSON schema: <div class="code-block">{"type":"object","properties":{"loginId":{"type":"string"}}}</div></li>
             <li>Add action: <strong>Excel Online → Get a row</strong> (or "List rows present in a table") → ModInfo table → filter: <code>loginId eq @{triggerBody()?['loginId']}</code></li>
-            <li>Add action: <strong>Response</strong> → Status 200 → Body:<div class="code-block">{"found": true, "modId": "@{first(outputs('List_rows')?['body/value'])?['modId']}", "modName": "@{first(outputs('List_rows')?['body/value'])?['modName']}", "location": "@{first(outputs('List_rows')?['body/value'])?['location']}", "email": "@{first(outputs('List_rows')?['body/value'])?['email']}", "phone": "@{first(outputs('List_rows')?['body/value'])?['phone']}"}</div></li>
+            <li>Add action: <strong>Response</strong> → Status 200 → Body:<div class="code-block">{"found": true, "modId": "@{first(outputs('List_rows')?['body/value'])?['modId']}", "modName": "@{first(outputs('List_rows')?['body/value'])?['modName']}", "odName": "@{first(outputs('List_rows')?['body/value'])?['OD Name']}", "location": "@{first(outputs('List_rows')?['body/value'])?['location']}", "email": "@{first(outputs('List_rows')?['body/value'])?['email']}", "phone": "@{first(outputs('List_rows')?['body/value'])?['phone']}"}</div></li>
             <li>If no row found, add a parallel <strong>Response</strong> with body: <div class="code-block">{"found": false}</div></li>
             <li>Save → copy HTTP POST URL → paste above</li>
           </ul>
@@ -6522,7 +6655,7 @@ const TASK_VIDEOS = [
 ];
 
 // ── APP VERSION (searchable constant for version-poll notification) ──
-const APP_VERSION = "1.2.062426";
+const APP_VERSION = "1.2.062926";
 
 const TASKS=[
   {id:0,title:"Registration",cat:"Registration",distance:"",lux:"",duration:"",warn:"",note:"",isRegistration:true,steps:[]},
@@ -6784,7 +6917,17 @@ let paUrl       = localStorage.getItem('centific_pa_url') || DEFAULT_PA_URL;
 // Read flow for the Schedule table (PrimaryModerator → today's session lookup).
 // Empty until the PA "Schedule, Read" flow is built — see handoff. All schedule
 // code below is written to degrade silently to a no-op while this is ''.
-const SCHEDULE_PA_READ_URL = '';  // ← paste the read-flow URL here
+const SCHEDULE_PA_READ_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/7f941fd7927c4760b3f068dcefe0301f/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=HkEdySf96kgjWUYBqtV-fC4DrbdTuK77TQZMS5oypWw';  // ← paste the read-flow URL here
+// Write flow for status-back (Confirm / No-show / Cancelled + StatusNote). Empty
+// until the "Schedule, Write" flow is built. While '', actions still update the
+// card optimistically and persist locally (per-session override cache), so the
+// UI is fully usable; only cross-device durability waits on this URL + a unique
+// SessionId column + a StatusNote column on the Schedule table.
+const SCHEDULE_PA_WRITE_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/2b041569d59c4a62afb2400cf73bc69a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=JbPMZy9ps6Ij4KL80iPhBZDGY5brFddZ-2oxKjwFz68';  // ← paste the write-flow URL here
+// Data Point B — reads the Schedule WRITE/log table (moderator status updates).
+// Overlaid onto Data Point A (the baseline read above) by SessionId: latest log
+// entry per SessionId wins and overrides the baseline status + note. Empty = off.
+const SCHEDULE_LOG_READ_URL = 'https://default9b415834803a4da0afdcfe6b1d52d6.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a18cf75cdc4d4f21a64a282c5b819e41/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=D4XkE_M6GnA-BhuVlnZIMGOjcyzXdzPRsy-Z4ZYaxzk';
 let currentTheme= localStorage.getItem('centific_theme')||'dark';
 
 // ── Init ──────────────────────────────────────────────
@@ -6851,8 +6994,8 @@ document.addEventListener('click',e=>{
 });
 
 // ── Panel management ──────────────────────────────────
-const PANEL_IDS=['reminders','trouble','settings'];
-const HD_IDS={reminders:'hd-reminders',trouble:'hd-trouble',settings:'hd-settings'};
+const PANEL_IDS=['reminders','trouble','schedule','settings'];
+const HD_IDS={reminders:'hd-reminders',trouble:'hd-trouble',schedule:'hd-schedule',settings:'hd-settings'};
 
 function openPanelFromMenu(name){ closeHamburger(); openPanel(name); }
 
@@ -6886,6 +7029,8 @@ function openPanel(name){
     document.getElementById('sidebar').classList.add('hidden');
     document.getElementById('main-panel').classList.remove('hidden');
   }
+  // My Schedule re-fetches + renders on every open (cloud-first).
+  if(name==='schedule'){ try{ renderSchedulePanel(true); }catch(e){ console.warn('[Schedule] render error:', e&&e.message); } }
 }
 
 // ── Nav Sync button — routes to correct sync based on active view ─────────────
@@ -6969,7 +7114,7 @@ function updateProgress(){
   const c=completedCount(),pct=total > 0 ? Math.round(c/total*100) : 0;
   document.getElementById('nav-fill').style.width=pct+'%';
   document.getElementById('nav-label').textContent=c+'/'+total;
-  document.getElementById('nav-badge').textContent=c+' / '+total;
+  // #nav-badge replaced by the Session Tracker pill (see renderNavSessionPill).
 }
 function syncGlobal(){
   globalData.participant=document.getElementById('g-participant').value;
@@ -7079,6 +7224,7 @@ function renderSidebar(){
     item.addEventListener('click',()=>openTask(i));
     el.appendChild(item);
   });
+  if(typeof _schApplyBeginGate === 'function') _schApplyBeginGate();
 }
 
 function quickCheck(e,i){
@@ -7806,19 +7952,24 @@ async function doLogin(){
     //   "Mod" or anything else → checklist app directly
     // Case-insensitive match on the role value from Excel.
     const isAdmin = /^admin$/i.test(role);
+    // Lead Mod: any role containing "lead" (covers "Lead Mod", "LeadMod",
+    // "Lead Moderator"). Admins are never also leads. Everyone else = Mod.
+    const isLead = !isAdmin && /lead/i.test(role);
     currentUser = {
       modId:    data.modId    || '',
       modName:  data.modName  || '',
+      odName:   data.odName   || '',   // ModInfo "OD Name" column — used to match Schedule.PrimaryModerator
       firstName: firstName,
       location: data.location || '',
       email:    data.email    || '',
       phone:    data.phone    || '',
       role:     role,
       isAdmin:  isAdmin,
+      isLead:   isLead,
       loginId:  loginId,
       loginAt:  Date.now()   // start of the 10-hour auto-logout window (fresh login)
     };
-    console.log('[Login] Role:', role || '(empty)', '→', isAdmin ? 'Admin landing' : 'Checklist app');
+    console.log('[Login] Role:', role || '(empty)', '→', isAdmin ? 'Admin landing' : isLead ? 'Lead Mod landing' : 'Checklist app');
     sessionStorage.setItem('centific_user', JSON.stringify(currentUser));
     onLoginSuccess();
 
@@ -7873,7 +8024,9 @@ function onLoginSuccess(){
 // Case/space-insensitive field getter (tolerant to column-name variants).
 function _schGetField(obj, names){
   if(!obj) return '';
-  const norm = s => String(s).toLowerCase().replace(/\s+/g,'');
+  // Normalize away ALL non-alphanumerics so "Participant_Name", "Participant-Name",
+  // "Participant Name" and "ParticipantName" all match the same candidate.
+  const norm = s => String(s).toLowerCase().replace(/[^a-z0-9]/g,'');
   for(const n of names){
     const want = norm(n);
     for(const k of Object.keys(obj)){
@@ -7887,6 +8040,26 @@ function _schGetField(obj, names){
 function _schCanon(s){ return String(s==null?'':s).trim().replace(/\s+/g,' ').toLowerCase(); }
 
 // Normalize a SessionDate value (string OR Excel serial) → "YYYY-MM-DD" (or '').
+// Format a SessionTime cell into a clock time. Excel time cells come back as a
+// day-fraction (e.g. 0.326388… = 07:50) or a full serial datetime whose
+// fractional part is the time; plain text like "9:00 AM" is passed through.
+function _schFormatTime(v){
+  if(v===null || v===undefined) return '';
+  const s = String(v).trim();
+  if(!s) return '';
+  // Already a clock string (has am/pm or H:MM) → leave as-is.
+  if(/[ap]\.?m\.?/i.test(s) || /^\d{1,2}:\d{2}/.test(s)) return s;
+  const n = Number(s);
+  if(!isFinite(n)) return s;                 // unknown text → show as-is
+  const frac = n - Math.floor(n);            // fractional part = time of day
+  let mins = Math.round(frac * 24 * 60);
+  mins = ((mins % 1440) + 1440) % 1440;      // clamp into 0..1439
+  let h = Math.floor(mins / 60); const m = mins % 60;
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  let h12 = h % 12; if(h12 === 0) h12 = 12;
+  return h12 + ':' + String(m).padStart(2,'0') + ' ' + ampm;
+}
+
 function _schToYMD(v){
   if(v===null || v===undefined || v==='') return '';
   const s = String(v).trim();
@@ -7896,7 +8069,9 @@ function _schToYMD(v){
   if(/^\d{1,6}(\.\d+)?$/.test(s)){
     const serial = parseFloat(s);
     if(serial > 20000 && serial < 80000){
-      const ed = new Date(Date.UTC(1899,11,30) + Math.round(serial)*86400000);
+      // Use FLOOR, not round: a datetime serial carries a time fraction, and
+      // rounding pushes any afternoon session (frac >= .5) onto the next day.
+      const ed = new Date(Date.UTC(1899,11,30) + Math.floor(serial)*86400000);
       if(!isNaN(ed)){
         return ed.getUTCFullYear()+'-'+String(ed.getUTCMonth()+1).padStart(2,'0')+'-'+String(ed.getUTCDate()).padStart(2,'0');
       }
@@ -7942,6 +8117,12 @@ async function _schReadRows(url){
       const text = await res.text();
       let data; try{ data = JSON.parse(text); }catch(_){ return []; }
       const rows = _schExtractArray(data);
+      // One-time diagnostic: log the real column headers so any mis-mapped
+      // field (e.g. participant name) can be matched to its actual header.
+      if(rows.length && !window._schLoggedKeys){
+        window._schLoggedKeys = true;
+        try{ console.log('[Schedule] column headers from sheet:', Object.keys(rows[0])); }catch(_){}
+      }
       if(rows.length >= 256 && rows.length % 256 === 0){
         console.warn('[Schedule] ' + rows.length + ' rows (= ' + (rows.length/256) + ' x 256, a PA page boundary) — likely truncated. Raise the read flow pagination threshold above the table size (max 100000).');
       }
@@ -7955,23 +8136,118 @@ async function _schReadRows(url){
   return [];
 }
 
+/* =====================================================================
+   STATUS-LOG OVERLAY (Data Point B)
+   =====================================================================
+   Data Point A (SCHEDULE_PA_READ_URL) is the baseline schedule. Data Point B
+   (SCHEDULE_LOG_READ_URL) is the write-log of moderator status updates. We
+   overlay B onto A by SessionId: for each SessionId, the LATEST log entry wins
+   (by updatedAt epoch; if that column isn't stored, later row order wins). The
+   overlay carries the new {status, note} so a logged session shows the
+   moderator's update on the admin page AND on any device the moderator signs
+   into (no local override needed). Map: canon(SessionId) → {status, note, _epoch}.
+*/
+let _schLogOverlay = {};
+
+async function _schLoadLogOverlay(){
+  if(!SCHEDULE_LOG_READ_URL){ _schLogOverlay = {}; return _schLogOverlay; }
+  let rows = [];
+  try{ rows = await _schReadRows(SCHEDULE_LOG_READ_URL); }catch(_){ rows = []; }
+  const map = {};
+  (rows || []).forEach((row) => {
+    const sid = _schCanon(_schGetField(row, ['SessionId','Session Id','sessionId','Session_ID']) || '');
+    const status = String(_schGetField(row, ['SessionStatus','Session Status','sessionStatus','Status']) || '').trim();
+    if(!sid || !status) return;            // a log row with no id/status can't override anything
+    const note = String(_schGetField(row, ['StatusNote','Status Note','statusNote','StatusComment','Status Comment']) || '').trim();
+    let epoch = Date.parse(_schGetField(row, ['updatedAt','UpdatedAt','updated_at','Timestamp','LoggedAt','at']));
+    if(isNaN(epoch)) epoch = 0;            // no timestamp → rely on row order (>= below keeps the later row)
+    const prev = map[sid];
+    if(!prev || epoch >= prev._epoch) map[sid] = { status: status, note: note, _epoch: epoch };
+  });
+  _schLogOverlay = map;
+  console.log('[SchedLog] overlay built —', Object.keys(map).length, 'session(s) with logged updates');
+  return map;
+}
+
 // Normalize one raw schedule row into a clean session object.
 function _schParseRow(row){
-  const fullName = String(_schGetField(row, ['ParticipantName','Participant Name','participantName']) || '').trim();
+  const fullName = String(_schGetField(row, ['ParticipantName','Participant Name','participantName','Participant','PT Name','PTName','PT','Name','FullName','Full Name','Candidate','Candidate Name','Customer','Customer Name']) || '').trim();
   const first    = fullName.split(/\s+/)[0] || '';
-  const timeRaw  = String(_schGetField(row, ['SessionTime','Session Time','sessionTime','Time']) || '').trim();
-  return {
+  const timeRaw  = _schGetField(row, ['SessionTime','Session Time','sessionTime','Time']);
+  const o = {
     date:      _schToYMD(_schGetField(row, ['SessionDate','Session Date','sessionDate'])),
     status:    String(_schGetField(row, ['SessionStatus','Session Status','sessionStatus','Status']) || '').trim(),
-    location:  String(_schGetField(row, ['SessionType','Session Type','sessionType']) || '').trim(),
+    sessionId: String(_schGetField(row, ['SessionId','Session Id','sessionId','Session_ID']) || '').trim(),
+    note:      String(_schGetField(row, ['StatusNote','Status Note','statusNote','StatusComment','Status Comment']) || '').trim(),
+    location:  String(_schGetField(row, ['Location','location','SessionType','Session Type','sessionType']) || '').trim(),
     name:      fullName,
     firstName: first,
     email:     String(_schGetField(row, ['Email','email','ParticipantEmail']) || '').trim(),
     phone:     String(_schGetField(row, ['PhoneNumber','Phone Number','phoneNumber','Phone']) || '').trim(),
     moderator: String(_schGetField(row, ['PrimaryModerator','Primary Moderator','primaryModerator']) || '').trim(),
-    time:      timeRaw,        // '' when the column is absent/empty (current state)
+    time:      _schFormatTime(timeRaw),   // Excel serial/day-fraction → "7:50 AM"
     _raw:      row
   };
+  // Case-insensitive search haystack: name, email, phone, time, date (+ a long
+  // human label so "monday"/"july"/"29" all match), location, moderator.
+  let _dl = '';
+  if(o.date){ try{ _dl = new Date(o.date + 'T00:00:00').toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'}); }catch(_){} }
+  o._search = [o.name, o.email, o.phone, o.time, o.date, _dl, o.location, o.moderator].join(' ').toLowerCase();
+  return o;
+}
+
+// Encode a status comment as compact JSON for the StatusNote column. Empty
+// pieces are kept as '' so the parsed shape is always predictable.
+function _schMakeNote(obj){
+  obj = obj || {};
+  return JSON.stringify({
+    v: 1,
+    reason: String(obj.reason || '').trim(),   // 'Reschedule' | 'Partial Payment' | ''
+    band:   String(obj.band   || '').trim(),   // 'Less than 1 hr' | '2 hrs' | ''
+    amount: String(obj.amount || '').trim(),   // '$25' | '$60' | '$125' | ''
+    note:   String(obj.note   || '').trim()    // free-text moderator note
+  });
+}
+
+// Decode a StatusNote value into {reason, band, amount, note, raw}. Tolerant of
+// BOTH the new JSON format AND legacy plain text written before this change
+// ("Partial Payment - Less than 1 hr - $25 — left early" / "Reschedule — note" /
+// a bare note), so existing rows still render correctly. Pure → harness-testable.
+function _schParseNote(raw){
+  const out = { reason:'', band:'', amount:'', note:'', raw: String(raw == null ? '' : raw) };
+  const s = out.raw.trim();
+  if(!s) return out;
+  if(s.charAt(0) === '{'){                          // new JSON format
+    try{
+      const o = JSON.parse(s);
+      if(o && typeof o === 'object'){
+        out.reason = String(o.reason || '').trim();
+        out.band   = String(o.band   || '').trim();
+        out.amount = String(o.amount || '').trim();
+        out.note   = String(o.note   || '').trim();
+        return out;
+      }
+    }catch(_){ /* malformed JSON → fall through to legacy parsing */ }
+  }
+  // Legacy plain text. Old builder joined "<subType> — <note>" with a spaced em-dash.
+  let head = s, tail = '';
+  const parts = s.split(/\s+—\s+/);
+  if(parts.length >= 2){ head = parts[0].trim(); tail = parts.slice(1).join(' — ').trim(); }
+  else if(!/^(reschedule|partial payment)/i.test(s)){ out.note = s; return out; }  // bare note
+  if(/^partial payment/i.test(head)){
+    out.reason = 'Partial Payment';
+    const tier = head.replace(/^partial payment\s*-\s*/i, '').trim();   // "Less than 1 hr - $25"
+    const m = tier.match(/^(.*?)\s*-\s*(\$[\d.,]+)\s*$/);
+    if(m){ out.band = m[1].trim(); out.amount = m[2].trim(); }
+    else if(tier){ out.band = tier; }
+    out.note = tail;
+  } else if(/^reschedule/i.test(head)){
+    out.reason = 'Reschedule';
+    out.note = tail;
+  } else {
+    out.note = s;
+  }
+  return out;
 }
 
 // Filter parsed rows to those for THIS moderator on the given YMD date.
@@ -7987,6 +8263,842 @@ function getTodaysSessionsForMod(rows, modName, todayYMD){
 // Cache of today's sessions for this moderator (consumed by stage b pill).
 let _todaySessions = [];
 
+/* =====================================================================
+   MY SCHEDULE PANEL  (Stages b + d)
+   =====================================================================
+   A moderator-facing drawer screen listing TODAY + UPCOMING sessions for
+   the signed-in moderator (matched on PrimaryModerator, same as Stage a).
+   Each session can be marked Confirm / No-show / Cancelled. No-show and
+   Cancelled require a comment before they commit.
+
+   Persistence model (important):
+   - SCHEDULE_PA_WRITE_URL is '' until the write flow exists, and the
+     Schedule table has no unique SessionId or StatusNote column yet. So
+     status changes are written to a LOCAL override cache keyed by a
+     composite of the row's stable fields, applied on top of whatever the
+     read flow returns. This makes the UI fully functional now and survives
+     refresh; once the write flow + SessionId + StatusNote columns exist,
+     _schWriteStatus() starts persisting server-side with no UI change.
+   - A local override is the moderator's intent; it always wins over the
+     sheet's SessionStatus on this device until cleared (Undo) or until a
+     server round-trip reflects it back.
+   ===================================================================== */
+
+const SCH_OVERRIDE_KEY = 'centific_kilo_schedule_overrides';
+
+function _schLoadOverrides(){
+  try{ return JSON.parse(localStorage.getItem(SCH_OVERRIDE_KEY) || '{}') || {}; }catch(_){ return {}; }
+}
+function _schSaveOverrides(obj){
+  try{ localStorage.setItem(SCH_OVERRIDE_KEY, JSON.stringify(obj || {})); }catch(_){}
+}
+// Stable composite key for a session (no SessionId column exists yet).
+function _schSessionKey(s){
+  return [_schCanon(s.moderator), s.date||'', _schCanon(s.name), _schCanon(s.location), _schCanon(s.time)].join('|');
+}
+// Is a status string terminal (already acted on)?
+function _schIsTerminal(status){
+  const c = String(status||'').toLowerCase();
+  return /confirm|complet|no[\s-]?show|cancel|call[\s-]?off/.test(c);
+}
+// Map a status string → chip/card css state. "Call-off" (and legacy
+// "Cancelled") share the red 'cancelled' class.
+function _schStatusClass(status){
+  const c = String(status||'').toLowerCase();
+  if(/complet/.test(c)) return 'completed';
+  if(/confirm/.test(c)) return 'confirmed';
+  if(/no[\s-]?show/.test(c)) return 'noshow';
+  if(/cancel|call[\s-]?off/.test(c)) return 'cancelled';
+  return 'scheduled';
+}
+
+// Parse + filter to THIS moderator's sessions on OR AFTER today, sorted.
+// Pure (no DOM/fetch) so the Node harness can exercise it directly.
+function getUpcomingSessionsForMod(rows, modName, todayYMD){
+  const wantMod = _schCanon(modName);
+  if(!wantMod) return [];
+  const toMin = t => {
+    const m = String(t||'').match(/(\d{1,2}):(\d{2})\s*(am|pm)?/i);
+    if(!m) return 0;
+    let h = parseInt(m[1],10) % 12; if((m[3]||'').toLowerCase()==='pm') h += 12;
+    return h*60 + parseInt(m[2],10);
+  };
+  return (rows||[])
+    .map(_schParseRow)
+    .filter(s => _schCanon(s.moderator) === wantMod && s.date && s.date >= todayYMD)
+    .sort((a,b) => a.date === b.date ? (toMin(a.time) - toMin(b.time)) : (a.date < b.date ? -1 : 1));
+}
+
+// Parse + filter to ALL of THIS moderator's sessions (past, today, future),
+// sorted ascending by date+time. Used for the My Schedule history view; the
+// pill/reminder/gate filter this down to TODAY themselves.
+function getAllSessionsForMod(rows, modName){
+  const wantMod = _schCanon(modName);
+  if(!wantMod) return [];
+  const toMin = t => {
+    const m = String(t||'').match(/(\d{1,2}):(\d{2})\s*(am|pm)?/i);
+    if(!m) return 0;
+    let h = parseInt(m[1],10) % 12; if((m[3]||'').toLowerCase()==='pm') h += 12;
+    return h*60 + parseInt(m[2],10);
+  };
+  return (rows||[])
+    .map(_schParseRow)
+    .filter(s => _schCanon(s.moderator) === wantMod && s.date)
+    .sort((a,b) => a.date === b.date ? (toMin(a.time) - toMin(b.time)) : (a.date < b.date ? -1 : 1));
+}
+
+// The name we match Schedule.PrimaryModerator against. Prefer the ModInfo
+// "OD Name" (currentUser.odName); fall back to modName so matching keeps
+// working on sessions saved before the login flow returned odName.
+function _schMatchName(){
+  return (currentUser && (currentUser.odName || currentUser.modName)) || '';
+}
+
+// Earliest non-terminal upcoming session for the nav pill. Reads the shared
+// _schPanelAll cache (already sorted earliest-first) and applies local
+// status overrides so a Confirm/No-show/Cancel advances the pill. Returns
+// null when there are no non-terminal sessions.
+function getCurrentOrNextSession(){
+  const today = _schTodayYMD();
+  const ov = _schLoadOverrides();
+  for(const s0 of (_schPanelAll || [])){
+    if(s0.date !== today) continue;   // pill/reminder are TODAY only
+    const key = _schSessionKey(s0);
+    const sid = _schCanon(s0.sessionId || '');
+    const remote = sid ? (_schLogOverlay[sid] || null) : null;
+    const local  = ov[key] || null;
+    // Latest-wins between local override and the server log, same as the panel.
+    let status = s0.status;
+    if(local && remote){ status = ((Date.parse(local.at)||0) >= (remote._epoch||0)) ? local.status : remote.status; }
+    else if(local){ status = local.status; }
+    else if(remote){ status = remote.status; }
+    if(!_schIsTerminal(status)) return s0;
+  }
+  return null;
+}
+
+// Pill text: "<time|Today|date> · <first name>". SessionTime may be absent —
+// degrade gracefully to the date, then to just the name, then "Session".
+function _schNavLabel(s){
+  const first = String(s.name || '').trim().split(/\s+/)[0] || '';
+  let when = '';
+  if(s.time){ when = s.time; }
+  else if(s.date){
+    const today = _schTodayYMD();
+    when = (s.date === today)
+      ? 'Today'
+      : new Date(s.date + 'T00:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric'});
+  }
+  return [when, first].filter(Boolean).join(' · ') || 'Session';
+}
+
+// Render the nav Session Tracker pill from current state. Pink + labelled
+// when a session exists; neutral "No sessions" otherwise. Visible for ALL
+// logged-in roles (admins/leads also run the checklist), so it must not be
+// hidden by role — hiding it here was the "disappears after clicking" bug.
+// Called after status changes, panel fetches, and at login.
+function renderNavSessionPill(){
+  const pill = document.getElementById('nav-session-pill');
+  if(!pill) return;
+  pill.style.display = '';
+  const s = getCurrentOrNextSession();
+  const calIcon = '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>';
+  const clkIcon = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+  const goIcon  = '<svg class="nav-session-go" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>';
+  if(s){
+    pill.classList.add('has-session');
+    // Has-session pill is the next un-confirmed session in today's queue → label
+    // it "Upcoming" with the time (falling back to the participant's first name).
+    const first = String(s.name || '').trim().split(/\s+/)[0] || '';
+    const tail = s.time ? (' · ' + s.time) : (first ? (' · ' + first) : '');
+    pill.innerHTML = clkIcon + '<span>Upcoming' + escapeHtml(tail) + '</span>' + goIcon;
+  } else {
+    pill.classList.remove('has-session');
+    pill.innerHTML = calIcon + '<span>No sessions today</span>';
+  }
+}
+
+// Lightweight fetch to populate the pill at login without opening the panel.
+// Reuses the same read flow + filter as the panel; shares the _schPanelAll
+// cache so opening the panel later just refreshes it.
+async function _schLoadForNav(){
+  try{
+    if(!currentUser){ renderNavSessionPill(); return; }
+    if(!SCHEDULE_PA_READ_URL || !_schMatchName()){ renderNavSessionPill(); return; }  // empty pill until wired / no name
+    const [rows] = await Promise.all([ _schReadRows(SCHEDULE_PA_READ_URL), _schLoadLogOverlay() ]);
+    _schPanelAll = getAllSessionsForMod(rows, _schMatchName());
+    const _t = _schTodayYMD();
+    console.log('[Schedule] today =', _t, '| matchName =', _schMatchName(),
+      '| total', _schPanelAll.length, '| today', _schPanelAll.filter(s=>s.date===_t).length,
+      '| sample dates:', _schPanelAll.slice(0,5).map(s=>s.date).join(', '));
+  }catch(e){
+    console.warn('[Schedule] nav pill load error:', e && e.message);
+  }
+  renderNavSessionPill();
+  _schApplyBeginGate();   // begin buttons reflect the (now-loaded) gate state
+}
+
+// Cache of the last fetched+filtered sessions (pre-override) so action
+// handlers can re-render without re-fetching.
+let _schPanelAll = [];
+// Render-order array WITH overrides applied; handlers index into this.
+let _schPanelSessions = [];
+
+/* =====================================================================
+   BEGIN-SESSION GATE + SLIDE REMINDER (moderator workflow)
+   =====================================================================
+   When a moderator has an unconfirmed scheduled session for TODAY, the
+   "Begin a new session" buttons are locked until they confirm that session's
+   status. A reminder slides down from the nav pill to do the confirming. The
+   gate clears on confirm and re-locks when a checklist session finishes (so the
+   next session must be confirmed). The initial slide is fired ONCE after the
+   Device Set is confirmed; thereafter the pill re-invokes it and finishing a
+   session auto-opens the next. Cleared-flag lives in sessionStorage.
+*/
+const _SCH_CLEARED_KEY = 'centific_sched_begin_cleared';
+const _SCH_ACTIVE_KEY  = 'centific_sched_active_key';
+function _schGetCleared(){ try{ return sessionStorage.getItem(_SCH_CLEARED_KEY) === '1'; }catch(_){ return false; } }
+function _schSetCleared(v){ try{ if(v) sessionStorage.setItem(_SCH_CLEARED_KEY,'1'); else sessionStorage.removeItem(_SCH_CLEARED_KEY); }catch(_){} }
+function _schGetActiveKey(){ try{ return sessionStorage.getItem(_SCH_ACTIVE_KEY) || ''; }catch(_){ return ''; } }
+function _schClearActiveKey(){ try{ sessionStorage.removeItem(_SCH_ACTIVE_KEY); }catch(_){} }
+
+// The session the moderator confirmed and is cleared to run, but has NOT yet
+// completed (resolved status still "Confirmed"). Returns null once it rolls up
+// to Completed — that's what suppresses the "Begin a new session" prompt when
+// there's nothing left to run.
+function _schConfirmedUnrun(){
+  const key = _schGetActiveKey();
+  if(!key) return null;
+  const s = (_schPanelAll || []).find(x => _schSessionKey(x) === key);
+  if(!s) return null;
+  const ov = (typeof _schLoadOverrides === 'function') ? _schLoadOverrides() : {};
+  const cur = ov[key] ? ov[key].status : s.status;
+  return /confirm/i.test(cur) ? s : null;
+}
+
+// Roll the just-run scheduled session up to "Completed". Called from BOTH
+// session-complete-modal exits ("Start a New Session" and "Done for the day"),
+// since reaching that modal means all tasks were finished. Identifies the
+// session via the confirmed-active key, falling back to a lone Confirmed
+// session for today. Idempotent + safe when nothing matches.
+function _schCompleteCurrentSession(){
+  try{
+    if(typeof _schSessionKey !== 'function' || typeof _schCommitSession !== 'function') return;
+    const today = (typeof _schTodayYMD === 'function') ? _schTodayYMD() : '';
+    const ov = _schLoadOverrides();
+    let done = null;
+    const activeKey = _schGetActiveKey();
+    if(activeKey) done = (_schPanelAll || []).find(x => _schSessionKey(x) === activeKey);
+    // Fallback: exactly one Confirmed (cleared-to-run) session today.
+    if(!done){
+      const resolved = s => { const k = _schSessionKey(s); return ov[k] ? ov[k].status : s.status; };
+      const confirmedToday = (_schPanelAll || []).filter(s => s.date === today && /confirm/i.test(resolved(s)));
+      if(confirmedToday.length === 1) done = confirmedToday[0];
+    }
+    if(done){
+      const k = _schSessionKey(done);
+      const cur = ov[k] ? ov[k].status : done.status;
+      // Only a Confirmed (participant-present) session rolls up to Completed.
+      if(/confirm/i.test(cur)){
+        _schCommitSession(done, 'Completed', (ov[k] && ov[k].note) || '', { noGate:true, silent:true });
+      }
+    }
+  }catch(e){ console.warn('[Schedule] complete-current error:', e && e.message); }
+  _schClearActiveKey();   // the run is over; nothing left "cleared to run"
+}
+
+// The earliest non-terminal session scheduled for TODAY (the one to confirm),
+// resolving status via local override vs log overlay (latest-wins), or null.
+function _schGateSession(){
+  const today = _schTodayYMD();
+  const ov = (typeof _schLoadOverrides === 'function') ? _schLoadOverrides() : {};
+  for(const s0 of (_schPanelAll || [])){
+    if(s0.date !== today) continue;
+    const key = _schSessionKey(s0);
+    const sid = _schCanon(s0.sessionId || '');
+    const remote = sid ? (_schLogOverlay[sid] || null) : null;
+    const local  = ov[key] || null;
+    let status = s0.status;
+    if(local && remote){ status = ((Date.parse(local.at)||0) >= (remote._epoch||0)) ? local.status : remote.status; }
+    else if(local){ status = local.status; }
+    else if(remote){ status = remote.status; }
+    if(!_schIsTerminal(status)) return s0;
+  }
+  return null;
+}
+
+// Begin locked when: not already mid-session, schedule is wired, there's an
+// unconfirmed TODAY session, and the gate hasn't been cleared this cycle.
+function _schBeginLocked(){
+  if(typeof isSessionStarted === 'function' && isSessionStarted()) return false;
+  if(currentUser && currentUser.isAdmin) return false;
+  if(!SCHEDULE_PA_READ_URL) return false;
+  if(!_schGateSession()) return false;
+  return !_schGetCleared();
+}
+
+// Toggle the locked look on every "Begin a new session" entry point. We do NOT
+// use the disabled attribute (it would swallow the click) — the click still
+// fires and openPrereqModal()'s guard surfaces the reminder instead.
+function _schApplyBeginGate(){
+  const locked = _schBeginLocked();
+  document.querySelectorAll('.begin-session-btn, .sidebar-begin-pill').forEach(el => {
+    if(el.classList.contains('sidebar-begin-pill') && el.classList.contains('done')) {
+      el.classList.remove('gate-locked');   // active session pill (restart) never dimmed
+    } else {
+      el.classList.toggle('gate-locked', locked);
+    }
+  });
+}
+
+// ── Slide reminder popover (anchored under the nav pill) ──
+function _schEnsureReminderEl(){
+  let pop = document.getElementById('sched-reminder-pop');
+  if(pop) return pop;
+  pop = document.createElement('div');
+  pop.id = 'sched-reminder-pop';
+  pop.className = 'sched-reminder-pop';
+  document.body.appendChild(pop);
+  // Outside-click closes (but a click on the pill is handled by its own toggle).
+  document.addEventListener('click', (e) => {
+    if(!pop.classList.contains('open')) return;
+    const pill = document.getElementById('nav-session-pill');
+    if(pop.contains(e.target)) return;
+    if(pill && pill.contains(e.target)) return;
+    closeSchedReminder();
+  });
+  document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && pop.classList.contains('open')) closeSchedReminder(); });
+  window.addEventListener('resize', () => { if(pop.classList.contains('open')) _schPositionReminder(); });
+  return pop;
+}
+
+function _schPositionReminder(){
+  const pop = document.getElementById('sched-reminder-pop');
+  const pill = document.getElementById('nav-session-pill');
+  if(!pop || !pill) return;
+  const r = pill.getBoundingClientRect();
+  if(window.innerWidth <= 600){
+    // Mobile: full-width sheet under the nav.
+    pop.style.left = '10px'; pop.style.right = '10px'; pop.style.width = 'auto';
+    pop.style.top = (r.bottom + 8) + 'px';
+  } else {
+    pop.style.right = Math.max(10, (window.innerWidth - r.right)) + 'px';
+    pop.style.left = 'auto'; pop.style.width = '320px';
+    pop.style.top = (r.bottom + 8) + 'px';
+  }
+}
+
+function renderSchedReminder(){
+  const pop = document.getElementById('sched-reminder-pop');
+  if(!pop) return;
+  const esc = escapeHtml;
+  const pending = _schGateSession();
+  const cleared = _schGetCleared();
+  const unrun   = _schConfirmedUnrun();   // confirmed-but-not-yet-completed session, or null
+  const today   = _schTodayYMD();
+  const todaysCount = (_schPanelAll || []).filter(s => s.date === today).length;
+
+  const sessLine = (s) => {
+    const bits = [];
+    if(s.time)     bits.push('<span class="srp-meta"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>' + esc(s.time) + '</span>');
+    if(s.location) bits.push('<span class="srp-meta"><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>' + esc(s.location) + '</span>');
+    return '<div class="srp-name">' + esc(s.name || 'Participant') + '</div>'
+         + (bits.length ? '<div class="srp-metarow">' + bits.join('') + '</div>' : '');
+  };
+
+  if(pending && !cleared){
+    pop.innerHTML =
+        '<div class="srp-head"><span class="srp-eyebrow">Upcoming session</span>'
+      +   '<button class="srp-x" onclick="closeSchedReminder()" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>'
+      + sessLine(pending)
+      + '<div class="srp-note">Confirm this session\u2019s status to begin a new session.</div>'
+      + '<div class="srp-actions">'
+      +   '<button class="srp-btn confirm" onclick="schReminderConfirm()"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>Confirm</button>'
+      +   '<button class="srp-btn noshow" onclick="schReminderToDrawer()"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 9l4 4M20 9l-4 4"/></svg>No-show</button>'
+      +   '<button class="srp-btn calloff" onclick="schReminderToDrawer()"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M9 14l6 6M15 14l-6 6"/></svg>Call-off</button>'
+      + '</div>'
+      + '<div class="srp-hint">No-show &amp; Call-off open your schedule to add the required note.</div>';
+  } else if(cleared && unrun){
+    // Only prompt to begin while a confirmed session is actually waiting to run.
+    pop.innerHTML =
+        '<div class="srp-head"><span class="srp-eyebrow ok">Cleared to begin</span>'
+      +   '<button class="srp-x" onclick="closeSchedReminder()" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>'
+      + '<div class="srp-cleared"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg><span>Status confirmed \u2014 you can start a new session.</span></div>'
+      + '<div class="srp-actions"><button class="srp-btn begin" onclick="schReminderBegin()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8l5 4-5 4z"/></svg>Begin a new session</button></div>';
+  } else if(todaysCount > 0 && !pending){
+    // Had sessions today and none are still pending → all handled. No begin prompt.
+    pop.innerHTML =
+        '<div class="srp-head"><span class="srp-eyebrow ok">All done today</span>'
+      +   '<button class="srp-x" onclick="closeSchedReminder()" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>'
+      + '<div class="srp-cleared"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg><span>All of today\u2019s sessions are complete.</span></div>';
+  } else {
+    pop.innerHTML =
+        '<div class="srp-head"><span class="srp-eyebrow">Schedule</span>'
+      +   '<button class="srp-x" onclick="closeSchedReminder()" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>'
+      + '<div class="srp-empty">No sessions to confirm today.</div>';
+  }
+}
+
+function openSchedReminder(){
+  const pop = _schEnsureReminderEl();
+  renderSchedReminder();
+  _schPositionReminder();
+  requestAnimationFrame(() => pop.classList.add('open'));
+}
+function closeSchedReminder(){
+  const pop = document.getElementById('sched-reminder-pop');
+  if(pop) pop.classList.remove('open');
+}
+function toggleSchedReminder(){
+  const pop = document.getElementById('sched-reminder-pop');
+  if(pop && pop.classList.contains('open')) closeSchedReminder();
+  else openSchedReminder();
+}
+
+// Reminder action handlers.
+function schReminderConfirm(){
+  const s = _schGateSession();
+  if(s){ _schCommitSession(s, 'Confirmed', ''); }   // one-tap; sets cleared + refreshes popover
+}
+function schReminderToDrawer(){
+  closeSchedReminder();
+  if(typeof openPanel === 'function') openPanel('schedule');  // full No-show / Call-off note flow lives here
+}
+function schReminderBegin(){
+  closeSchedReminder();
+  if(typeof openPrereqModal === 'function') openPrereqModal();
+}
+
+// Ensure schedule data is loaded, sync the gate, and slide the reminder open
+// only if there's actually a session to confirm. Used by the device-set hook.
+async function _schEnsureLoadedThenOpenReminder(){
+  if(!_schPanelAll || !_schPanelAll.length){ try{ await _schLoadForNav(); }catch(_){} }
+  _schApplyBeginGate();
+  if(_schGateSession()) openSchedReminder();
+}
+
+
+// Fetch from the read flow, filter, cache, render. force is accepted for
+// symmetry with the refresh button (we always re-fetch on open anyway).
+async function renderSchedulePanel(force){
+  const box = document.getElementById('schedule-list-container');
+  if(!box) return;
+  if(!currentUser || !currentUser.modName){
+    box.innerHTML = _schEmptyHtml('Sign in to view your schedule', '');
+    return;
+  }
+  box.innerHTML = '<div class="trouble-loading"><div class="trouble-spinner"></div><span>Loading…</span></div>';
+  let rows = [];
+  try{ [rows] = await Promise.all([ _schReadRows(SCHEDULE_PA_READ_URL), _schLoadLogOverlay() ]); }catch(_){ rows = []; }
+  const today = _schTodayYMD();
+  _schPanelAll = getAllSessionsForMod(rows, _schMatchName());
+  console.log('[Schedule] panel —', _schPanelAll.length, 'session(s) (all dates) for', _schMatchName());
+  _schRenderFromCache();
+  renderNavSessionPill();   // panel data is freshest source for the pill
+}
+
+function _schEmptyHtml(title, sub){
+  return '<div class="sch-empty">'
+    + '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>'
+    + '<div class="sch-empty-title">' + escapeHtml(title) + '</div>'
+    + (sub ? '<div class="sch-empty-sub">' + escapeHtml(sub) + '</div>' : '')
+    + '</div>';
+}
+
+// Re-apply overrides over the cached list and rebuild the DOM.
+function _schRenderFromCache(){
+  const box = document.getElementById('schedule-list-container');
+  if(!box) return;
+  const today = _schTodayYMD();
+  const ov = _schLoadOverrides();
+
+  // Apply overrides → working list. Two override sources, resolved latest-wins:
+  //   • local override (this device's optimistic update, keyed by composite _key)
+  //   • log overlay from Data Point B (the moderator's own writes, keyed by SessionId)
+  // Whichever has the newer timestamp wins, so a moderator signing in on a new
+  // device sees their previously-logged status even with no local override.
+  // Local wins ties (it's the freshest action and gets pushed to B anyway); only
+  // a local override exposes the Undo button.
+  _schPanelSessions = _schPanelAll.map(s0 => {
+    const s = Object.assign({}, s0);
+    s._key = _schSessionKey(s);
+    const local = ov[s._key] || null;                         // {status, note, at}
+    const sid = _schCanon(s.sessionId || '');
+    const remote = sid ? (_schLogOverlay[sid] || null) : null; // {status, note, _epoch}
+    const le = local  ? (Date.parse(local.at) || 0) : -1;
+    const re = remote ? (remote._epoch || 0)        : -1;
+    let chosen = null, chosenLocal = false;
+    if(local && remote){ if(le >= re){ chosen = local; chosenLocal = true; } else { chosen = remote; } }
+    else if(local){ chosen = local; chosenLocal = true; }
+    else if(remote){ chosen = remote; }
+    if(chosen){
+      s.status = chosen.status;
+      s._note = chosen.note || '';
+      s._overridden = chosenLocal;   // Undo only reverts a LOCAL override
+      s._logged = !chosenLocal;      // came from the server log
+    }
+    return s;
+  });
+
+  if(_schPanelSessions.length === 0){
+    box.innerHTML = SCHEDULE_PA_READ_URL
+      ? _schEmptyHtml('No upcoming sessions', 'Sessions scheduled to you will appear here.')
+      : _schEmptyHtml('Schedule not connected yet', 'Once the schedule sync is set up, your sessions will appear here automatically.');
+    return;
+  }
+
+  const todays = [], upcoming = [], past = [];
+  _schPanelSessions.forEach((s, i) => {
+    if(s.date === today) todays.push(i);
+    else if(s.date > today) upcoming.push(i);
+    else past.push(i);
+  });
+
+  const dlabel = d => new Date(d + 'T00:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+
+  let html = '';
+  if(todays.length){
+    const lbl = new Date(today + 'T00:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+    html += '<div class="sch-section-label">Today · ' + escapeHtml(lbl) + '</div>';
+    todays.forEach(i => { html += _schCardHtml(i); });
+  }
+  if(upcoming.length){
+    html += '<div class="sch-section-label">Upcoming</div>';
+    let lastDate = '';
+    upcoming.forEach(i => {                       // ascending (soonest first)
+      const s = _schPanelSessions[i];
+      if(s.date !== lastDate){ lastDate = s.date; html += '<div class="sch-date-label">' + escapeHtml(dlabel(s.date)) + '</div>'; }
+      html += _schCardHtml(i);
+    });
+  }
+  if(past.length){
+    html += '<div class="sch-section-label">Past sessions</div>';
+    let lastDate = '';
+    past.slice().reverse().forEach(i => {         // most-recent past first
+      const s = _schPanelSessions[i];
+      if(s.date !== lastDate){ lastDate = s.date; html += '<div class="sch-date-label">' + escapeHtml(dlabel(s.date)) + '</div>'; }
+      html += _schCardHtml(i);
+    });
+  }
+  box.innerHTML = html;
+}
+
+// Build one session card by index into _schPanelSessions.
+function _schCardHtml(i){
+  const s = _schPanelSessions[i];
+  const cls = _schStatusClass(s.status);
+  const terminal = _schIsTerminal(s.status);
+  const esc = escapeHtml;
+
+  const chipLabel = cls === 'completed' ? 'Completed' : cls === 'confirmed' ? 'Confirmed' : cls === 'noshow' ? 'No-show' : cls === 'cancelled' ? 'Call-off' : (s.status || 'Scheduled');
+  const chip = '<span class="sch-chip ' + cls + '">' + esc(chipLabel) + '</span>';
+
+  const meta = [];
+  if(s.location) meta.push('<span><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>' + esc(s.location) + '</span>');
+  if(s.time)     meta.push('<span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>' + esc(s.time) + '</span>');
+  if(s.phone)    meta.push('<span><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>' + esc(s.phone) + '</span>');
+
+  let body;
+  if(terminal){
+    // Parse the structured note (override wins; else server StatusNote). Never
+    // render the raw JSON — pull reason/band/amount/note out for display.
+    const pn = _schParseNote(s._note || s.note || '');
+    const reasonTxt = pn.reason ? (pn.reason + (pn.band ? ' \u00b7 ' + pn.band : '')) : '';
+    const amtPill = pn.amount ? '<span class="sch-amt">' + esc(pn.amount) + '</span>' : '';
+    const resLine = (reasonTxt || amtPill)
+      ? '<div class="sch-resline">' + (reasonTxt ? '<span class="sch-reason">' + esc(reasonTxt) + '</span>' : '') + amtPill + '</div>'
+      : '';
+    const note = pn.note
+      ? '<svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h10"/></svg>' + esc(pn.note)
+      : (cls==='completed' ? '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>Session completed'
+        : cls==='confirmed' ? '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>Participant present'
+        : cls==='noshow'   ? '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 9l4 4M20 9l-4 4"/></svg>Participant did not show'
+        :                    '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M9 14l6 6M15 14l-6 6"/></svg>Call-off recorded');
+    body = '<div class="sch-meta">' + meta.join('') + '</div>'
+         + resLine
+         + '<div class="sch-doneline">' + note + '</div>'
+         + '<div class="sch-reminder"><svg viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg><span>Please update the <strong>OD</strong> and the <strong>Tracker</strong> for this session.</span></div>'
+         + (s._overridden ? '<button class="sch-undo" onclick="schUndo(' + i + ')"><svg viewBox="0 0 24 24"><path d="M9 14l-4-4 4-4"/><path d="M5 10h7a5 5 0 0 1 0 10h-1"/></svg>Undo</button>' : '');
+  } else {
+    body = '<div class="sch-meta spaced">' + meta.join('') + '</div>'
+      + '<div class="sch-actions">'
+      +   '<button class="sch-btn confirm" onclick="schAction(' + i + ',\'confirm\')"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>Confirm</button>'
+      +   '<button class="sch-btn noshow" onclick="schAction(' + i + ',\'noshow\')"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 9l4 4M20 9l-4 4"/></svg>No-show</button>'
+      +   '<button class="sch-btn cancel" onclick="schAction(' + i + ',\'calloff\')"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M9 14l6 6M15 14l-6 6"/></svg>Call-off</button>'
+      + '</div>'
+      + '<div class="sch-expand" id="sch-exp-' + i + '">'
+      +   '<div class="sch-expand-inner">'
+      +     '<div class="sch-choose" id="sch-choose-' + i + '" style="display:none">'
+      +       '<div class="sch-comment-label cancel">Call-off reason <span class="req">*</span></div>'
+      +       '<div class="sch-subrow">'
+      +         '<button class="sch-subbtn" onclick="schCalloffType(' + i + ',\'Reschedule\')"><svg viewBox="0 0 24 24"><path d="M4 8a8 8 0 0 1 14-4M20 4v4h-4"/><path d="M20 16a8 8 0 0 1-14 4M4 20v-4h4"/></svg>Reschedule</button>'
+      +         '<button class="sch-subbtn" onclick="schCalloffType(' + i + ',\'Partial Payment\')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M14.5 9.2c-.6-.7-1.6-1-2.5-1-1.4 0-2.5.8-2.5 2s1.1 1.7 2.5 2 2.5.8 2.5 2-1.1 2-2.5 2c-.9 0-1.9-.3-2.5-1"/></svg>Partial Payment</button>'
+      +       '</div>'
+      +       '<div class="sch-expand-actions"><button class="sch-back" onclick="schBack(' + i + ')">Back</button></div>'
+      +     '</div>'
+      +     '<div class="sch-tiers" id="sch-tiers-' + i + '" style="display:none">'
+      +       '<div class="sch-comment-label cancel">Partial payment amount <span class="req">*</span></div>'
+      +       '<div class="sch-subrow tiers">'
+      +         '<button class="sch-subbtn tier" onclick="schPartialTier(' + i + ',\'Less than 1 hr - $25\')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Less than 1 hr<b>$25</b></button>'
+      +         '<button class="sch-subbtn tier" onclick="schPartialTier(' + i + ',\'Less than 2 hrs - $60\')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Less than 2 hrs<b>$60</b></button>'
+      +         '<button class="sch-subbtn tier" onclick="schPartialTier(' + i + ',\'2 hrs - $125\')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>2 hrs<b>$125</b></button>'
+      +       '</div>'
+      +       '<div class="sch-expand-actions"><button class="sch-back" onclick="schBack(' + i + ')">Back</button></div>'
+      +     '</div>'
+      +     '<div class="sch-note" id="sch-note-' + i + '" style="display:none">'
+      +       '<div class="sch-comment-label" id="sch-explabel-' + i + '"></div>'
+      +       '<textarea class="sch-textarea" id="sch-ta-' + i + '" rows="2" oninput="schTextInput(' + i + ')" placeholder="Add a brief note…"></textarea>'
+      +       '<div class="sch-expand-actions">'
+      +         '<button class="sch-back" id="sch-noteback-' + i + '" onclick="schBack(' + i + ')">Back</button>'
+      +         '<button class="sch-submit" id="sch-submit-' + i + '" disabled onclick="schSubmit(' + i + ')"></button>'
+      +       '</div>'
+      +       '<div class="sch-hint"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>A note is required before this can be submitted.</div>'
+      +     '</div>'
+      +   '</div>'
+      + '</div>';
+  }
+
+  return '<div class="sch-card ' + cls + '">'
+    + '<div class="sch-card-top"><span class="sch-pt-tag">PT</span>'
+    +   '<span class="sch-name' + (cls==='cancelled' ? ' struck' : '') + '">' + esc(s.name || 'Participant') + '</span>'
+    +   chip
+    + '</div>'
+    + body
+    + '</div>';
+}
+
+// Confirm = one tap. No-show = open the required-note field directly.
+// Call-off = open a sub-choice (Reschedule / Partial Payment) FIRST. Reschedule
+// goes straight to the note; Partial Payment inserts a tier-amount picker, then
+// the note. Stages: 'choose' → ('tiers') → 'note', tracked on exp.dataset.stage.
+function schAction(i, kind){
+  if(kind === 'confirm'){ _schCommit(i, 'Confirmed', ''); return; }
+  const exp = document.getElementById('sch-exp-' + i);
+  const choose = document.getElementById('sch-choose-' + i);
+  const tiers = document.getElementById('sch-tiers-' + i);
+  const note = document.getElementById('sch-note-' + i);
+  if(!exp) return;
+  exp.dataset.kind = kind;
+  exp.dataset.subtype = '';
+  exp.dataset.subbase = '';
+  if(tiers) tiers.style.display = 'none';
+  if(kind === 'calloff'){
+    // Stage 1: pick a call-off reason before writing the note.
+    if(note) note.style.display = 'none';
+    if(choose) choose.style.display = '';
+    exp.dataset.stage = 'choose';
+    exp.classList.add('open');
+    return;
+  }
+  // No-show → straight to the note stage.
+  if(choose) choose.style.display = 'none';
+  _schShowNoteStage(i, 'noshow', '');
+  exp.classList.add('open');
+}
+
+// A moderator picked a call-off reason. Reschedule → note. Partial Payment →
+// tier-amount picker first (the chosen amount is folded into the sub-type).
+function schCalloffType(i, subType){
+  const exp = document.getElementById('sch-exp-' + i);
+  const choose = document.getElementById('sch-choose-' + i);
+  const tiers = document.getElementById('sch-tiers-' + i);
+  if(!exp) return;
+  exp.dataset.subbase = subType;
+  if(/partial payment/i.test(subType)){
+    if(choose) choose.style.display = 'none';
+    if(tiers) tiers.style.display = '';
+    exp.dataset.stage = 'tiers';
+    return;
+  }
+  exp.dataset.subtype = subType;
+  if(choose) choose.style.display = 'none';
+  _schShowNoteStage(i, 'calloff', subType);
+}
+
+// A Partial Payment tier was picked → fold the amount into the sub-type, advance to note.
+function schPartialTier(i, tier){
+  const exp = document.getElementById('sch-exp-' + i);
+  const tiers = document.getElementById('sch-tiers-' + i);
+  if(!exp) return;
+  const full = 'Partial Payment - ' + tier;
+  exp.dataset.subtype = full;
+  if(tiers) tiers.style.display = 'none';
+  _schShowNoteStage(i, 'calloff', full);
+}
+
+// Configure + reveal the note textarea for either a no-show or a call-off sub-type.
+function _schShowNoteStage(i, kind, subType){
+  const exp = document.getElementById('sch-exp-' + i);
+  const note = document.getElementById('sch-note-' + i);
+  const tiers = document.getElementById('sch-tiers-' + i);
+  const label = document.getElementById('sch-explabel-' + i);
+  const ta = document.getElementById('sch-ta-' + i);
+  const submit = document.getElementById('sch-submit-' + i);
+  if(!note || !label || !ta || !submit) return;
+  if(tiers) tiers.style.display = 'none';
+  if(exp) exp.dataset.stage = 'note';
+  note.style.display = '';
+  const isNoShow = kind === 'noshow';
+  label.className = 'sch-comment-label ' + (isNoShow ? 'noshow' : 'cancel');
+  label.innerHTML = (isNoShow ? 'Reason for no-show ' : ('Call-off · ' + escapeHtml(subType || '') + ' — note ')) + '<span class="req">*</span>';
+  ta.className = 'sch-textarea ' + (isNoShow ? 'noshow' : 'cancel');
+  ta.placeholder = isNoShow
+    ? 'e.g. Participant did not arrive within the 15-minute grace window.'
+    : 'e.g. Participant requested reschedule — work conflict.';
+  submit.className = 'sch-submit ' + (isNoShow ? 'noshow' : 'cancel');
+  submit.innerHTML = (isNoShow
+    ? '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 9l4 4M20 9l-4 4"/></svg>Submit no-show'
+    : '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M9 14l6 6M15 14l-6 6"/></svg>Submit call-off');
+  ta.value = '';
+  setTimeout(() => { try{ ta.focus(); }catch(_){} }, 60);
+  schTextInput(i);
+}
+
+// Enable submit only when the note has non-whitespace content.
+function schTextInput(i){
+  const ta = document.getElementById('sch-ta-' + i);
+  const submit = document.getElementById('sch-submit-' + i);
+  if(!ta || !submit) return;
+  submit.disabled = ta.value.trim().length === 0;
+}
+
+// Back is stage-aware: note → (tiers if Partial Payment, else choose) → close.
+// No-show notes have no sub-choice, so Back closes the expand outright.
+function schBack(i){
+  const exp = document.getElementById('sch-exp-' + i);
+  const choose = document.getElementById('sch-choose-' + i);
+  const tiers = document.getElementById('sch-tiers-' + i);
+  const note = document.getElementById('sch-note-' + i);
+  const ta = document.getElementById('sch-ta-' + i);
+  if(!exp) return;
+  const stage = exp.dataset.stage || '';
+  if(stage === 'note' && exp.dataset.kind === 'calloff'){
+    if(note) note.style.display = 'none';
+    if(ta) ta.value = '';
+    exp.dataset.subtype = '';
+    if(/partial payment/i.test(exp.dataset.subbase || '')){
+      if(tiers) tiers.style.display = '';      // back to the amount picker
+      exp.dataset.stage = 'tiers';
+    } else {
+      if(choose) choose.style.display = '';    // back to the reason picker
+      exp.dataset.subbase = '';
+      exp.dataset.stage = 'choose';
+    }
+    return;
+  }
+  if(stage === 'tiers'){
+    if(tiers) tiers.style.display = 'none';
+    if(choose) choose.style.display = '';
+    exp.dataset.subbase = '';
+    exp.dataset.stage = 'choose';
+    return;
+  }
+  // choose stage (or a no-show note) → close the whole expand.
+  exp.classList.remove('open');
+  if(choose) choose.style.display = 'none';
+  if(tiers) tiers.style.display = 'none';
+  if(note) note.style.display = 'none';
+  if(ta) ta.value = '';
+  exp.dataset.kind = ''; exp.dataset.subtype = ''; exp.dataset.subbase = ''; exp.dataset.stage = '';
+}
+
+function schSubmit(i){
+  const exp = document.getElementById('sch-exp-' + i);
+  const ta = document.getElementById('sch-ta-' + i);
+  if(!exp || !ta) return;
+  const typed = ta.value.trim();
+  if(!typed) return;  // guard — submit is disabled, but double-check
+  if(exp.dataset.kind === 'calloff'){
+    const reason = exp.dataset.subbase || '';        // 'Reschedule' | 'Partial Payment'
+    let band = '', amount = '';
+    if(/partial payment/i.test(reason)){
+      // dataset.subtype holds "Partial Payment - <band> - <$amount>"; split it back out.
+      const tier = (exp.dataset.subtype || '').replace(/^partial payment\s*-\s*/i, '').trim();
+      const m = tier.match(/^(.*?)\s*-\s*(\$[\d.,]+)\s*$/);
+      if(m){ band = m[1].trim(); amount = m[2].trim(); }
+      else if(tier){ band = tier; }
+    }
+    _schCommit(i, 'Call-off', _schMakeNote({ reason: reason, band: band, amount: amount, note: typed }));
+  } else {
+    _schCommit(i, 'No-show', _schMakeNote({ note: typed }));
+  }
+}
+
+// Revert a local override (only meaningful while write-back is dormant).
+function schUndo(i){
+  const s = _schPanelSessions[i]; if(!s) return;
+  const ov = _schLoadOverrides();
+  if(ov[s._key]){ delete ov[s._key]; _schSaveOverrides(ov); }
+  showToast('Reverted to scheduled');
+  _schRenderFromCache();
+  renderNavSessionPill();
+}
+
+// Persist a status change: local override (always) + server write (when wired).
+function _schCommit(i, status, note){
+  const s = _schPanelSessions[i]; if(!s) return;
+  _schCommitSession(s, status, note);
+}
+
+// Commit a status directly against a session object (works whether or not the
+// drawer's _schPanelSessions array is built — e.g. from the slide reminder).
+// opts.noGate skips clearing the begin-gate; opts.silent skips the toast.
+function _schCommitSession(s, status, note, opts){
+  if(!s) return;
+  opts = opts || {};
+  if(!s._key) s._key = _schSessionKey(s);
+  const ov = _schLoadOverrides();
+  ov[s._key] = { status: status, note: note || '', at: new Date().toISOString() };
+  _schSaveOverrides(ov);
+  _schWriteStatus(s, status, note);   // dormant no-op until SCHEDULE_PA_WRITE_URL is set
+  // Remember the confirmed session so finishing its checklist can flip it to Completed.
+  if(/confirm/i.test(status) && s.date === _schTodayYMD()){
+    try{ sessionStorage.setItem('centific_sched_active_key', s._key); }catch(_){}
+  }
+  // Gate: confirming TODAY's session (any terminal status) clears the begin lock.
+  if(!opts.noGate && _schIsTerminal(status) && s.date === _schTodayYMD()) _schSetCleared(true);
+  const _verb = /complet/i.test(status) ? 'Completed'
+    : status === 'Confirmed' ? 'Confirmed'
+    : status === 'No-show' ? 'No-show' : 'Call-off';
+  if(!opts.silent) showToast(_verb + ' — please update the OD & Tracker');
+  _schRenderFromCache();
+  renderNavSessionPill();   // current session now terminal → pill advances to next
+  _schApplyBeginGate();     // begin buttons may unlock now
+  renderSchedReminder();    // popover flips to the "cleared" state if open
+}
+
+// Server write-back. No-op (returns false) until the write flow is wired.
+// Sends the raw row plus the new status/note so a future flow can match the
+// row by SessionId once that column exists (composite _matchKey meanwhile).
+async function _schWriteStatus(session, status, note){
+  if(!SCHEDULE_PA_WRITE_URL) return false;
+  const payload = Object.assign({}, session._raw || {}, {
+    SessionId: session._raw ? (_schGetField(session._raw, ['SessionId','Session Id','sessionId']) || '') : '',
+    SessionStatus: status,
+    StatusNote: note || '',
+    PrimaryModerator: session.moderator || '',
+    ParticipantName: session.name || '',
+    SessionDate: session.date || '',
+    SessionType: session.location || '',
+    _matchKey: session._key || '',
+    updatedAt: new Date().toISOString()
+  });
+  for(let attempt=0; attempt<2; attempt++){
+    try{
+      const res = await fetch(SCHEDULE_PA_WRITE_URL, {
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
+      });
+      if(res.ok || res.status===202) return true;
+      if(attempt===0) continue; return false;
+    }catch(e){
+      if(attempt===0) continue;
+      console.warn('[Schedule] write failed:', e && e.message);
+      return false;
+    }
+  }
+  return false;
+}
+
 // Entry point: fetch, match, and show the popup. Safe to call when unwired.
 async function maybeShowTodaySessionPopup(){
   try{
@@ -7995,9 +9107,9 @@ async function maybeShowTodaySessionPopup(){
     if(currentUser.isAdmin) return;                   // admins use the landing chooser
     const rows = await _schReadRows(SCHEDULE_PA_READ_URL);
     const today = _schTodayYMD();
-    const sessions = getTodaysSessionsForMod(rows, currentUser.modName, today);
+    const sessions = getTodaysSessionsForMod(rows, _schMatchName(), today);
     _todaySessions = sessions;                         // stash for the nav pill (stage b)
-    console.log('[Schedule] today =', today, '| modName =', currentUser.modName,
+    console.log('[Schedule] today =', today, '| matchName =', _schMatchName(),
                 '| matched', sessions.length, 'session(s)');
     if(sessions.length === 0) return;                  // no match → silent (no popup)
     showTodaySessionPopup(sessions);
@@ -8076,8 +9188,10 @@ function _onLoginSuccessInner(){
   saveProgress();
   // Update logout label
   document.getElementById('hd-logout-label').textContent = 'Sign out (' + currentUser.firstName + ')';
-  // Admin gets landing tile chooser; regular users go straight to checklist
-  if(currentUser.isAdmin){
+  // Admin + Lead Mod get the landing tile chooser; regular Mods go straight to checklist
+  if(currentUser.isAdmin || currentUser.isLead){
+    // Lead Mods also run sessions → expose the moderator My Schedule item
+    if(currentUser.isLead){ const schItem = document.getElementById('hd-schedule'); if(schItem) schItem.style.display = 'flex'; }
     // Restore whichever admin view was active before refresh
     const savedView = sessionStorage.getItem('centific_admin_view') || 'landing';
     if(savedView === 'dashboard'){
@@ -8098,6 +9212,8 @@ function _onLoginSuccessInner(){
   } else {
     document.querySelector('.layout').style.display = 'flex';
     updateWelcomeMessage();
+    // My Schedule is a moderator-facing surface (admins use the landing chooser).
+    { const schItem = document.getElementById('hd-schedule'); if(schItem) schItem.style.display = 'flex'; }
     // Check 24-hour inventory eligibility for moderators (admins skip)
     if(typeof checkInventoryEligibility === 'function'){
       setTimeout(() => checkInventoryEligibility(), 800);
@@ -8106,10 +9222,11 @@ function _onLoginSuccessInner(){
     if(typeof refreshDeviceSetField === 'function'){
       setTimeout(() => refreshDeviceSetField(), 300);
     }
-    // ── Today's-session popup (Stage a) ──
-    // Fires only here (fresh moderator sign-in, non-admin). No-ops silently
-    // until SCHEDULE_PA_READ_URL is wired. Deferred so login UI settles first.
-    setTimeout(() => { try{ maybeShowTodaySessionPopup(); }catch(e){ console.warn(e); } }, 700);
+    // ── Schedule pill + begin-gate (Stage a) ──
+    // The slide reminder is fired ONCE after the Device Set is confirmed (see
+    // confirmInventorySet), NOT on login. Here we just load the pill data and
+    // sync the begin-gate so the buttons start in the correct locked state.
+    setTimeout(() => { try{ _schLoadForNav(); }catch(e){ console.warn(e); } }, 750);
   }
   // ── Feedback inbox runs for ALL roles (admins included) ──
   // The recipient is matched by name/loginId, so anyone addressed gets the popup.
@@ -8196,6 +9313,20 @@ function doLogout(opts){
   if(!opts.auto && !confirm('Sign out of the app?')) return;
   clearAutoLogout();
   currentUser = null;
+  if(typeof _schResetCache === 'function') _schResetCache();   // wipe schedule state so it can't roam to the next user
+  // Close any open side panel (My Schedule, etc.) and reset the toggle state, so
+  // the next user doesn't inherit the previous user's open panel / DOM — and so
+  // their first tap re-opens fresh instead of toggling the stale panel closed.
+  try{
+    activePanel = null;
+    if(typeof PANEL_IDS !== 'undefined'){
+      PANEL_IDS.forEach(p => {
+        const pe = document.getElementById('panel-'+p); if(pe) pe.classList.remove('open');
+        const he = document.getElementById(HD_IDS[p]);   if(he) he.classList.remove('active');
+      });
+    }
+    const mc = document.getElementById('main-content'); if(mc) mc.style.display = 'block';
+  }catch(_){}
   sessionStorage.removeItem('centific_user');
   if(typeof hideCollReminderFab === 'function') hideCollReminderFab();
   // Hide nav chip
@@ -8217,6 +9348,9 @@ function doLogout(opts){
   if(switchSep) switchSep.style.display = 'none';
   const trackerLog = document.getElementById('hd-tracker-log');
   if(trackerLog) trackerLog.style.display = 'none';
+  // Hide moderator-only My Schedule item
+  const schItem = document.getElementById('hd-schedule');
+  if(schItem) schItem.style.display = 'none';
   // Hide and clear inbox
   const inboxItem = document.getElementById('hd-inbox');
   if(inboxItem) inboxItem.style.display = 'none';
@@ -8911,9 +10045,9 @@ updateProgress();
   try{
     const layoutEl = document.querySelector('.layout');
     const loginEl  = document.getElementById('login-screen');
-    if(currentUser && currentUser.isAdmin){
+    if(currentUser && (currentUser.isAdmin || currentUser.isLead)){
       if(layoutEl && (sessionStorage.getItem('centific_admin_view')||'landing') !== 'checklist'){
-        layoutEl.style.display = 'none';   // hide checklist unless admin was in checklist view
+        layoutEl.style.display = 'none';   // hide checklist unless they were in checklist view
       }
     } else if(!currentUser){
       if(layoutEl) layoutEl.style.display = 'none';
@@ -8926,7 +10060,7 @@ updateProgress();
 // elements are defined later in the document than this script position).
 function _revealInitialAdminScreen(){
   try{
-    if(!(currentUser && currentUser.isAdmin)) return;
+    if(!(currentUser && (currentUser.isAdmin || currentUser.isLead))) return;
     const savedView = sessionStorage.getItem('centific_admin_view') || 'landing';
     const al = document.getElementById('admin-landing');
     const dp = document.getElementById('dashboard-page');
@@ -8971,7 +10105,14 @@ function _el(id){ return document.getElementById(id); }
 
 function showAdminLanding(){
   const al=_el('admin-landing'); if(al) al.classList.add('visible');
+  // Role-scoped landing: only full Admins see the Scheduling tile.
+  const schedTile = _el('tile-scheduling');
+  if(schedTile) schedTile.style.display = (currentUser && currentUser.isAdmin) ? '' : 'none';
+  // Title reflects the role (Lead Mods aren't "Admin").
+  const lt = document.querySelector('.admin-landing-title');
+  if(lt) lt.textContent = (currentUser && currentUser.isLead && !currentUser.isAdmin) ? 'Lead Moderator' : 'Admin Dashboard';
   const dp=_el('dashboard-page'); if(dp) dp.classList.remove('visible');
+  const sp=_el('schedule-admin-page'); if(sp) sp.classList.remove('visible');
   const la=_layout(); if(la) la.style.display='none';
   sessionStorage.setItem('centific_admin_view','landing');
   updateAdminSwitchBtn();
@@ -8985,6 +10126,7 @@ function showAdminLanding(){
 function gotoChecklist(){
   const al=_el('admin-landing'); if(al) al.classList.remove('visible');
   const dp=_el('dashboard-page'); if(dp) dp.classList.remove('visible');
+  const sp=_el('schedule-admin-page'); if(sp) sp.classList.remove('visible');
   const la=_layout(); if(la) la.style.display='flex';
   sessionStorage.setItem('centific_admin_view','checklist');
   updateAdminSwitchBtn();
@@ -8997,14 +10139,20 @@ function gotoChecklist(){
 function gotoDashboard(){
   const al=_el('admin-landing'); if(al) al.classList.remove('visible');
   const dp=_el('dashboard-page'); if(dp) dp.classList.add('visible');
+  const sp=_el('schedule-admin-page'); if(sp) sp.classList.remove('visible');
   const la=_layout(); if(la) la.style.display='none';
   sessionStorage.setItem('centific_admin_view','dashboard');
   updateAdminSwitchBtn();
+  // Lead Mods have no Dashboard sub-tab — hide its toggle (Moderators + Devices remain).
+  const _leadOnly = currentUser && currentUser.isLead && !currentUser.isAdmin;
+  const _dashToggle = document.getElementById('toggle-dashboard');
+  if(_dashToggle) _dashToggle.style.display = _leadOnly ? 'none' : '';
   // Render whatever we have cached RIGHT AWAY so the page is never blank while
   // the network sync runs. dashData is restored from localStorage on boot.
   if(dashData){
     populateModFilter();
-    const savedSub = sessionStorage.getItem('centific_tracker_page') || 'dashboard';
+    let savedSub = sessionStorage.getItem('centific_tracker_page') || 'dashboard';
+    if(_leadOnly && savedSub === 'dashboard') savedSub = 'moderators';   // no dashboard for leads
     if(savedSub === 'moderators') switchTrackerPage('moderators');
     else if(savedSub === 'devices') switchTrackerPage('devices');
     else switchTrackerPage('dashboard');
@@ -9012,8 +10160,8 @@ function gotoDashboard(){
       Object.values(dashCharts).forEach(c=>{ try{ c.resize(); }catch(e){} });
     }, 100);
   } else {
-    // No cache — show the dashboard shell (it has its own "click Sync" empty state)
-    switchTrackerPage('dashboard');
+    // No cache — show the appropriate shell (leads → moderators, others → dashboard)
+    switchTrackerPage(_leadOnly ? 'moderators' : 'dashboard');
   }
   // Refresh from Excel in the background (non-blocking); UI already painted.
   if(typeof dashSync === 'function' && dashPaUrl){
@@ -9029,13 +10177,16 @@ function adminSwitchView(){
 }
 
 function updateAdminSwitchBtn(){
-  if(!currentUser || !currentUser.isAdmin) return;
+  if(!currentUser || !(currentUser.isAdmin || currentUser.isLead)) return;
   const btn=_el('hd-switch-view'), sep=_el('hd-switch-sep'), label=_el('hd-switch-label');
   if(!btn||!sep||!label) return;
   btn.style.display=''; sep.style.display='';
-  // Show Kilo Tracker Log link (admin only)
+  // Kilo Tracker Log link is admin-only (leads don't get it)
   const trackerLog = _el('hd-tracker-log');
-  if(trackerLog) trackerLog.style.display = 'flex';
+  if(trackerLog) trackerLog.style.display = currentUser.isAdmin ? 'flex' : 'none';
+  // Scheduling shortcut is admin-only (gotoSchedAdmin guards on isAdmin too).
+  const schedAdmin = _el('hd-sched-admin');
+  if(schedAdmin) schedAdmin.style.display = currentUser.isAdmin ? 'flex' : 'none';
   const dp=_el('dashboard-page');
   const onDash = dp && dp.classList.contains('visible');
   label.textContent = onDash ? 'Switch to Checklist' : 'Progress Tracker';
@@ -9055,10 +10206,338 @@ function dashBack(){
   Object.values(dashCharts).forEach(c=>{ try{c.destroy();}catch(e){} });
   dashCharts={};
   const dp=_el('dashboard-page'); if(dp) dp.classList.remove('visible');
+  if(currentUser&&(currentUser.isAdmin||currentUser.isLead)){ showAdminLanding(); }
+  else { const la=_layout(); if(la) la.style.display='flex'; }
+  updateAdminSwitchBtn();
+}
+
+/* =====================================================================
+   ADMIN SCHEDULING PAGE
+   =====================================================================
+   Read-only view over the SAME Schedule table the moderator panel reads,
+   but across ALL moderators (no PrimaryModerator filter). Master list =
+   moderators (grouped); click one → detail list of that moderator's
+   participants with status + basic info. Filters: Today / This Week /
+   Range / All + status. Status here is the SHEET's SessionStatus (server
+   truth) — local per-device moderator overrides are intentionally NOT
+   applied, since admin runs on a different device.
+*/
+let _schAdminAll = [];                 // parsed rows for all moderators (last fetch)
+let _schAdminSelectedMod = null;       // canon key of the drilled-into moderator, or null = master
+const _schAdminFilter = { window: 'today', status: 'all', location: 'all', q: '' };  // from/to read from the inputs
+
+// Wipe all in-memory schedule state on sign-out. The page is NOT reloaded
+// between sign-ins, so without this the previous user's sessions keep rendering
+// (and "roaming" through the pill/reminder/My Schedule) until the next user's
+// data finishes loading. Local status overrides in localStorage are keyed by
+// moderator name, so they're left intact (they're the only record of unsynced
+// status changes until the PA write flow is wired) — they simply won't match
+// the next user's session keys.
+function _schResetCache(){
+  try{ _schPanelAll = []; }catch(_){}
+  try{ _schPanelSessions = []; }catch(_){}
+  try{ _schLogOverlay = {}; }catch(_){}
+  try{ _schAdminAll = []; }catch(_){}
+  try{ _schAdminSelectedMod = null; }catch(_){}
+  try{ _schAdminFilter.window='today'; _schAdminFilter.status='all'; _schAdminFilter.location='all'; _schAdminFilter.q=''; }catch(_){}
+  try{ sessionStorage.removeItem(_SCH_CLEARED_KEY); }catch(_){}
+  try{ sessionStorage.removeItem(_SCH_ACTIVE_KEY); }catch(_){}
+  try{ sessionStorage.removeItem('centific_sched_prompt_shown'); }catch(_){}
+  // Tear down the reminder popover and reset the nav pill so nothing lingers.
+  try{ const pop = document.getElementById('sched-reminder-pop'); if(pop) pop.remove(); }catch(_){}
+  try{ const pill = document.getElementById('nav-session-pill'); if(pill){ pill.classList.remove('has-session'); pill.innerHTML=''; } }catch(_){}
+  // Clear the My Schedule panel body — otherwise the previous user's rendered
+  // cards stay in the DOM and show through if the panel is still open.
+  try{ const box = document.getElementById('schedule-list-container'); if(box) box.innerHTML=''; }catch(_){}
+}
+
+function gotoSchedAdmin(){
+  if(!(currentUser && currentUser.isAdmin)) return;   // Scheduling is admin-only
+  const al=_el('admin-landing'); if(al) al.classList.remove('visible');
+  const dp=_el('dashboard-page'); if(dp) dp.classList.remove('visible');
+  const sp=_el('schedule-admin-page'); if(sp) sp.classList.add('visible');
+  const la=_layout(); if(la) la.style.display='none';
+  sessionStorage.setItem('centific_admin_view','scheduling');
+  updateAdminSwitchBtn();
+  _schAdminSelectedMod = null;          // always open at the master list
+  loadSchedAdmin(false);
+}
+
+function schedAdminBack(){
+  const sp=_el('schedule-admin-page'); if(sp) sp.classList.remove('visible');
   if(currentUser&&currentUser.isAdmin){ showAdminLanding(); }
   else { const la=_layout(); if(la) la.style.display='flex'; }
   updateAdminSwitchBtn();
 }
+
+// Monday..Sunday bounds (YMD strings) for the week containing todayYMD.
+// Uses local Date math anchored on the PST 'today' string; good enough for
+// an admin view (week-boundary edge cases are a known, accepted imprecision).
+function _schWeekBounds(todayYMD){
+  const d = new Date(todayYMD + 'T12:00:00');   // noon avoids DST/midnight edges
+  const dow = (d.getDay() + 6) % 7;             // Mon=0 … Sun=6
+  const mon = new Date(d); mon.setDate(d.getDate() - dow);
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  const fmt = x => x.getFullYear() + '-' + String(x.getMonth()+1).padStart(2,'0') + '-' + String(x.getDate()).padStart(2,'0');
+  return { start: fmt(mon), end: fmt(sun) };
+}
+
+function schadSetWindow(win){
+  _schAdminFilter.window = win;
+  ['today','week','range','all'].forEach(w => {
+    const b=_el('schad-win-'+w); if(b) b.classList.toggle('active', w===win);
+  });
+  const show = win==='range';
+  ['schad-from-label','schad-from','schad-to-label','schad-to'].forEach(id => {
+    const el=_el(id); if(el) el.style.display = show ? '' : 'none';
+  });
+  renderSchedAdmin();
+}
+
+function schadFiltersChanged(){
+  const st=_el('schad-status'); if(st) _schAdminFilter.status = st.value;
+  const lo=_el('schad-location'); if(lo) _schAdminFilter.location = lo.value;
+  renderSchedAdmin();
+}
+
+// Live search box — filters as you type (case-insensitive).
+function schadSearchInput(){
+  const el=_el('schad-q'); if(el) _schAdminFilter.q = el.value;
+  renderSchedAdmin();
+}
+
+// Fetch + parse all rows, then render. force is accepted for the button.
+async function loadSchedAdmin(force){
+  const body=_el('schad-body'); if(!body) return;
+  if(!SCHEDULE_PA_READ_URL){
+    _schAdminAll = [];
+    body.innerHTML = _schadEmpty('Schedule not connected yet',
+      'Once the Schedule read flow URL is set, every moderator\u2019s sessions will appear here.');
+    _schadSetCount('');
+    return;
+  }
+  body.innerHTML = '<div class="schad-empty"><div class="trouble-spinner"></div><div class="schad-empty-title" style="margin-top:14px">Loading\u2026</div></div>';
+  let rows = [];
+  // Data Point A (baseline) + Data Point B (status log) fetched in parallel.
+  try{ [rows] = await Promise.all([ _schReadRows(SCHEDULE_PA_READ_URL), _schLoadLogOverlay() ]); }catch(e){ rows = []; }
+  _schAdminAll = (rows||[]).map(r => {
+    const s = _schParseRow(r);
+    // Overlay the latest log entry for this SessionId, if any → it overrides the
+    // baseline status + note, and we flag the row as logged for the ✓ badge.
+    const sid = _schCanon(s.sessionId || '');
+    const ov = sid ? _schLogOverlay[sid] : null;
+    if(ov){ s.status = ov.status; s.note = ov.note || ''; s._logged = true; }
+    return s;
+  });
+  if(rows.length && rows.length % 256 === 0){
+    console.warn('[SchedAdmin] Possible 256-row pagination ceiling — got', rows.length, 'rows. Check the read flow pagination threshold.');
+  }
+  console.log('[SchedAdmin] loaded', _schAdminAll.length, 'session row(s) across all moderators');
+  _schadPopulateLocations();
+  renderSchedAdmin();
+}
+
+// Fill the Location filter from the distinct locations in the data, keeping
+// the current selection if it's still present.
+function _schadPopulateLocations(){
+  const sel = _el('schad-location'); if(!sel) return;
+  const prev = sel.value || 'all';
+  const locs = [...new Set(_schAdminAll.map(s => (s.location||'').trim()).filter(Boolean))]
+    .sort((a,b) => a.localeCompare(b));
+  let html = '<option value="all">All locations</option>';
+  locs.forEach(l => { html += '<option value="' + escapeHtml(l) + '">' + escapeHtml(l) + '</option>'; });
+  sel.innerHTML = html;
+  // Restore prior selection if it still exists, else reset to all.
+  sel.value = (prev === 'all' || locs.some(l => l === prev)) ? prev : 'all';
+  _schAdminFilter.location = sel.value;
+}
+
+// Apply the active time-window + status filters to the parsed cache.
+function _schadFiltered(){
+  const today = _schTodayYMD();
+  const f = _schAdminFilter;
+  const week = f.window==='week' ? _schWeekBounds(today) : null;
+  const lo = (_el('schad-from')||{}).value || '';
+  const hi = (_el('schad-to')||{}).value || '';
+  const q = String(f.q||'').trim().toLowerCase();
+  return _schAdminAll.filter(s => {
+    // status filter
+    if(f.status !== 'all' && _schStatusClass(s.status) !== f.status) return false;
+    // location filter
+    if(f.location !== 'all' && _schCanon(s.location) !== _schCanon(f.location)) return false;
+    // text search (case-insensitive) across name/email/phone/time/date/location/moderator
+    if(q && !(s._search || '').includes(q)) return false;
+    // An active search looks across ALL dates (so name/date/time lookups aren't
+    // hidden by the current time window). Status + location still apply above.
+    if(q) return true;
+    // window filter
+    if(f.window === 'all') return true;
+    if(!s.date) return false;                      // dated windows exclude undated rows
+    if(f.window === 'today') return s.date === today;
+    if(f.window === 'week')  return s.date >= week.start && s.date <= week.end;
+    if(f.window === 'range'){
+      if(lo && s.date < lo) return false;
+      if(hi && s.date > hi) return false;
+      return true;
+    }
+    return true;
+  });
+}
+
+function _schadInitials(name){
+  const parts = String(name||'').trim().split(/\s+/).filter(Boolean);
+  if(!parts.length) return '?';
+  return (parts[0][0] + (parts.length>1 ? parts[parts.length-1][0] : '')).toUpperCase();
+}
+function _schadChipLabel(cls, raw){
+  return cls==='completed' ? 'Completed' : cls==='confirmed' ? 'Confirmed' : cls==='noshow' ? 'No-show' : cls==='cancelled' ? 'Call-off' : (raw && String(raw).trim() ? raw : 'Scheduled');
+}
+function _schadSetCount(txt){ const c=_el('schad-count'); if(c) c.textContent = txt; }
+
+// Render the moderator accordion. Each moderator is a clickable header that
+// slides open/closed to reveal their participants (single-open).
+function renderSchedAdmin(){
+  const body=_el('schad-body'); if(!body) return;
+  if(!SCHEDULE_PA_READ_URL){ return; }   // empty-state already painted by loader
+  _schadRenderMaster(body, _schadFiltered());
+}
+
+// Build the date-grouped participant cards for one moderator's sessions.
+// Used inside each accordion panel.
+function _schadPartsHtml(sessions){
+  const toMin = t => {
+    const m = String(t||'').match(/(\d{1,2}):(\d{2})\s*(am|pm)?/i);
+    if(!m) return -1;
+    let h = parseInt(m[1],10) % 12; if((m[3]||'').toLowerCase()==='pm') h += 12;
+    return h*60 + parseInt(m[2],10);
+  };
+  const list = sessions.slice().sort((a,b) => a.date===b.date ? (toMin(a.time)-toMin(b.time)) : (a.date < b.date ? -1 : 1));
+  let html = '';
+  let lastDate = '\u0000';
+  list.forEach(s => {
+    if(s.date !== lastDate){
+      lastDate = s.date;
+      const lbl = s.date
+        ? new Date(s.date + 'T00:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})
+        : 'No date';
+      html += '<div class="schad-date-label">' + escapeHtml(lbl) + '</div>';
+    }
+    const cls = _schStatusClass(s.status);
+    const meta = [];
+    if(s.time)     meta.push('<span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>' + escapeHtml(s.time) + '</span>');
+    if(s.location) meta.push('<span><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>' + escapeHtml(s.location) + '</span>');
+    if(s.email)    meta.push('<span><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>' + escapeHtml(s.email) + '</span>');
+    if(s.phone)    meta.push('<span><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>' + escapeHtml(s.phone) + '</span>');
+    // Parsed status comment (reason / partial-payment amount / note) from StatusNote.
+    const pn = _schParseNote(s.note || '');
+    const reasonTxt = pn.reason ? (pn.reason + (pn.band ? ' \u00b7 ' + pn.band : '')) : '';
+    const nb = [];
+    if(pn.amount)  nb.push('<span class="schad-amt">' + escapeHtml(pn.amount) + '</span>');
+    if(reasonTxt)  nb.push('<span class="schad-reason">' + escapeHtml(reasonTxt) + '</span>');
+    if(pn.note)    nb.push('<span class="schad-note-txt">' + escapeHtml(pn.note) + '</span>');
+    const noteLine = nb.length ? '<div class="schad-note">' + nb.join('') + '</div>' : '';
+    // Call-off splits by sub-reason for color: Partial Payment → purple, else (Reschedule
+    // or unspecified) → red. Label still reads "Call-off" via the original class.
+    let chipCls = cls;
+    if(cls === 'cancelled') chipCls = /partial payment/i.test(pn.reason) ? 'partial' : 'reschedule';
+    const loggedTag = s._logged
+      ? '<span class="schad-logged"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>Logged</span>'
+      : '';
+    html += '<div class="schad-part">'
+      + '<div class="schad-part-main"><div class="schad-part-name">' + escapeHtml(s.name || 'Unnamed participant') + '</div>'
+      + '<div class="schad-meta">' + (meta.join('') || '<span style="color:var(--text3)">No contact info on file</span>') + '</div>'
+      + noteLine + '</div>'
+      + '<div class="schad-chip-col"><span class="schad-chip ' + chipCls + '">' + escapeHtml(_schadChipLabel(cls, s.status)) + '</span>' + loggedTag + '</div>'
+      + '</div>';
+  });
+  return html;
+}
+
+// Group filtered sessions by moderator → accordion (header + collapsible panel).
+function _schadRenderMaster(body, filtered){
+  const groups = {};   // canon → { name, sessions:[] }
+  filtered.forEach(s => {
+    const key = _schCanon(s.moderator) || '(unassigned)';
+    if(!groups[key]) groups[key] = { name: s.moderator || 'Unassigned', sessions: [] };
+    groups[key].sessions.push(s);
+  });
+  const keys = Object.keys(groups).sort((a,b) => groups[a].name.localeCompare(groups[b].name));
+
+  _schadSetCount(keys.length + ' moderator' + (keys.length===1?'':'s') + ' \u00b7 ' + filtered.length + ' session' + (filtered.length===1?'':'s'));
+
+  if(keys.length === 0){
+    body.innerHTML = _schadEmpty('No sessions match', 'Try a wider time window, another location, a different status, or clearing the search.');
+    return;
+  }
+
+  let html = '';
+  keys.forEach((key, ix) => {
+    const g = groups[key];
+    const counts = { confirmed:0, scheduled:0, noshow:0, cancelled:0 };
+    const locs = new Set();
+    g.sessions.forEach(s => { counts[_schStatusClass(s.status)]++; if(s.location) locs.add(s.location); });
+    const locTxt = [...locs].slice(0,2).join(', ') + (locs.size>2 ? ' +'+(locs.size-2) : '');
+    const n = g.sessions.length;
+
+    let chips = '';
+    if(counts.confirmed) chips += '<span class="schad-cc confirmed">'+counts.confirmed+' confirmed</span>';
+    if(counts.noshow)    chips += '<span class="schad-cc noshow">'+counts.noshow+' no-show</span>';
+    if(counts.cancelled) chips += '<span class="schad-cc cancelled">'+counts.cancelled+' call-off</span>';
+    if(counts.scheduled) chips += '<span class="schad-cc scheduled">'+counts.scheduled+' scheduled</span>';
+
+    html += '<div class="schad-acc">'
+      + '<div class="schad-mod" id="schad-mod-' + ix + '" role="button" tabindex="0" aria-expanded="false"'
+      +   ' onclick="schadToggleMod(' + ix + ')"'
+      +   ' onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();schadToggleMod(' + ix + ');}">'
+      +   '<div class="schad-avatar">' + escapeHtml(_schadInitials(g.name)) + '</div>'
+      +   '<div class="schad-mod-main"><div class="schad-mod-name">' + escapeHtml(g.name) + '</div>'
+      +   '<div class="schad-mod-sub">' + (locTxt ? escapeHtml(locTxt) + ' \u00b7 ' : '') + n + ' participant' + (n===1?'':'s') + '</div></div>'
+      +   chips
+      +   '<div class="schad-chev"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>'
+      + '</div>'
+      + '<div class="schad-panel" id="schad-panel-' + ix + '" data-idx="' + ix + '">'
+      +   '<div class="schad-panel-inner">' + _schadPartsHtml(g.sessions) + '</div>'
+      + '</div>'
+      + '</div>';
+  });
+  body.innerHTML = html;
+}
+
+// Toggle one moderator's accordion panel open/closed with a smooth slide.
+// Single-open: opening one closes any other that's open.
+function schadToggleMod(idx){
+  const panel = document.getElementById('schad-panel-' + idx);
+  const header = document.getElementById('schad-mod-' + idx);
+  if(!panel) return;
+  const willOpen = !panel.classList.contains('open');
+  // Close every other open panel first (single-open accordion).
+  document.querySelectorAll('#schad-body .schad-panel.open').forEach(p => {
+    if(p === panel) return;
+    p.style.maxHeight = '0px';
+    p.classList.remove('open');
+    const h = document.getElementById('schad-mod-' + p.dataset.idx);
+    if(h){ h.classList.remove('open'); h.setAttribute('aria-expanded','false'); }
+  });
+  if(willOpen){
+    // scrollHeight gives the exact target height for a precise slide.
+    panel.style.maxHeight = panel.scrollHeight + 'px';
+    panel.classList.add('open');
+    if(header){ header.classList.add('open'); header.setAttribute('aria-expanded','true'); }
+  } else {
+    panel.style.maxHeight = '0px';
+    panel.classList.remove('open');
+    if(header){ header.classList.remove('open'); header.setAttribute('aria-expanded','false'); }
+  }
+}
+
+function _schadEmpty(title, sub){
+  return '<div class="schad-empty">'
+    + '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>'
+    + '<div class="schad-empty-title">' + escapeHtml(title) + '</div>'
+    + '<div class="schad-empty-sub">' + escapeHtml(sub) + '</div></div>';
+}
+// Escape a canon key for safe inlining inside a single-quoted onclick attr.
+function _schAttr(s){ return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
 
 async function dashSync(){
   const btn = document.getElementById('dash-sync-btn');
@@ -9162,9 +10641,19 @@ async function dashSync(){
         syncEl.title = '';
       }
     }
-    populateModFilter(); renderDashboard();
-    if(currentTrackerPage === 'moderators') renderModeratorsPage();
-    if(currentTrackerPage === 'devices'){ window._devicesForceReload = true; loadDevices(); }
+    // Render only the ACTIVE sub-tab so its data paints immediately. Building
+    // the Dashboard's Chart.js charts is the expensive synchronous step — doing
+    // it unconditionally here used to block the Moderators list behind it. The
+    // inactive tab is rendered lazily by switchTrackerPage() when opened.
+    populateModFilter();
+    if(currentTrackerPage === 'moderators'){
+      renderModeratorsPage();
+    } else if(currentTrackerPage === 'devices'){
+      window._devicesForceReload = true; loadDevices();
+    } else {
+      renderDashboard();
+      setTimeout(()=>Object.values(dashCharts).forEach(c=>{try{c.resize();}catch(e){}}),100);
+    }
     showToast('Dashboard updated — '+dashData.length+' rows loaded');
   } catch(e){
     console.error('Dash sync error:', e);
@@ -9755,6 +11244,8 @@ function toggleDailyTarget(on){
 }
 
 function switchTrackerPage(page){
+  // Lead Mods have no Dashboard access — coerce to Moderators.
+  if(page === 'dashboard' && currentUser && currentUser.isLead && !currentUser.isAdmin){ page = 'moderators'; }
   currentTrackerPage = page;
   const dashBody  = document.getElementById('dash-body');
   const modsBody  = document.getElementById('mods-body');
@@ -10404,6 +11895,12 @@ function renderModsCardView(mods, now, thirtyMinsAgo, showTeamStats){
 const prereqChecked = {1: false, 2: false};
 
 function openPrereqModal(){
+  // Gate: an unconfirmed scheduled session for today must be confirmed first.
+  if(typeof _schBeginLocked === 'function' && _schBeginLocked()){
+    if(typeof showToast === 'function') showToast('Confirm your upcoming session first');
+    if(typeof openSchedReminder === 'function') openSchedReminder();
+    return;
+  }
   // Reset state
   prereqChecked[1] = false;
   prereqChecked[2] = false;
@@ -10602,6 +12099,20 @@ function _doStartNewSession(){
   if(window.innerWidth <= 700){
     document.getElementById('sidebar').classList.remove('hidden');
     document.getElementById('main-panel').classList.add('hidden');
+  }
+  // Session finished via "Start a New Session" → roll the run-just-finished
+  // scheduled session up to Completed, then re-lock the begin gate and surface
+  // the NEXT scheduled session (if any) to confirm.
+  if(typeof _schCompleteCurrentSession === 'function') _schCompleteCurrentSession();
+  if(typeof _schSetCleared === 'function'){
+    _schSetCleared(false);
+    setTimeout(async () => {
+      try{
+        if(typeof _schLoadForNav === 'function') await _schLoadForNav();
+        if(typeof _schApplyBeginGate === 'function') _schApplyBeginGate();
+        if(typeof _schGateSession === 'function' && _schGateSession()) openSchedReminder();
+      }catch(_){}
+    }, 450);
   }
 }
 
@@ -11478,6 +12989,11 @@ function openDeviceCheckout(){
   // Close session-complete first
   document.getElementById('session-complete-overlay').classList.add('hidden');
 
+  // "Done for the day" also finishes the current scheduled session → Completed,
+  // and clears the begin gate (they're checking out).
+  if(typeof _schCompleteCurrentSession === 'function') _schCompleteCurrentSession();
+  if(typeof _schSetCleared === 'function') _schSetCleared(false);
+
   // Load devices from the confirmed inventory set (if available)
   try {
     const saved = sessionStorage.getItem('centific_inv_set');
@@ -12062,8 +13578,8 @@ let inventorySelected = null; // currently selected set object
 
 function shouldShowInventoryCheck(){
   if(!currentUser) return false;
-  // For admins from PA login: only show when they're in the checklist view, not on the admin landing
-  if(currentUser.isAdmin){
+  // For admins/leads from PA login: only show when they're in the checklist view, not on the landing
+  if(currentUser.isAdmin || currentUser.isLead){
     const view = sessionStorage.getItem('centific_admin_view');
     if(view !== 'checklist') return false;
   }
@@ -12420,6 +13936,13 @@ async function confirmInventorySet(){
     if(typeof showToast === 'function') showToast('Equipment ' + inventorySelected.setName + ' confirmed ✓');
     // Refresh the active-set indicator on welcome screen
     if(typeof injectActiveSetIndicator === 'function') injectActiveSetIndicator();
+    // ── Initial schedule reminder — fire ONCE, after the Device Set is set ──
+    if(!sessionStorage.getItem('centific_sched_prompt_shown')){
+      sessionStorage.setItem('centific_sched_prompt_shown', '1');
+      if(typeof _schEnsureLoadedThenOpenReminder === 'function'){
+        setTimeout(() => { _schEnsureLoadedThenOpenReminder().catch(()=>{}); }, 450);
+      }
+    }
   } catch(err){
     console.error('[Inventory] Log error:', err);
     if(errEl) errEl.textContent = 'Submission failed: ' + (err.message || 'try again');
@@ -13113,6 +14636,7 @@ function openRatingsHistory(){
 // Per-moderator ratings history + notes (Team-card History button + List row).
 // Reuses the same overlay/renderer as the global view, scoped to one mod.
 function openModRatingsHistory(modName, modLoginId){
+  if(_blockOthersHistory(modName, modLoginId)) return;
   const ov = document.getElementById('rth-overlay');
   if(!ov) return;
   _rthFilter = 'ALL';
@@ -13272,7 +14796,34 @@ function getFeedbackForMod(modName, modLoginId){
   }).sort((a,b) => (Date.parse(b.sentAt) || 0) - (Date.parse(a.sentAt) || 0));
 }
 
+// True if (modName/loginId) identifies the CURRENT user's own moderator
+// record. Used to restrict Lead Mods to their own feedback/rating history.
+// dashData keys moderators by the checklist display name (== modName), so
+// match on modName first, then odName, then loginId/modId as fallbacks.
+function _isOwnModRecord(modName, modLoginId){
+  if(!currentUser) return false;
+  const tgtN = _schCanon(modName);
+  const myN1 = _schCanon(currentUser.modName);
+  const myN2 = _schCanon(currentUser.odName);
+  const tgtL = String(modLoginId||'').trim().toLowerCase();
+  const myL  = String(currentUser.loginId||'').trim().toLowerCase();
+  const myId = String(currentUser.modId||'').trim().toLowerCase();
+  if(tgtN && (tgtN === myN1 || (myN2 && tgtN === myN2))) return true;
+  if(tgtL && ((myL && tgtL === myL) || (myId && tgtL === myId))) return true;
+  return false;
+}
+// Lead Mods may only view their OWN history. Returns true if the open should
+// be blocked (and shows a toast). Admins are never blocked.
+function _blockOthersHistory(modName, modLoginId){
+  if(currentUser && currentUser.isLead && !currentUser.isAdmin && !_isOwnModRecord(modName, modLoginId)){
+    if(typeof showToast === 'function') showToast('You can only view your own history');
+    return true;
+  }
+  return false;
+}
+
 function openFeedbackHistory(modName, modLoginId){
+  if(_blockOthersHistory(modName, modLoginId)) return;
   _fbhTarget = { name: modName, loginId: modLoginId || '' };
   const ov = document.getElementById('fbh-overlay');
   if(!ov) return;
@@ -13660,7 +15211,66 @@ function openCollReminderForCurrent(){
       <div class="admin-tile-desc">Interactive dashboard — view moderator progress, filter by date, location and compare performance.</div>
       <div class="admin-tile-arrow">→</div>
     </div>
+    <div class="admin-tile" id="tile-scheduling" onclick="gotoSchedAdmin()">
+      <div class="admin-tile-icon schedule">
+        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/><path d="M9 14l2 2 4-4"/></svg>
+      </div>
+      <div class="admin-tile-name">Scheduling</div>
+      <div class="admin-tile-desc">View every moderator's scheduled participants — filter by day, week, range or status, and drill into each moderator.</div>
+      <div class="admin-tile-arrow">→</div>
+    </div>
   </div>
+</div>
+
+<!-- ── Admin Scheduling Page ── -->
+<div id="schedule-admin-page">
+  <div class="dash-toolbar">
+    <button class="dash-back-btn" onclick="schedAdminBack()">
+      <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg>
+      Back
+    </button>
+    <div class="dash-sep"></div>
+    <div class="page-toggle" id="schad-window-toggle">
+      <button class="page-toggle-btn active" id="schad-win-today" onclick="schadSetWindow('today')">Today</button>
+      <button class="page-toggle-btn" id="schad-win-week" onclick="schadSetWindow('week')">This Week</button>
+      <button class="page-toggle-btn" id="schad-win-range" onclick="schadSetWindow('range')">Range</button>
+      <button class="page-toggle-btn" id="schad-win-all" onclick="schadSetWindow('all')">All</button>
+    </div>
+
+    <div class="schad-search-wrap">
+      <svg class="schad-search-ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <input type="search" class="schad-search" id="schad-q" placeholder="Search name, email, phone, date, time, moderator…" oninput="schadSearchInput()" autocomplete="off"/>
+    </div>
+
+    <span class="dash-filter-label" id="schad-from-label" style="display:none">From</span>
+    <input type="date" class="dash-select dash-date-input" id="schad-from" style="display:none" onchange="schadFiltersChanged()"/>
+    <span class="dash-filter-label" id="schad-to-label" style="display:none">To</span>
+    <input type="date" class="dash-select dash-date-input" id="schad-to" style="display:none" onchange="schadFiltersChanged()"/>
+
+    <span class="dash-filter-label">Location</span>
+    <select class="dash-select" id="schad-location" onchange="schadFiltersChanged()">
+      <option value="all" selected>All locations</option>
+    </select>
+
+    <span class="dash-filter-label">Status</span>
+    <select class="dash-select" id="schad-status" onchange="schadFiltersChanged()">
+      <option value="all" selected>All statuses</option>
+      <option value="scheduled">Scheduled</option>
+      <option value="confirmed">Confirmed</option>
+      <option value="completed">Completed</option>
+      <option value="noshow">No-show</option>
+      <option value="cancelled">Call-off</option>
+    </select>
+
+    <div class="dash-sep"></div>
+    <span class="schad-count" id="schad-count"></span>
+    <button class="dash-btn primary" id="schad-refresh-btn" onclick="loadSchedAdmin(true)">
+      <svg viewBox="0 0 16 16"><path d="M14 8a6 6 0 1 1-1.5-4"/><polyline points="14,2 14,6 10,6"/></svg>
+      Refresh
+    </button>
+  </div>
+
+  <div class="schad-body" id="schad-body"></div>
 </div>
 
 <!-- ── Dashboard Page ── -->
@@ -13978,6 +15588,83 @@ function openCollReminderForCurrent(){
 }
 .session-popup-btn:hover{background:var(--pink-dim,#c4359a);transform:translateY(-1px);box-shadow:0 8px 24px rgba(239,67,179,.28)}
 .session-popup-btn:active{transform:scale(.98)}
+/* ── My Schedule panel ───────────────────────────────────────────────── */
+.sch-section-label{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin:18px 2px 10px}
+.sch-section-label:first-child{margin-top:2px}
+.sch-date-label{font-size:11.5px;color:var(--text3);margin:0 2px 7px}
+.sch-card{background:var(--card-bg);border:.5px solid var(--border);border-radius:14px;padding:14px 15px;margin-bottom:12px;animation:fadeUp .3s cubic-bezier(.4,0,.2,1) both}
+.sch-card.confirmed{border-color:rgba(34,197,94,.35)}
+.sch-card.noshow{border-color:rgba(245,158,11,.4)}
+.sch-card.cancelled{border-color:rgba(239,68,68,.32);opacity:.92}
+.sch-card-top{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.sch-pt-tag{font-size:9.5px;font-weight:600;letter-spacing:.06em;background:rgba(239,67,179,.16);color:var(--pink);padding:2px 7px;border-radius:20px;flex-shrink:0}
+.sch-name{font-size:15.5px;font-weight:500;letter-spacing:-.01em}
+.sch-name.struck{text-decoration:line-through;color:var(--text2)}
+.sch-chip{margin-left:auto;font-size:9.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.sch-chip.scheduled{background:var(--bg4);color:var(--text2)}
+.sch-chip.confirmed{background:rgba(34,197,94,.15);color:var(--green)}
+.sch-chip.completed{background:var(--green);color:#062a14}
+.sch-chip.noshow{background:rgba(245,158,11,.15);color:var(--amber)}
+.sch-chip.cancelled{background:rgba(239,68,68,.14);color:var(--red)}
+.sch-meta{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--text2)}
+.sch-meta.spaced{margin-bottom:13px}
+.sch-meta svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;margin-right:4px}
+.sch-doneline{font-size:11.5px;color:var(--text3);margin-top:9px}
+.sch-doneline svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;margin-right:4px}
+.sch-undo{margin-top:10px;font-size:11.5px;font-weight:500;color:var(--text3);background:none;border:none;cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:4px}
+.sch-undo:hover{color:var(--text)}
+.sch-undo svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.sch-actions{display:flex;gap:8px}
+.sch-btn{flex:1;font-family:var(--font);font-size:13px;font-weight:500;border-radius:10px;padding:9px 6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px;transition:all .18s ease}
+.sch-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sch-btn.confirm{color:#fff;background:var(--pink);border:none}
+.sch-btn.confirm:hover{background:var(--pink-dim,#c4359a)}
+.sch-btn.noshow{color:var(--amber);background:transparent;border:.5px solid rgba(245,158,11,.4)}
+.sch-btn.noshow:hover{background:rgba(245,158,11,.1)}
+.sch-btn.cancel{color:var(--red);background:transparent;border:.5px solid rgba(239,68,68,.4)}
+.sch-btn.cancel:hover{background:rgba(239,68,68,.08)}
+.sch-btn:active{transform:scale(.98)}
+.sch-expand{max-height:0;overflow:hidden;transition:max-height .3s cubic-bezier(.4,0,.2,1)}
+.sch-expand.open{max-height:260px}
+.sch-expand-inner{border-top:.5px solid var(--border);padding-top:12px;margin-top:12px}
+.sch-comment-label{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-bottom:7px}
+.sch-comment-label.noshow{color:var(--amber)}
+.sch-comment-label.cancel{color:var(--red)}
+.sch-comment-label .req{color:var(--red)}
+.sch-textarea{width:100%;box-sizing:border-box;background:var(--input-bg);border:.5px solid var(--border-strong);border-radius:10px;color:var(--text);font-family:var(--font);font-size:13px;padding:10px 12px;min-height:58px;resize:none}
+.sch-textarea.noshow:focus{border-color:var(--amber);outline:none}
+.sch-textarea.cancel:focus{border-color:var(--red);outline:none}
+.sch-expand-actions{display:flex;gap:8px;margin-top:10px}
+.sch-back{flex:1;font-family:var(--font);font-size:13px;font-weight:500;color:var(--text3);background:transparent;border:.5px solid var(--border-strong);border-radius:10px;padding:9px 6px;cursor:pointer}
+.sch-back:hover{background:var(--bg3)}
+.sch-submit{flex:2;font-family:var(--font);font-size:13px;font-weight:500;border-radius:10px;padding:9px 6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px;border:none}
+.sch-submit svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sch-submit.noshow{color:var(--bg2);background:var(--amber)}
+.sch-submit.cancel{color:#fff;background:var(--red)}
+/* Call-off sub-choices (Reschedule / Partial Payment) */
+.sch-subrow{display:flex;gap:8px;margin:4px 0 2px}
+.sch-subbtn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-family:var(--font);font-size:13px;font-weight:500;color:var(--text);background:rgba(239,68,68,.08);border:.5px solid rgba(239,68,68,.4);border-radius:10px;padding:10px;cursor:pointer;transition:background .18s,transform .12s}
+.sch-subbtn:hover{background:rgba(239,68,68,.16)}
+.sch-subbtn:active{transform:scale(.98)}
+.sch-subbtn svg{width:14px;height:14px;flex:none;fill:none;stroke:var(--red);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sch-subrow.tiers{flex-wrap:wrap}
+.sch-subbtn.tier{flex:1 1 100%;justify-content:flex-start;gap:8px;font-weight:500}
+.sch-subbtn.tier b{margin-left:auto;font-weight:700;color:var(--red);font-variant-numeric:tabular-nums}
+.sch-resline{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:2px 0 4px}
+.sch-reason{font-size:12.5px;font-weight:600;color:var(--text2)}
+.sch-amt{margin-left:auto;font-family:var(--font-num,var(--font));font-weight:700;font-size:12.5px;color:var(--pink);background:rgba(239,67,179,.12);border:.5px solid rgba(239,67,179,.4);border-radius:8px;padding:2px 9px;font-variant-numeric:tabular-nums}
+/* Persistent "update the OD & Tracker" reminder on every acted card */
+.sch-reminder{display:flex;align-items:flex-start;gap:8px;margin-top:10px;background:rgba(252,208,48,.10);border:.5px solid rgba(252,208,48,.30);border-radius:10px;padding:9px 11px}
+.sch-reminder svg{width:15px;height:15px;flex:none;fill:none;stroke:#fcd030;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;margin-top:1px}
+.sch-reminder span{font-size:12.5px;color:var(--text);line-height:1.45}
+.sch-reminder strong{font-weight:600}
+.sch-submit:disabled{opacity:.45;cursor:not-allowed}
+.sch-hint{font-size:10.5px;color:var(--text3);margin-top:7px;display:flex;align-items:center;gap:4px}
+.sch-hint svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.sch-empty{text-align:center;padding:48px 20px;color:var(--text3)}
+.sch-empty svg{width:34px;height:34px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;opacity:.6;margin-bottom:12px}
+.sch-empty-title{font-size:14px;font-weight:500;color:var(--text2);margin-bottom:5px}
+.sch-empty-sub{font-size:12px;line-height:1.5;max-width:260px;margin:0 auto}
 </style>
 <div class="session-popup-overlay hidden" id="session-popup-overlay" onclick="if(event.target===this)closeTodaySessionPopup()">
   <div class="session-popup-modal">
