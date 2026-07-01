@@ -4265,6 +4265,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .dash-date-input::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.6}
 .dash-date-input::-webkit-calendar-picker-indicator:hover{opacity:1}
 .dash-select:focus{border-color:var(--pink)}
+.schad-logged-chk{display:inline-flex;align-items:center;gap:6px;font-family:var(--font);font-size:12px;color:var(--text2);background:var(--input-bg);border:.5px solid var(--border-strong);border-radius:8px;padding:6px 10px;cursor:pointer;user-select:none;transition:border-color .15s,color .15s;white-space:nowrap}
+.schad-logged-chk:hover{border-color:var(--pink)}
+.schad-logged-chk input{accent-color:var(--pink);width:14px;height:14px;cursor:pointer;margin:0}
+.schad-logged-chk:has(input:checked){border-color:var(--pink);color:var(--text)}
 .dash-btn{display:flex;align-items:center;gap:6px;font-family:var(--font);font-size:12px;font-weight:500;color:var(--text2);background:var(--bg2);border:.5px solid var(--border-strong);border-radius:8px;padding:7px 13px;cursor:pointer;transition:all .18s;white-space:nowrap}
 .dash-btn:hover{border-color:var(--pink);color:var(--pink)}
 .dash-btn.primary{background:var(--pink);color:#fff;border-color:var(--pink)}
@@ -4332,6 +4336,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .kpi-card.green .kpi-value,.kpi-card.green .kpi-value-xl{color:var(--green)}
 .kpi-card.blue .kpi-value,.kpi-card.blue .kpi-value-xl{color:var(--blue)}
 .kpi-card.amber .kpi-value,.kpi-card.amber .kpi-value-xl{color:var(--amber)}
+.kpi-card.red .kpi-value,.kpi-card.red .kpi-value-xl{color:var(--red)}
+/* Scheduling KPI tiles — Dashboard-KPI format, sized to fit 4 across + the "12 / 6" value */
+.schad-kpi-row{margin:14px 0 16px}
+.schad-kpi{cursor:pointer;min-height:96px;padding:16px 18px}
+.schad-kpi .kpi-neutral{color:var(--text)}
+.schad-kpi .kpi-value-xl{font-size:52px}
+@media(max-width:1100px){.schad-kpi .kpi-value-xl{font-size:44px}}
+@media(max-width:820px){.schad-kpi-row{grid-template-columns:1fr 1fr}.schad-kpi .kpi-value-xl{font-size:52px}}
+@media(max-width:480px){.schad-kpi .kpi-value-xl{font-size:40px}}
+.schad-kpi .kpi-sub{max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-bottom:5px}
+.schad-kpi.active{border-color:var(--pink);box-shadow:0 0 0 2px rgba(239,67,179,.35)}
+.schad-kpi.active:hover{box-shadow:0 0 0 2px rgba(239,67,179,.35),var(--shadow-md)}
 
 /* Charts grid */
 .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -6659,7 +6675,7 @@ const TASK_VIDEOS = [
 ];
 
 // ── APP VERSION (searchable constant for version-poll notification) ──
-const APP_VERSION = "1.2.062926";
+const APP_VERSION = "1.2.063026";
 
 const TASKS=[
   {id:0,title:"Registration",cat:"Registration",distance:"",lux:"",duration:"",warn:"",note:"",isRegistration:true,steps:[]},
@@ -10240,7 +10256,7 @@ function dashBack(){
 */
 let _schAdminAll = [];                 // parsed rows for all moderators (last fetch)
 let _schAdminSelectedMod = null;       // canon key of the drilled-into moderator, or null = master
-const _schAdminFilter = { window: 'today', status: 'all', location: 'all', q: '' };  // from/to read from the inputs
+const _schAdminFilter = { window: 'today', status: 'all', location: 'all', q: '', loggedOnly: false };  // from/to read from the inputs
 
 // Wipe all in-memory schedule state on sign-out. The page is NOT reloaded
 // between sign-ins, so without this the previous user's sessions keep rendering
@@ -10255,7 +10271,8 @@ function _schResetCache(){
   try{ _schLogOverlay = {}; }catch(_){}
   try{ _schAdminAll = []; }catch(_){}
   try{ _schAdminSelectedMod = null; }catch(_){}
-  try{ _schAdminFilter.window='today'; _schAdminFilter.status='all'; _schAdminFilter.location='all'; _schAdminFilter.q=''; }catch(_){}
+  try{ _schAdminFilter.window='today'; _schAdminFilter.status='all'; _schAdminFilter.location='all'; _schAdminFilter.q=''; _schAdminFilter.loggedOnly=false; }catch(_){}
+  try{ const lg=document.getElementById('schad-logged-only'); if(lg) lg.checked=false; }catch(_){}
   try{ sessionStorage.removeItem(_SCH_CLEARED_KEY); }catch(_){}
   try{ sessionStorage.removeItem(_SCH_ACTIVE_KEY); }catch(_){}
   try{ sessionStorage.removeItem('centific_sched_prompt_shown'); }catch(_){}
@@ -10313,6 +10330,7 @@ function schadSetWindow(win){
 function schadFiltersChanged(){
   const st=_el('schad-status'); if(st) _schAdminFilter.status = st.value;
   const lo=_el('schad-location'); if(lo) _schAdminFilter.location = lo.value;
+  const lg=_el('schad-logged-only'); if(lg) _schAdminFilter.loggedOnly = lg.checked;
   renderSchedAdmin();
 }
 
@@ -10369,7 +10387,20 @@ function _schadPopulateLocations(){
 }
 
 // Apply the active time-window + status filters to the parsed cache.
-function _schadFiltered(){
+// Status matcher shared by the list and the KPI tiles. 'all' → everything;
+// 'active' is the on-track bucket (scheduled + confirmed + completed); anything
+// else is an exact status-class match.
+function _schadStatusMatch(status, want){
+  if(!want || want === 'all') return true;
+  const cls = _schStatusClass(status);
+  if(want === 'active') return cls === 'scheduled' || cls === 'confirmed' || cls === 'completed';
+  return cls === want;
+}
+
+// Everything EXCEPT the status filter. Used both for the list (status applied on
+// top) and for the KPI tile counts (so each tile shows its full bucket count
+// within the current location / window / search / logged context).
+function _schadBaseFiltered(){
   const today = _schTodayYMD();
   const f = _schAdminFilter;
   const week = f.window==='week' ? _schWeekBounds(today) : null;
@@ -10377,18 +10408,12 @@ function _schadFiltered(){
   const hi = (_el('schad-to')||{}).value || '';
   const q = String(f.q||'').trim().toLowerCase();
   return _schAdminAll.filter(s => {
-    // status filter
-    if(f.status !== 'all' && _schStatusClass(s.status) !== f.status) return false;
-    // location filter
     if(f.location !== 'all' && _schCanon(s.location) !== _schCanon(f.location)) return false;
-    // text search (case-insensitive) across name/email/phone/time/date/location/moderator
+    if(f.loggedOnly && !s._logged) return false;
     if(q && !(s._search || '').includes(q)) return false;
-    // An active search looks across ALL dates (so name/date/time lookups aren't
-    // hidden by the current time window). Status + location still apply above.
-    if(q) return true;
-    // window filter
+    if(q) return true;                                 // search spans all dates
     if(f.window === 'all') return true;
-    if(!s.date) return false;                      // dated windows exclude undated rows
+    if(!s.date) return false;                          // dated windows exclude undated rows
     if(f.window === 'today') return s.date === today;
     if(f.window === 'week')  return s.date >= week.start && s.date <= week.end;
     if(f.window === 'range'){
@@ -10398,6 +10423,25 @@ function _schadFiltered(){
     }
     return true;
   });
+}
+
+function _schadFiltered(){
+  const want = _schAdminFilter.status;
+  return _schadBaseFiltered().filter(s => _schadStatusMatch(s.status, want));
+}
+
+// Bucket counts over the base-filtered set (drives the KPI tiles).
+function _schadKpiCounts(){
+  const base = _schadBaseFiltered();
+  let sched = 0, comp = 0, noshow = 0, calloff = 0;
+  base.forEach(s => {
+    const c = _schStatusClass(s.status);
+    if(c === 'completed') comp++;
+    else if(c === 'noshow') noshow++;
+    else if(c === 'cancelled') calloff++;
+    else sched++;                                      // scheduled + confirmed
+  });
+  return { total: base.length, sched, comp, noshow, calloff };
 }
 
 function _schadInitials(name){
@@ -10415,7 +10459,48 @@ function _schadSetCount(txt){ const c=_el('schad-count'); if(c) c.textContent = 
 function renderSchedAdmin(){
   const body=_el('schad-body'); if(!body) return;
   if(!SCHEDULE_PA_READ_URL){ return; }   // empty-state already painted by loader
+  _schadRenderKpis();
   _schadRenderMaster(body, _schadFiltered());
+}
+
+// Which KPI tile is "active" given the current status filter.
+function _schadActiveTile(){
+  const s = _schAdminFilter.status;
+  if(s === 'noshow') return 'noshow';
+  if(s === 'cancelled') return 'calloff';
+  if(s === 'all' || !s) return 'location';
+  return 'active';   // active / scheduled / confirmed / completed → Scheduled·Completed tile
+}
+
+// Clicking a tile sets the status filter (and mirrors it into the dropdown).
+function schadKpiClick(bucket){
+  _schAdminFilter.status = bucket;
+  const st=_el('schad-status'); if(st) st.value = bucket;
+  renderSchedAdmin();
+}
+
+// Build the four summary tiles (Dashboard-KPI format). Counts come from the
+// base-filtered set so each tile shows its full bucket within the current
+// location / window / search / logged context. Hidden when drilled into one mod.
+function _schadRenderKpis(){
+  const row = _el('schad-kpi-row'); if(!row) return;
+  if(_schAdminSelectedMod){ row.style.display='none'; row.innerHTML=''; return; }
+  row.style.display='';
+  const c = _schadKpiCounts();
+  const active = _schadActiveTile();
+  const f = _schAdminFilter;
+  const locName = (f.location && f.location !== 'all') ? f.location : 'All locations';
+  const tile = (key, color, label, valueHtml, sub) =>
+      '<div class="kpi-card schad-kpi ' + color + (active===key?' active':'') + '" onclick="schadKpiClick(\'' +
+      (key==='location'?'all':key==='active'?'active':key==='noshow'?'noshow':'cancelled') + '\')">'
+    + '<div class="kpi-top-row"><div class="kpi-label">' + label + '</div></div>'
+    + '<div class="kpi-bottom-row">' + (sub ? '<div class="kpi-sub">' + sub + '</div>' : '')
+    + '<div class="kpi-value kpi-value-xl">' + valueHtml + '</div></div></div>';
+  row.innerHTML =
+      tile('location','accent','Location', String(c.total), escapeHtml(locName))
+    + tile('active','green','Scheduled / Completed', '<span class="kpi-neutral">' + c.sched + ' / </span>' + c.comp, '')
+    + tile('noshow','amber','No-show', String(c.noshow), '')
+    + tile('calloff','red','Called-off', String(c.calloff), '');
 }
 
 // Build the date-grouped participant cards for one moderator's sessions.
@@ -15271,12 +15356,15 @@ function openCollReminderForCurrent(){
     <span class="dash-filter-label">Status</span>
     <select class="dash-select" id="schad-status" onchange="schadFiltersChanged()">
       <option value="all" selected>All statuses</option>
+      <option value="active">Scheduled / Completed</option>
       <option value="scheduled">Scheduled</option>
       <option value="confirmed">Confirmed</option>
       <option value="completed">Completed</option>
       <option value="noshow">No-show</option>
       <option value="cancelled">Call-off</option>
     </select>
+
+    <label class="schad-logged-chk" title="Show only sessions that have a logged status update"><input type="checkbox" id="schad-logged-only" onchange="schadFiltersChanged()"><span>Logged only</span></label>
 
     <div class="dash-sep"></div>
     <span class="schad-count" id="schad-count"></span>
@@ -15285,6 +15373,8 @@ function openCollReminderForCurrent(){
       Refresh
     </button>
   </div>
+
+  <div class="schad-kpi-row kpi-row" id="schad-kpi-row"></div>
 
   <div class="schad-body" id="schad-body"></div>
 </div>
